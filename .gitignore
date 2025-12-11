@@ -1,0 +1,58 @@
+# Build directories
+build/
+cmake-build-*/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Compiled objects
+*.o
+*.obj
+*.so
+*.dylib
+*.a
+*.lib
+*.exe
+
+# LLVM/MLIR generated files
+*.inc
+*.cpp.inc
+*.h.inc
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+!CMakeLists.txt
+!*.cmake.in
+
+# Ninja
+.ninja_deps
+.ninja_log
+build.ninja
+rules.ninja
+
+# TableGen generated
+*.td.inc
+
+# Test outputs
+test/**/output/
+*.log
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+
+# Temporary files
+*.tmp
+*.temp
