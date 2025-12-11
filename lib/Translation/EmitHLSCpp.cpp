@@ -37,7 +37,7 @@
 #include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/Operation.h"
 #include "mlir/Support/IndentedOstream.h"
-#include "mlir/Translation.h"
+#include "mlir/Tools/mlir-translate/Translation.h"
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/StringMap.h"
 #include "llvm/ADT/TypeSwitch.h"
@@ -120,7 +120,7 @@ private:
   
   /// Emit an affine map application
   std::string emitAffineMap(AffineMap map,
-                            ArrayRef<Value> operands);
+                            OperandRange operands);
   
   //===--------------------------------------------------------------------===//
   // Pragma Generation (AutoSA: HLS pragma insertion)
@@ -333,21 +333,26 @@ std::string HLSCppEmitter::emitAffineExpr(AffineExpr expr,
                                           ArrayRef<Value> symbolOperands) {
   std::stringstream ss;
   
-  if (auto dimExpr = dyn_cast<AffineDimExpr>(expr)) {
+  // Use isa<> and cast<> instead of dyn_cast for AffineExpr subtypes
+  if (expr.isa<AffineDimExpr>()) {
+    auto dimExpr = expr.cast<AffineDimExpr>();
     unsigned pos = dimExpr.getPosition();
     if (pos < dimOperands.size())
       ss << getName(dimOperands[pos]);
     else
       ss << "d" << pos;
-  } else if (auto symExpr = dyn_cast<AffineSymbolExpr>(expr)) {
+  } else if (expr.isa<AffineSymbolExpr>()) {
+    auto symExpr = expr.cast<AffineSymbolExpr>();
     unsigned pos = symExpr.getPosition();
     if (pos < symbolOperands.size())
       ss << getName(symbolOperands[pos]);
     else
       ss << "s" << pos;
-  } else if (auto constExpr = dyn_cast<AffineConstantExpr>(expr)) {
+  } else if (expr.isa<AffineConstantExpr>()) {
+    auto constExpr = expr.cast<AffineConstantExpr>();
     ss << constExpr.getValue();
-  } else if (auto binExpr = dyn_cast<AffineBinaryOpExpr>(expr)) {
+  } else if (expr.isa<AffineBinaryOpExpr>()) {
+    auto binExpr = expr.cast<AffineBinaryOpExpr>();
     std::string lhs = emitAffineExpr(binExpr.getLHS(), dimOperands, symbolOperands);
     std::string rhs = emitAffineExpr(binExpr.getRHS(), dimOperands, symbolOperands);
     
@@ -376,21 +381,23 @@ std::string HLSCppEmitter::emitAffineExpr(AffineExpr expr,
 }
 
 std::string HLSCppEmitter::emitAffineMap(AffineMap map,
-                                         ArrayRef<Value> operands) {
+                                         OperandRange operands) {
+  SmallVector<Value, 4> opVec(operands.begin(), operands.end());
+  
   // For single-result maps, just emit the expression
   if (map.getNumResults() == 1) {
-    return emitAffineExpr(map.getResult(0), 
-                          operands.take_front(map.getNumDims()),
-                          operands.drop_front(map.getNumDims()));
+    ArrayRef<Value> dims = ArrayRef<Value>(opVec).take_front(map.getNumDims());
+    ArrayRef<Value> syms = ArrayRef<Value>(opVec).drop_front(map.getNumDims());
+    return emitAffineExpr(map.getResult(0), dims, syms);
   }
   
   // For multi-result, return comma-separated list
   std::stringstream ss;
   for (unsigned i = 0; i < map.getNumResults(); ++i) {
     if (i > 0) ss << ", ";
-    ss << emitAffineExpr(map.getResult(i),
-                         operands.take_front(map.getNumDims()),
-                         operands.drop_front(map.getNumDims()));
+    ArrayRef<Value> dims = ArrayRef<Value>(opVec).take_front(map.getNumDims());
+    ArrayRef<Value> syms = ArrayRef<Value>(opVec).drop_front(map.getNumDims());
+    ss << emitAffineExpr(map.getResult(i), dims, syms);
   }
   return ss.str();
 }
@@ -477,7 +484,7 @@ LogicalResult HLSCppEmitter::emitAffineFor(affine::AffineForOp forOp) {
   // Get loop bounds
   int64_t lb = forOp.getConstantLowerBound();
   int64_t ub = forOp.getConstantUpperBound();
-  int64_t step = forOp.getStepAsInt();
+  int64_t step = forOp.getStep();
   
   // Assign name to induction variable
   std::string ivName = "i" + std::to_string(valueCounter++);

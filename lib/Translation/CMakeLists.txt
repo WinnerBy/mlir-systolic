@@ -3,8 +3,13 @@
 add_mlir_library(SystolicTranslation
   EmitHLSCpp.cpp
 
+  ADDITIONAL_HEADER_DIRS
+  ${PROJECT_SOURCE_DIR}/include/systolic/Translation
+
   DEPENDS
-  MLIRSystolicIncGen
+  MLIRSystolicHLSOpsIncGen
+  MLIRSystolicHLSTypesIncGen
+  MLIRSystolicHLSDialectIncGen
 
   LINK_LIBS PUBLIC
   MLIRIR
@@ -14,5 +19,5 @@ add_mlir_library(SystolicTranslation
   MLIRArithDialect
   MLIRSupport
   MLIRTranslateLib
-  SystolicDialect
+  SystolicHLSDialect
 )

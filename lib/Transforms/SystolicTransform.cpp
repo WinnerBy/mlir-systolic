@@ -258,26 +258,32 @@ static LogicalResult selectSpaceLoops(
   switch (spaceTimeMode) {
     case 0:  // [i] - 1D row array
       spaceLoopIndices.push_back(0);
-      timeLoopIndices = {1, 2};
+      timeLoopIndices.push_back(1);
+      timeLoopIndices.push_back(2);
       break;
     case 1:  // [j] - 1D column array
       spaceLoopIndices.push_back(1);
-      timeLoopIndices = {0, 2};
+      timeLoopIndices.push_back(0);
+      timeLoopIndices.push_back(2);
       break;
     case 2:  // [k] - 1D reduction array
       spaceLoopIndices.push_back(2);
-      timeLoopIndices = {0, 1};
+      timeLoopIndices.push_back(0);
+      timeLoopIndices.push_back(1);
       break;
     case 3:  // [i,j] - 2D output-stationary (default)
-      spaceLoopIndices = {0, 1};
+      spaceLoopIndices.push_back(0);
+      spaceLoopIndices.push_back(1);
       timeLoopIndices.push_back(2);
       break;
     case 4:  // [i,k] - 2D with horizontal reduction
-      spaceLoopIndices = {0, 2};
+      spaceLoopIndices.push_back(0);
+      spaceLoopIndices.push_back(2);
       timeLoopIndices.push_back(1);
       break;
     case 5:  // [j,k] - 2D with vertical reduction
-      spaceLoopIndices = {1, 2};
+      spaceLoopIndices.push_back(1);
+      spaceLoopIndices.push_back(2);
       timeLoopIndices.push_back(0);
       break;
     default:
@@ -355,8 +361,11 @@ static LogicalResult permuteLoopsForSpaceTime(
   
   // Use MLIR's loop permutation utility
   // Note: This requires the loops to be perfectly nested
-  if (failed(permuteLoops(band, permMap))) {
-    LLVM_DEBUG(llvm::dbgs() << "[Systolic] Loop permutation failed\n");
+  // permuteLoops returns the number of loops that could not be permuted
+  unsigned numUnpermuted = permuteLoops(band, permMap);
+  if (numUnpermuted > 0) {
+    LLVM_DEBUG(llvm::dbgs() << "[Systolic] Loop permutation failed, " 
+                            << numUnpermuted << " loops could not be permuted\n");
     return failure();
   }
   
@@ -521,8 +530,10 @@ static LogicalResult applyFinalPermutation(LoopBand &tiledBand) {
     llvm::dbgs() << "\n";
   });
   
-  if (failed(permuteLoops(tiledBand, permMap))) {
-    LLVM_DEBUG(llvm::dbgs() << "[Systolic] Final permutation failed\n");
+  unsigned numUnpermuted = permuteLoops(tiledBand, permMap);
+  if (numUnpermuted > 0) {
+    LLVM_DEBUG(llvm::dbgs() << "[Systolic] Final permutation failed, "
+                            << numUnpermuted << " loops could not be permuted\n");
     return failure();
   }
   

@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "systolic/Transforms/Passes.h"
+#include "systolic/Dialect/HLS/HLS.h"
 
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
@@ -16,8 +17,6 @@
 #include "mlir/Dialect/Vector/IR/VectorOps.h"
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/MLIRContext.h"
-#include "mlir/InitAllDialects.h"
-#include "mlir/InitAllPasses.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Support/FileUtilities.h"
@@ -30,14 +29,17 @@
 using namespace mlir;
 
 int main(int argc, char **argv) {
-  // Register all MLIR dialects
+  // Register dialects
   DialectRegistry registry;
-  registerAllDialects(registry);
+  registry.insert<affine::AffineDialect>();
+  registry.insert<arith::ArithDialect>();
+  registry.insert<func::FuncDialect>();
+  registry.insert<memref::MemRefDialect>();
+  registry.insert<scf::SCFDialect>();
+  registry.insert<vector::VectorDialect>();
+  registry.insert<systolic::hls::HLSDialect>();
   
-  // Register all MLIR passes
-  registerAllPasses();
-  
-  // Register systolic passes
+  // Register systolic passes only
   mlir::systolic::registerSystolicPasses();
   
   return mlir::asMainReturnCode(

@@ -8,6 +8,9 @@ add_mlir_library(SystolicTransforms
   ${PROJECT_SOURCE_DIR}/include/systolic/Transforms
 
   DEPENDS
+  MLIRSystolicHLSOpsIncGen
+  MLIRSystolicHLSTypesIncGen
+  MLIRSystolicHLSDialectIncGen
   MLIRAffineDialect
   MLIRArithDialect
   MLIRMemRefDialect
@@ -15,6 +18,7 @@ add_mlir_library(SystolicTransforms
 
   LINK_LIBS PUBLIC
   SystolicAnalysis
+  SystolicHLSDialect
   MLIRAffineDialect
   MLIRAffineAnalysis
   MLIRAffineUtils

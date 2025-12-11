@@ -104,7 +104,7 @@ struct SubscriptAnalysis {
   
   /// Analyze which IVs appear in the map operands
   static void analyze(Operation *memOp, 
-                     const SmallVectorImpl<AffineForOp> &loops,
+                     SmallVectorImpl<AffineForOp> &loops,
                      DenseMap<Value, SmallVector<unsigned, 2>> &ivToLoopMap) {
     SmallVector<Value, 4> operands;
     
@@ -162,7 +162,7 @@ struct OperandInfo {
 /// All three can be space loops, but we typically choose [i,j] for 2D array.
 static LogicalResult computeDependenceDistances(
     AffineForOp outerLoop,
-    const SmallVectorImpl<AffineForOp> &loops,
+    SmallVectorImpl<AffineForOp> &loops,
     SmallVectorImpl<DependenceDistance> &distances) {
   
   distances.clear();
@@ -255,7 +255,7 @@ static LogicalResult computeDependenceDistances(
 ///   - C[i,j]: stays local (output-stationary, k doesn't appear)
 static LogicalResult analyzeOperandFlows(
     AffineForOp outerLoop,
-    const SmallVectorImpl<AffineForOp> &loops,
+    SmallVectorImpl<AffineForOp> &loops,
     const SmallVectorImpl<unsigned> &spaceLoops,
     DenseMap<Value, SystolicFlowDir> &flows) {
   

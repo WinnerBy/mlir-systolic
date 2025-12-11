@@ -323,7 +323,7 @@ static void generateIOL3Task(
   
   // Create task operation
   auto taskOp = builder.create<func::FuncOp>(
-      loc, (operand.name + "_IO_L3_in").str(),
+      loc, operand.name + "_IO_L3_in",
       builder.getFunctionType({operand.memref.getType()}, {}));
   taskOp.setPrivate();
   

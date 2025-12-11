@@ -9,6 +9,7 @@
 #define SYSTOLIC_DIALECT_HLS_OPS_TD
 
 include "mlir/Interfaces/SideEffectInterfaces.td"
+include "mlir/Interfaces/ControlFlowInterfaces.td"
 include "mlir/IR/SymbolInterfaces.td"
 include "systolic/Dialect/HLS/HLS.td"
 include "systolic/Dialect/HLS/Types.td"
@@ -163,14 +164,13 @@ def BufferOp : HLSOp<"dataflow.buffer", []> {
     Declares a local buffer for double-buffering or local storage.
   }];
 
-  let arguments = (ins I32Attr:$depth,
-                       OptionalAttr<TypedAttrInterface>:$init_value);
+  let arguments = (ins I32Attr:$depth);
   let results = (outs AnyMemRef:$memref);
   let assemblyFormat = "attr-dict `:` type($memref)";
 
   let builders = [
     OpBuilder<(ins "Type":$memrefType), [{
-      build($_builder, $_state, memrefType, 1, nullptr);
+      build($_builder, $_state, memrefType, 1);
     }]>
   ];
 }

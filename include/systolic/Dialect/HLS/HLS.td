@@ -25,7 +25,8 @@ def HLS_Dialect : Dialect {
   }];
 
   let useDefaultTypePrinterParser = 1;
-  let useDefaultAttributePrinterParser = 1;
+  // Don't use attributes, so skip the printer/parser
+  // let useDefaultAttributePrinterParser = 1;
 }
 
 //===----------------------------------------------------------------------===//
