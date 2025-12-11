@@ -22,16 +22,26 @@ namespace systolic {
 /// - Analyzing dependences (via Polymer)
 /// - Selecting space loops
 /// - Loop permutation and tiling
+/// AutoSA: sa_space_time_transform, sa_array_partitioning, sa_latency_hiding
 std::unique_ptr<Pass> createSpaceTimeTransformPass();
 std::unique_ptr<Pass> createSpaceTimeTransformPass(const SystolicConfig &config);
 
 /// Create a pass that generates stream channels and dataflow tasks.
+/// This creates the complete systolic array dataflow structure:
+/// - I/O modules (L3, L2, L1) for data feeding
+/// - PE modules for computation
+/// - Drain modules for output
+/// AutoSA: sa_io_construct_optimize, generate_hw_modules
 std::unique_ptr<Pass> createStreamGenerationPass();
+std::unique_ptr<Pass> createDataflowGenerationPass();
+std::unique_ptr<Pass> createDataflowGenerationPass(const SystolicConfig &config);
 
 /// Create a pass that generates I/O modules (L1, L2, L3).
+/// AutoSA: sa_io_module_gen
 std::unique_ptr<Pass> createIOModuleGenerationPass();
 
 /// Create a pass that applies SIMD vectorization.
+/// AutoSA: sa_simd_vectorization_optimize
 std::unique_ptr<Pass> createSIMDVectorizationPass(unsigned simdWidth = 2);
 
 //===----------------------------------------------------------------------===//
@@ -40,16 +50,28 @@ std::unique_ptr<Pass> createSIMDVectorizationPass(unsigned simdWidth = 2);
 
 struct SpaceTimeTransformOptions {
   /// Space-time mapping mode (0-5, same as AutoSA)
-  unsigned spaceTimeMode = 3;  // Default: [i,j] 2D output-stationary
+  /// 0: [i]   - 1D row array
+  /// 1: [j]   - 1D column array  
+  /// 2: [k]   - 1D reduction array
+  /// 3: [i,j] - 2D output-stationary (default)
+  /// 4: [i,k] - 2D with horizontal reduction
+  /// 5: [j,k] - 2D with vertical reduction
+  unsigned spaceTimeMode = 3;
   
-  /// Array partitioning factors
+  /// Array partitioning factors (first-level tiling)
   llvm::SmallVector<int64_t, 3> arrayPart = {16, 16, 16};
   
-  /// Latency hiding factors
+  /// Latency hiding factors (second-level tiling)
   llvm::SmallVector<int64_t, 2> latency = {8, 8};
   
   /// SIMD width
   unsigned simdWidth = 1;
+  
+  /// Enable two-level buffering
+  bool twoLevelBuffer = false;
+  
+  /// Enable double buffering (ping-pong)
+  bool doubleBuffer = true;
 };
 
 //===----------------------------------------------------------------------===//
