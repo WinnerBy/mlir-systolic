@@ -21,6 +21,25 @@
 
 **设计理念**：用 MLIR 的方式重新表达 AutoSA 的语义，而不是直接翻译。通过引入 `SystolicDataflow` Dialect，清晰地表达多层 IO 结构和双缓冲逻辑。
 
+### AutoSA 的两部分架构
+
+AutoSA 包含两个主要部分：
+
+1. **FPGA Kernel 生成**（当前重点）：
+   - 处理 SCoP 参数包裹的嵌套 for 循环
+   - 通过多面体编译生成 FPGA 的 HLS C 文件
+   - 包含 PE 阵列、IO 模块、双缓冲等硬件结构
+
+2. **Host 端代码生成**（预留接口，暂不实现）：
+   - 根据命令参数生成不同的 Host 端代码
+   - HLS C Testbench：用于 Vivado HLS 仿真
+   - OpenCL Host：用于 Xilinx OpenCL 运行时
+   - 其他目标平台（TAPA、Catapult HLS 等）
+
+**当前实现范围**：专注于 FPGA Kernel 生成，Host 端代码生成接口已预留但暂不实现。
+
+### 编译流程
+
 ```
 输入: Affine MLIR (来自 Polygeist 或手写)
          │
@@ -71,15 +90,27 @@
          │
          ▼ HLS Dialect IR
 ┌─────────────────────────────────────────────────────────┐
-│  Translation: EmitHLSCpp                                │
+│  Translation: EmitHLSCpp (FPGA Kernel)                 │
 │  ┌───────────────────────────────────────────────────┐  │
-│  │ • HLS C++ 代码生成                                │  │
+│  │ • HLS C++ 代码生成 (Kernel)                      │  │
 │  │ • Pragma 插入 (pipeline, array_partition, etc.)   │  │
 │  └───────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────┘
          │
          ▼
-输出: HLS C++ (Vivado HLS / Vitis 兼容)
+输出: HLS C++ Kernel (Vivado HLS / Vitis 兼容)
+
+┌─────────────────────────────────────────────────────────┐
+│  Translation: EmitHostCode (预留接口) ⚠️ 暂不实现      │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │ • HLS Testbench 生成                              │  │
+│  │ • OpenCL Host 代码生成                            │  │
+│  │ • 其他目标平台支持                                 │  │
+│  └───────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────┘
+         │
+         ▼
+输出: Host 端代码 (根据目标平台)
 ```
 
 **关键改进**：
@@ -128,8 +159,14 @@
 
 **EmitHLSCpp.cpp** (Translation: `-emit-hlscpp`)
 - 遍历 HLS Dialect IR
-- 生成 HLS C++ 代码
+- 生成 HLS C++ Kernel 代码
 - 插入 Pragma（pipeline, array_partition 等）
+
+**EmitHostCode.cpp** ⚠️ (Translation: `-emit-host-code`, 预留接口)
+- 生成 HLS Testbench（用于 Vivado HLS 仿真）
+- 生成 OpenCL Host 代码（用于 Xilinx OpenCL 运行时）
+- 支持其他目标平台（TAPA、Catapult HLS 等）
+- **当前状态**: 接口已预留，实现待后续开发
 
 ## 依赖
 
@@ -172,11 +209,16 @@ systolic-translate matmul_systolic.mlir -emit-hlscpp > matmul_hls.cpp
 
 | 功能 | AutoSA | mlir-systolic |
 |------|--------|---------------|
+| **FPGA Kernel 生成** | | |
 | 前端 | PET (C解析) | Polygeist (C→MLIR) |
 | 依赖分析 | ISL | Polymer (ISL) |
 | 调度 | ISL schedule tree | MLIR Affine + Polymer |
 | 变换 | ISL AST build | MLIR transforms |
-| 代码生成 | 自定义 C printer | EmitHLSCpp |
+| Kernel 代码生成 | 自定义 C printer | EmitHLSCpp |
+| **Host 端代码生成** | | |
+| HLS Testbench | ✅ 支持 | ⚠️ 预留接口（暂不实现） |
+| OpenCL Host | ✅ 支持 | ⚠️ 预留接口（暂不实现） |
+| 其他平台 | ✅ TAPA, Catapult | ⚠️ 预留接口（暂不实现） |
 
 ## 目录结构
 
@@ -229,7 +271,12 @@ mlir-systolic/
 
 ### Phase 4: 验证
 - [ ] MatMul 端到端测试
-- [ ] 与 AutoSA 输出对比
+- [ ] 与 AutoSA 输出对比（Kernel 部分）
+
+### Phase 5: Host 端代码生成（预留，暂不实现）
+- [ ] HLS Testbench 生成接口
+- [ ] OpenCL Host 代码生成接口
+- [ ] 其他目标平台支持接口
 
 ## 技术方案
 

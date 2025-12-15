@@ -242,16 +242,60 @@ void SystolicDataflowGenerationPass::runOnOperation() {
     return;
   }
   
-  // Step 2: Generate SystolicDataflow operations
-  // For now, we'll create a simple structure
-  // TODO: Implement full multi-level IO generation
+  // Step 2: Extract loop nest information for PE array dimensions
+  // Find the outermost affine.for loop to get tiling information
+  AffineForOp outermostLoop = nullptr;
+  func.walk([&](AffineForOp forOp) {
+    if (!forOp->getParentOfType<AffineForOp>()) {
+      outermostLoop = forOp;
+      return WalkResult::interrupt();
+    }
+    return WalkResult::advance();
+  });
+  
+  // Extract PE array dimensions from loop structure
+  // For MatMul with array_part=[16,16,16] and latency=[8,8]:
+  // PE array size = array_part / latency = [2, 2]
+  SmallVector<int64_t, 2> peArraySize = {2, 2};  // Default, should be extracted from config
+  SmallVector<int64_t, 2> tileSize = {8, 8};     // Default, should be extracted from config
+  
+  // Try to infer from loop bounds if available
+  if (outermostLoop) {
+    SmallVector<AffineForOp, 3> loopNest;
+    AffineForOp current = outermostLoop;
+    while (current && loopNest.size() < 3) {
+      loopNest.push_back(current);
+      // Find next nested loop
+      AffineForOp inner = nullptr;
+      for (auto &op : *current.getBody()) {
+        if (auto nestedFor = dyn_cast<AffineForOp>(op)) {
+          inner = nestedFor;
+          break;
+        }
+      }
+      current = inner;
+    }
+    
+    // If we have at least 2 loops, use their bounds for PE array size
+    if (loopNest.size() >= 2) {
+      if (loopNest[0].hasConstantUpperBound() && loopNest[1].hasConstantUpperBound()) {
+        int64_t bound0 = loopNest[0].getConstantUpperBound();
+        int64_t bound1 = loopNest[1].getConstantUpperBound();
+        // Assume these are tile loops, PE array is typically smaller
+        peArraySize[0] = std::max((int64_t)1, bound0 / 8);
+        peArraySize[1] = std::max((int64_t)1, bound1 / 8);
+        tileSize[0] = 8;  // Default tile size
+        tileSize[1] = 8;
+      }
+    }
+  }
   
   OpBuilder builder(func.getContext());
   builder.setInsertionPointToStart(&func.getBody().front());
   
   Location loc = func.getLoc();
   
-  // Create IO modules for input arrays
+  // Step 3: Generate IO modules for input arrays (L1, L2, L3)
   for (const auto &group : groups) {
     if (group.type == ArrayRefGroup::IO_GROUP && group.ioLevel > 0) {
       // Create IO module
@@ -280,7 +324,60 @@ void SystolicDataflowGenerationPass::runOnOperation() {
     }
   }
   
-  // TODO: Generate PE array and drain modules
+  // Step 4: Generate PE Array
+  // Find PE group (accumulator arrays with both loads and stores)
+  bool hasPEGroup = false;
+  for (const auto &group : groups) {
+    if (group.type == ArrayRefGroup::PE_GROUP) {
+      hasPEGroup = true;
+      break;
+    }
+  }
+  
+  if (hasPEGroup) {
+    auto peArray = builder.create<dataflow::PEArrayOp>(
+        loc,
+        /*arraySize=*/builder.getI64ArrayAttr(peArraySize),
+        /*tileSize=*/builder.getI64ArrayAttr(tileSize),
+        /*name=*/StringAttr());
+    
+    // Create body block
+    Block *bodyBlock = builder.createBlock(&peArray.getBody());
+    builder.setInsertionPointToStart(bodyBlock);
+    
+    // Create yield terminator
+    builder.create<dataflow::PEArrayYieldOp>(loc);
+    
+    LLVM_DEBUG(llvm::dbgs() << "Created PE array with size [" 
+                            << peArraySize[0] << ", " << peArraySize[1] << "]\n");
+  }
+  
+  // Step 5: Generate Drain modules for output arrays
+  for (const auto &group : groups) {
+    if (group.type == ArrayRefGroup::DRAIN_GROUP) {
+      // Determine drain level (typically L2 for output)
+      int drainLevel = group.ioLevel > 0 ? group.ioLevel : 2;
+      
+      auto drainModule = builder.create<dataflow::DrainModuleOp>(
+          loc,
+          /*level=*/builder.getI32IntegerAttr(drainLevel),
+          /*arrayName=*/builder.getStringAttr(group.arrayName),
+          /*bufferShape=*/group.bufferShape.empty()
+              ? ArrayAttr()
+              : builder.getI64ArrayAttr(group.bufferShape),
+          /*name=*/StringAttr());
+      
+      // Create body block
+      Block *bodyBlock = builder.createBlock(&drainModule.getBody());
+      builder.setInsertionPointToStart(bodyBlock);
+      
+      // Create yield terminator
+      builder.create<dataflow::DrainModuleYieldOp>(loc);
+      
+      LLVM_DEBUG(llvm::dbgs() << "Created drain module for " << group.arrayName
+                              << " at level " << drainLevel << "\n");
+    }
+  }
 }
 
 //===----------------------------------------------------------------------===//

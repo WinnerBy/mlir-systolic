@@ -45,6 +45,10 @@ std::unique_ptr<Pass> createIOModuleGenerationPass();
 /// AutoSA: sa_io_construct_optimize, generate_hw_modules
 std::unique_ptr<Pass> createSystolicDataflowGenerationPass();
 
+/// Create a pass that lowers SystolicDataflow Dialect to HLS Dialect.
+/// This converts high-level systolic abstractions to concrete HLS structures.
+std::unique_ptr<Pass> createSystolicDataflowToHLSPass();
+
 /// Create a pass that applies SIMD vectorization.
 /// AutoSA: sa_simd_vectorization_optimize
 std::unique_ptr<Pass> createSIMDVectorizationPass(unsigned simdWidth = 2);

@@ -53,7 +53,70 @@ MLIR-Systolic 旨在将 C 语言中的嵌套循环自动转换为 FPGA 中的脉
 
 ## 2. AutoSA 架构深度分析
 
-### 2.1 AutoSA 核心概念
+### 2.1 AutoSA 的两部分架构
+
+AutoSA 包含两个主要部分，分别处理不同的代码生成任务：
+
+#### 2.1.1 FPGA Kernel 生成（当前重点）
+
+**输入**: SCoP 参数包裹的嵌套 for 循环
+
+**处理流程**:
+1. **多面体分析**（ISL）：
+   - 依赖距离分析
+   - 空间循环选择
+   - 调度树生成
+
+2. **循环变换**：
+   - 空间-时间映射
+   - 多级分块（array_part + latency）
+   - 循环置换
+
+3. **硬件结构生成**：
+   - PE 阵列生成
+   - 多层 IO 模块（L1/L2/L3）
+   - 双缓冲机制
+   - 数据流通道
+
+4. **代码生成**：
+   - HLS C++ Kernel 代码
+   - 包含所有硬件模块函数
+   - 插入 HLS Pragma
+
+**输出**: FPGA 的 HLS C++ Kernel 文件
+
+**对应 AutoSA 代码**:
+- `autosa_trans.cpp` - 变换和优化
+- `autosa_comm.cpp` - 通信管理
+- `autosa_codegen.cpp` - 代码生成
+- `autosa_xilinx_hls_c.cpp` - Xilinx HLS C 代码生成
+
+#### 2.1.2 Host 端代码生成（预留接口）
+
+**输入**: Kernel 函数签名、参数信息、目标平台配置
+
+**处理流程**:
+1. **根据目标平台选择生成策略**：
+   - `autosa_hls_c` → HLS Testbench
+   - `autosa_opencl` → OpenCL Host 代码
+   - `autosa_tapa` → TAPA Host 代码
+   - `autosa_catapult_c` → Catapult HLS Host 代码
+
+2. **生成 Host 端代码**：
+   - 数据分配和初始化
+   - Kernel 调用接口
+   - 数据传输（Host ↔ Device）
+   - 结果验证和输出
+
+**输出**: Host 端代码文件
+
+**对应 AutoSA 代码**:
+- `autosa_scripts/codegen.py` - 代码生成脚本
+- `autosa_scripts/autosa.py` - 主入口脚本
+
+**mlir-systolic 对应**: `EmitHostCode.cpp`（预留接口，暂不实现）
+
+### 2.2 AutoSA 核心概念
 
 AutoSA 是一个基于 PPCG (Polyhedral Parallel Code Generator) 的编译器，专门用于生成脉动阵列的 HLS C++ 代码。其核心在于**分层的数据流管理**和**硬件感知的代码生成**。
 

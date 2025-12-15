@@ -4,6 +4,7 @@ add_mlir_library(SystolicTransforms
   SystolicTransform.cpp
   DataflowGeneration.cpp
   SystolicDataflowGeneration.cpp
+  SystolicDataflowToHLS.cpp
 
   ADDITIONAL_HEADER_DIRS
   ${PROJECT_SOURCE_DIR}/include/systolic/Transforms

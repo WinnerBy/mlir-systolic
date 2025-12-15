@@ -16,6 +16,7 @@
 #include "systolic/Transforms/Passes.h"
 #include "systolic/Analysis/SpaceTimeAnalysis.h"
 #include "systolic/Analysis/SystolicConfig.h"
+#include "systolic/Analysis/PolymerAnalysis.h"
 
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/Affine/Analysis/AffineAnalysis.h"
@@ -145,12 +146,43 @@ static LogicalResult checkLegality(LoopBand &band) {
 //===----------------------------------------------------------------------===//
 
 /// Analyze dependence distances for each loop in the band.
-/// This is a simplified version - full implementation would use Polymer/ISL.
+/// Uses Polymer/ISL for accurate polyhedral analysis when available,
+/// falls back to simplified heuristic analysis otherwise.
 static LogicalResult analyzeDependenceDistances(
+    func::FuncOp func,
     LoopBand &band,
     SmallVectorImpl<LoopDepInfo> &depInfos) {
   
   depInfos.clear();
+  
+  // Try to use Polymer for accurate analysis
+  if (systolic::isPolymerAvailable()) {
+    LLVM_DEBUG(llvm::dbgs() << "[Systolic] Using Polymer for dependence analysis\n");
+    
+    SmallVector<systolic::LoopDependenceDistance, 8> polymerDistances;
+    if (succeeded(systolic::computeDependenceDistancesWithPolymer(func, polymerDistances))) {
+      // Convert Polymer results to LoopDepInfo
+      for (const auto &pdist : polymerDistances) {
+        LoopDepInfo info;
+        info.loopIndex = pdist.loopIndex;
+        info.minDistance = pdist.minDistance;
+        info.maxDistance = pdist.maxDistance;
+        info.isUniform = pdist.isUniform;
+        info.canBeSpaceLoop = pdist.canBeSpaceLoop;
+        depInfos.push_back(info);
+      }
+      
+      if (!depInfos.empty()) {
+        LLVM_DEBUG(llvm::dbgs() << "[Systolic] Polymer analysis successful\n");
+        return success();
+      }
+    }
+    
+    LLVM_DEBUG(llvm::dbgs() << "[Systolic] Polymer analysis failed, falling back to heuristic\n");
+  }
+  
+  // Fallback: Simplified heuristic analysis
+  LLVM_DEBUG(llvm::dbgs() << "[Systolic] Using simplified heuristic analysis\n");
   
   // Get the innermost loop body for memory access analysis
   AffineForOp innermostLoop = band.back();
@@ -660,8 +692,9 @@ struct SystolicTransformPass
       ProblemSize problemSize = inferProblemSize(band);
       
       // Step 2.3: Dependence analysis (AutoSA: get_dep_dis_at_node)
+      // Uses Polymer/ISL when available, falls back to heuristic otherwise
       SmallVector<LoopDepInfo, 4> depInfos;
-      if (failed(analyzeDependenceDistances(band, depInfos))) {
+      if (failed(analyzeDependenceDistances(func, band, depInfos))) {
         LLVM_DEBUG(llvm::dbgs() << "Dependence analysis failed\n");
         continue;
       }
@@ -728,7 +761,8 @@ std::unique_ptr<Pass> createSpaceTimeTransformPass(const SystolicConfig &config)
 
 void registerSystolicPasses() {
   PassRegistration<SystolicTransformPass>();
-  // SystolicDataflowGenerationPass will be registered in its own file
+  // SystolicDataflowGenerationPass and SystolicDataflowToHLSPass
+  // are registered in their own files
 }
 
 } // namespace systolic
