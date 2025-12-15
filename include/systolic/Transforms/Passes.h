@@ -40,6 +40,11 @@ std::unique_ptr<Pass> createDataflowGenerationPass(const SystolicConfig &config)
 /// AutoSA: sa_io_module_gen
 std::unique_ptr<Pass> createIOModuleGenerationPass();
 
+/// Create a pass that generates SystolicDataflow Dialect from Affine IR.
+/// This creates multi-level IO modules, PE arrays, and double buffering.
+/// AutoSA: sa_io_construct_optimize, generate_hw_modules
+std::unique_ptr<Pass> createSystolicDataflowGenerationPass();
+
 /// Create a pass that applies SIMD vectorization.
 /// AutoSA: sa_simd_vectorization_optimize
 std::unique_ptr<Pass> createSIMDVectorizationPass(unsigned simdWidth = 2);

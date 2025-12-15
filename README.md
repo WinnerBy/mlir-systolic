@@ -5,10 +5,21 @@
 ## 项目目标
 
 将 Affine 循环嵌套自动转换为脉动阵列 HLS C++ 代码，结合：
-- **Polymer** 的多面体分析能力（依赖距离、空间循环选择）
+- **Polymer** 的多面体分析能力 ⭐ **核心依赖**
+  - 依赖距离分析（使用 ISL）
+  - 空间循环自动选择
+  - **调度树获取（用于 task 分解）**
 - **MLIR** 的变换和代码生成能力（参考 ScaleHLS）
 
+**为什么需要 Polymer**：
+- AutoSA 基于多面体模型，使用 ISL Schedule Tree 进行依赖分析和循环变换
+- **没有调度树，就无法正确分解 task 成多个独立的 module 函数**
+- 这是 ScaleHLS 无法解决的问题，也是我们创建 mlir-systolic 的主要原因
+- 详见：[Polymer 集成方案](docs/POLYMER_INTEGRATION.md)
+
 ## 架构
+
+**设计理念**：用 MLIR 的方式重新表达 AutoSA 的语义，而不是直接翻译。通过引入 `SystolicDataflow` Dialect，清晰地表达多层 IO 结构和双缓冲逻辑。
 
 ```
 输入: Affine MLIR (来自 Polygeist 或手写)
@@ -26,12 +37,35 @@
          │
          ▼ 分块后的 Affine IR
 ┌─────────────────────────────────────────────────────────┐
-│  Pass 2: DataflowGeneration                             │
+│  Pass 2: SystolicDataflowGeneration ⭐ NEW              │
 │  ┌───────────────────────────────────────────────────┐  │
-│  │ • Stream 通道生成                                 │  │
-│  │ • I/O 模块生成 (L1/L2/L3)                         │  │
-│  │ • PE 模块生成                                     │  │
-│  │ • 双缓冲 (ping-pong)                              │  │
+│  │ • 数组引用分组 (IO/PE/Drain)                      │  │
+│  │ • IO 层级分析 (L1/L2/L3)                         │  │
+│  │ • 生成 SystolicDataflow Dialect:                  │  │
+│  │   - systolic.io.module<L3> (Global Memory)        │  │
+│  │   - systolic.io.module<L2> (双缓冲)               │  │
+│  │   - systolic.io.module<L1> (PE 接口)              │  │
+│  │   - systolic.pe.array (计算阵列)                  │  │
+│  │   - systolic.drain.module (输出)                  │  │
+│  └───────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────┘
+         │
+         ▼ SystolicDataflow Dialect IR
+┌─────────────────────────────────────────────────────────┐
+│  Pass 3: SystolicDataflowToHLS (可选优化) ⭐ NEW       │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │ • 缓冲区合并优化                                   │  │
+│  │ • 流通道优化                                       │  │
+│  └───────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────┐
+│  Pass 4: SystolicDataflowToHLS (降级) ⭐ NEW           │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │ • systolic.io.module → hls.dataflow.task          │  │
+│  │ • 双缓冲逻辑 → Affine loops + SCF if              │  │
+│  │ • Stream 通道 → hls.dataflow.stream               │  │
 │  └───────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────┘
          │
@@ -48,15 +82,25 @@
 输出: HLS C++ (Vivado HLS / Vitis 兼容)
 ```
 
+**关键改进**：
+- 引入 `SystolicDataflow` Dialect 作为中间抽象层，清晰表达硬件结构
+- 支持多层（L1/L2/L3）双缓冲 IO 模块生成
+- 利用 MLIR 的 dialect 系统和 pass 组合能力，便于后续扩展和优化
+
 ## 核心实现文件
 
-本项目采用**三个核心文件**的设计：
+本项目采用**分层设计**，充分利用 MLIR 的 dialect 系统：
 
 | 文件 | 功能 | 行数估计 | 对应 AutoSA |
 |------|------|---------|-------------|
 | `SystolicTransform.cpp` | 分析 + 分块 + 置换 | ~600 | `sa_space_time_transform` + `compute_management` |
-| `DataflowGeneration.cpp` | Stream/Task 生成 | ~1000 | `comm_management` + `generate_hw_modules` |
+| `SystolicDataflowGeneration.cpp` ⭐ | 数据流抽象生成 | ~1200 | `comm_management` + `generate_hw_modules` |
+| `SystolicDataflowToHLS.cpp` ⭐ | Dialect 降级 | ~800 | - |
 | `EmitHLSCpp.cpp` | HLS C++ 输出 | ~1200 | `print_hw` |
+
+**新增 Dialect 定义**：
+- `include/systolic/Dialect/SystolicDataflow/` - Dialect 定义（TableGen）
+- `lib/Dialect/SystolicDataflow/` - Dialect 实现
 
 ### 详细职责
 
@@ -66,11 +110,21 @@
 - 执行循环置换（空间循环移到外层）
 - 执行多级分块（array_part + latency）
 
-**DataflowGeneration.cpp** (Pass 2: `-systolic-dataflow`)
-- 创建 `hls.dataflow.dispatch` 区域
-- 生成 Stream 通道（L1/L2/L3 层级）
-- 生成 I/O Task（含双缓冲）
-- 生成 PE Task（脉动数据流）
+**SystolicDataflowGeneration.cpp** ⭐ (Pass 2: `-systolic-dataflow-generation`)
+- 数组引用分组分析（IO/PE/Drain）
+- IO 层级分析（确定 L1/L2/L3）
+- 生成 `SystolicDataflow` Dialect：
+  - `systolic.io.module<L3>` - Global Memory 接口
+  - `systolic.io.module<L2>` - 双缓冲中间层
+  - `systolic.io.module<L1>` - PE 接口
+  - `systolic.pe.array` - PE 阵列
+  - `systolic.drain.module` - 输出模块
+- 双缓冲逻辑生成（ping-pong）
+
+**SystolicDataflowToHLS.cpp** ⭐ (Pass 3: `-systolic-dataflow-to-hls`)
+- 将 `SystolicDataflow` Dialect 降级到 `HLS` Dialect
+- 双缓冲逻辑转换为 Affine loops + SCF if
+- Stream 操作映射到 HLS Stream
 
 **EmitHLSCpp.cpp** (Translation: `-emit-hlscpp`)
 - 遍历 HLS Dialect IR
@@ -129,20 +183,26 @@ systolic-translate matmul_systolic.mlir -emit-hlscpp > matmul_hls.cpp
 ```
 mlir-systolic/
 ├── include/systolic/
-│   ├── Dialect/HLS/           # HLS Dialect 定义
-│   ├── Analysis/              # 分析接口
-│   └── Transforms/            # Pass 声明
+│   ├── Dialect/
+│   │   ├── HLS/                    # HLS Dialect 定义
+│   │   └── SystolicDataflow/ ⭐    # SystolicDataflow Dialect 定义
+│   ├── Analysis/                   # 分析接口
+│   └── Transforms/                 # Pass 声明
 ├── lib/
-│   ├── Dialect/HLS/           # HLS.cpp (~300 行)
-│   ├── Analysis/              # SpaceTimeAnalysis.cpp (~400 行)
+│   ├── Dialect/
+│   │   ├── HLS/                    # HLS.cpp (~300 行)
+│   │   └── SystolicDataflow/ ⭐    # Dialect 实现
+│   ├── Analysis/                   # SpaceTimeAnalysis.cpp (~400 行)
 │   ├── Transforms/
-│   │   ├── SystolicTransform.cpp   # (~600 行) ⭐核心
-│   │   └── DataflowGeneration.cpp  # (~1000 行) ⭐核心
+│   │   ├── SystolicTransform.cpp        # (~600 行) ⭐核心
+│   │   ├── SystolicDataflowGeneration.cpp ⭐ (~1200 行) ⭐核心
+│   │   └── SystolicDataflowToHLS.cpp ⭐ (~800 行) ⭐核心
 │   └── Translation/
 │       └── EmitHLSCpp.cpp          # (~1200 行) ⭐核心
-├── tools/systolic-opt/        # 主工具
-├── test/matmul/               # 测试用例
-└── docs/                      # 文档
+├── tools/systolic-opt/             # 主工具
+├── test/matmul/                    # 测试用例
+└── docs/
+    └── TECHNICAL_REDESIGN.md ⭐     # 技术方案详细文档
 ```
 
 ## 开发路线
@@ -152,19 +212,39 @@ mlir-systolic/
 - [x] HLS Dialect 定义 (TableGen)
 - [x] 分析接口设计
 
-### Phase 2: 核心实现 (进行中)
-- [ ] HLS.cpp - Dialect 实现
+### Phase 2: 核心实现 (重新设计)
+- [ ] SystolicDataflow Dialect 定义 (TableGen)
+- [ ] SystolicDataflow Dialect 实现
 - [ ] SystolicTransform.cpp - 变换 Pass
-- [ ] DataflowGeneration.cpp - 数据流生成
+- [ ] SystolicDataflowGeneration.cpp - 数据流抽象生成 ⭐
+- [ ] SystolicDataflowToHLS.cpp - Dialect 降级 ⭐
 - [ ] EmitHLSCpp.cpp - 代码生成
 
-### Phase 3: Polymer 集成
-- [ ] 依赖距离分析
-- [ ] 空间循环自动选择
+### Phase 3: Polymer 集成 ⭐ **最高优先级**
+- [ ] 集成 Polymer ISL 接口（获取调度树）
+- [ ] 实现依赖距离分析（使用 ISL）
+- [ ] 实现空间循环自动选择（依赖距离 ≤ 1）
+- [ ] **基于调度树分解 task**（生成多个独立函数）
+- [ ] 详见：[Polymer 集成方案](docs/POLYMER_INTEGRATION.md)
 
 ### Phase 4: 验证
 - [ ] MatMul 端到端测试
 - [ ] 与 AutoSA 输出对比
+
+## 技术方案
+
+详细的技术方案和设计思路请参考：
+
+- **[项目综合总结](docs/COMPREHENSIVE_SUMMARY.md)** ⭐ **推荐** - 包含 AutoSA 分析、技术方案、实现进展
+- [技术方案重新设计](docs/TECHNICAL_REDESIGN.md) - 详细设计文档
+- [快速参考](docs/QUICK_REFERENCE.md) - 关键改进点总结
+- [文档索引](docs/DOCUMENT_INDEX.md) - 所有文档的导航
+
+**核心改进**：
+1. 引入 `SystolicDataflow` Dialect 作为中间抽象层
+2. 支持多层（L1/L2/L3）双缓冲 IO 模块
+3. 充分利用 MLIR 的 dialect 系统和 pass 组合能力
+4. 清晰的抽象层级，便于扩展和优化
 
 ## 参考项目
 

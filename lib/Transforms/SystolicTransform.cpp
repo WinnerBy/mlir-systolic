@@ -728,6 +728,7 @@ std::unique_ptr<Pass> createSpaceTimeTransformPass(const SystolicConfig &config)
 
 void registerSystolicPasses() {
   PassRegistration<SystolicTransformPass>();
+  // SystolicDataflowGenerationPass will be registered in its own file
 }
 
 } // namespace systolic

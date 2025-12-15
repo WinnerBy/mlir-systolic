@@ -3,6 +3,7 @@
 add_mlir_library(SystolicTransforms
   SystolicTransform.cpp
   DataflowGeneration.cpp
+  SystolicDataflowGeneration.cpp
 
   ADDITIONAL_HEADER_DIRS
   ${PROJECT_SOURCE_DIR}/include/systolic/Transforms
@@ -11,6 +12,8 @@ add_mlir_library(SystolicTransforms
   MLIRSystolicHLSOpsIncGen
   MLIRSystolicHLSTypesIncGen
   MLIRSystolicHLSDialectIncGen
+  MLIRSystolicSystolicDataflowOpsIncGen
+  MLIRSystolicSystolicDataflowDialectIncGen
   MLIRAffineDialect
   MLIRArithDialect
   MLIRMemRefDialect
@@ -19,6 +22,7 @@ add_mlir_library(SystolicTransforms
   LINK_LIBS PUBLIC
   SystolicAnalysis
   SystolicHLSDialect
+  SystolicSystolicDataflowDialect
   MLIRAffineDialect
   MLIRAffineAnalysis
   MLIRAffineUtils

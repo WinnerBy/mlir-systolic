@@ -8,6 +8,7 @@
 
 #include "systolic/Transforms/Passes.h"
 #include "systolic/Dialect/HLS/HLS.h"
+#include "systolic/Dialect/SystolicDataflow/SystolicDataflow.h"
 
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
@@ -38,6 +39,7 @@ int main(int argc, char **argv) {
   registry.insert<scf::SCFDialect>();
   registry.insert<vector::VectorDialect>();
   registry.insert<systolic::hls::HLSDialect>();
+  systolic::dataflow::registerSystolicDataflowDialect(registry);
   
   // Register systolic passes only
   mlir::systolic::registerSystolicPasses();

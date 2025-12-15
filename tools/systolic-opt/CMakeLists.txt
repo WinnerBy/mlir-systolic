@@ -15,6 +15,7 @@ target_link_libraries(systolic-opt
   ${conversion_libs}
   SystolicAnalysis
   SystolicTransforms
+  SystolicSystolicDataflowDialect
   MLIRAffineDialect
   MLIRAffineAnalysis
   MLIRAffineUtils
