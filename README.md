@@ -36,7 +36,10 @@ AutoSA 包含两个主要部分：
    - OpenCL Host：用于 Xilinx OpenCL 运行时
    - 其他目标平台（TAPA、Catapult HLS 等）
 
-**当前实现范围**：专注于 FPGA Kernel 生成，Host 端代码生成接口已预留但暂不实现。
+**当前实现范围**：
+- ✅ **FPGA Kernel 生成**：专注于 SCoP 区域的循环嵌套（对应 AutoSA 的 `#pragma scop` 区域）
+- ⚠️ **Host 端代码生成**：接口已预留但暂不实现
+- ⚠️ **SCoP 区域检测**：当前测试阶段只处理单个 `affine.for` 循环嵌套（后续使用 Polygeist 处理 C 文件导入）
 
 ### 编译流程
 
@@ -242,7 +245,9 @@ mlir-systolic/
 │   └── Translation/
 │       └── EmitHLSCpp.cpp          # (~1200 行) ⭐核心
 ├── tools/systolic-opt/             # 主工具
-├── test/matmul/                    # 测试用例
+├── test/
+│   ├── matmul/                     # 矩阵乘测试用例
+│   └── reference-samples/          # AutoSA 生成的参考 HLS C++ 文件
 └── docs/
     └── TECHNICAL_REDESIGN.md ⭐     # 技术方案详细文档
 ```

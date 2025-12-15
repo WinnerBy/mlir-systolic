@@ -679,6 +679,12 @@ struct SystolicTransformPass
     LLVM_DEBUG(llvm::dbgs() << "Found " << bands.size() << " loop band(s)\n");
     
     // Step 2: Process each loop band
+    // Note: For testing, we assume there's only one loop band (single SCoP region)
+    if (bands.size() > 1) {
+      LLVM_DEBUG(llvm::dbgs() << "[Systolic] Warning: Multiple loop bands found, "
+                              << "processing only the first one (testing assumption)\n");
+    }
+    
     for (auto &band : bands) {
       LLVM_DEBUG(llvm::dbgs() << "\nProcessing band with " << band.size() << " loops\n");
       
