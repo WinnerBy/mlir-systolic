@@ -42,21 +42,57 @@ add_definitions(${LLVM_DEFINITIONS})
 # Polymer Integration (Optional)
 #-------------------------------------------------------------------------------
 if(SYSTOLIC_ENABLE_POLYMER)
-  # Polymer is part of Polygeist, we need to find it
-  if(DEFINED ENV{POLYGEIST_BUILD})
-    set(POLYGEIST_BUILD_DIR $ENV{POLYGEIST_BUILD})
-  elseif(DEFINED POLYGEIST_BUILD)
-    set(POLYGEIST_BUILD_DIR ${POLYGEIST_BUILD})
+  # Polymer is part of Polygeist
+  # First, try to use Polygeist as a submodule (preferred)
+  set(POLYGEIST_SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/Polygeist)
+  if(EXISTS ${POLYGEIST_SOURCE_DIR}/tools/polymer/include)
+    message(STATUS "Using Polygeist from submodule: ${POLYGEIST_SOURCE_DIR}")
+    # Add Polymer include directories from source
+    include_directories(${POLYGEIST_SOURCE_DIR}/tools/polymer/include)
+    
+    # Try to find Polygeist build directory
+    # Check common build directory locations
+    if(DEFINED ENV{POLYGEIST_BUILD})
+      set(POLYGEIST_BUILD_DIR $ENV{POLYGEIST_BUILD})
+    elseif(DEFINED POLYGEIST_BUILD)
+      set(POLYGEIST_BUILD_DIR ${POLYGEIST_BUILD})
+    else()
+      # Try to find build directory relative to source
+      if(EXISTS ${POLYGEIST_SOURCE_DIR}/../Polygeist-build)
+        set(POLYGEIST_BUILD_DIR ${POLYGEIST_SOURCE_DIR}/../Polygeist-build)
+      elseif(EXISTS ${POLYGEIST_SOURCE_DIR}/build)
+        set(POLYGEIST_BUILD_DIR ${POLYGEIST_SOURCE_DIR}/build)
+      endif()
+    endif()
+    
+    # If build directory is found, add library paths
+    if(DEFINED POLYGEIST_BUILD_DIR AND EXISTS ${POLYGEIST_BUILD_DIR})
+      message(STATUS "Polygeist build directory: ${POLYGEIST_BUILD_DIR}")
+      link_directories(${POLYGEIST_BUILD_DIR}/lib)
+    else()
+      message(WARNING "Polygeist build directory not found. "
+                      "Set POLYGEIST_BUILD environment variable or "
+                      "POLYGEIST_BUILD CMake variable to enable Polymer libraries.")
+    endif()
   else()
-    message(STATUS "POLYGEIST_BUILD not set, Polymer integration disabled")
-    set(SYSTOLIC_ENABLE_POLYMER OFF)
-  endif()
-  
-  if(SYSTOLIC_ENABLE_POLYMER)
-    message(STATUS "Polymer integration enabled from: ${POLYGEIST_BUILD_DIR}")
-    # Add Polymer include directories
-    include_directories(${POLYGEIST_BUILD_DIR}/../tools/polymer/include)
-    include_directories(${POLYGEIST_BUILD_DIR}/tools/polymer/include)
+    # Fallback: try to use external Polygeist (via POLYGEIST_BUILD)
+    if(DEFINED ENV{POLYGEIST_BUILD})
+      set(POLYGEIST_BUILD_DIR $ENV{POLYGEIST_BUILD})
+    elseif(DEFINED POLYGEIST_BUILD)
+      set(POLYGEIST_BUILD_DIR ${POLYGEIST_BUILD})
+    else()
+      message(STATUS "Polygeist submodule not found and POLYGEIST_BUILD not set, "
+                     "Polymer integration disabled")
+      set(SYSTOLIC_ENABLE_POLYMER OFF)
+    endif()
+    
+    if(SYSTOLIC_ENABLE_POLYMER)
+      message(STATUS "Using external Polygeist from: ${POLYGEIST_BUILD_DIR}")
+      # Add Polymer include directories
+      include_directories(${POLYGEIST_BUILD_DIR}/../tools/polymer/include)
+      include_directories(${POLYGEIST_BUILD_DIR}/tools/polymer/include)
+      link_directories(${POLYGEIST_BUILD_DIR}/lib)
+    endif()
   endif()
 endif()
 

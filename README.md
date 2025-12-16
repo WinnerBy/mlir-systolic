@@ -179,9 +179,41 @@ AutoSA 包含两个主要部分：
 
 ## 构建
 
+### 方式 1: 使用 Git Submodule（推荐）
+
 ```bash
-# 确保 Polygeist 已构建
-export POLYGEIST_BUILD=/home/user/work/Polygeist/build
+# 1. 克隆仓库并初始化 submodule
+git clone --recursive <repository-url>
+# 或者如果已经克隆，运行：
+git submodule update --init --recursive
+
+# 2. 构建 Polygeist（如果尚未构建）
+cd third_party/Polygeist
+mkdir build && cd build
+cmake .. \
+  -DMLIR_DIR=<path-to-mlir>/lib/cmake/mlir \
+  -DLLVM_DIR=<path-to-llvm>/lib/cmake/llvm \
+  -GNinja
+ninja
+
+# 3. 设置 Polygeist 构建目录（可选，CMake 会自动检测）
+export POLYGEIST_BUILD=$(pwd)
+
+# 4. 构建本项目
+cd ../../..  # 回到项目根目录
+mkdir build && cd build
+cmake .. \
+  -DMLIR_DIR=$POLYGEIST_BUILD/lib/cmake/mlir \
+  -DLLVM_DIR=$POLYGEIST_BUILD/lib/cmake/llvm \
+  -GNinja
+ninja
+```
+
+### 方式 2: 使用外部 Polygeist
+
+```bash
+# 如果 Polygeist 在其他位置，设置环境变量
+export POLYGEIST_BUILD=/path/to/Polygeist/build
 
 # 构建本项目
 mkdir build && cd build
@@ -191,6 +223,8 @@ cmake .. \
   -GNinja
 ninja
 ```
+
+**注意**: 如果使用 submodule，CMake 会自动检测 `third_party/Polygeist` 目录。如果找不到，会回退到使用 `POLYGEIST_BUILD` 环境变量。
 
 ## 使用示例
 

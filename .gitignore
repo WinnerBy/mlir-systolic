@@ -2,6 +2,10 @@
 build/
 cmake-build-*/
 
+# Third-party build directories (submodules are tracked, but their builds are not)
+third_party/*/build/
+third_party/*/cmake-build-*/
+
 # IDE files
 .idea/
 .vscode/
