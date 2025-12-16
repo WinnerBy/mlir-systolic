@@ -288,6 +288,7 @@ mlir-systolic/
 详细的技术方案和设计思路请参考：
 
 - **[项目综合总结](docs/COMPREHENSIVE_SUMMARY.md)** ⭐ **推荐** - 包含 AutoSA 分析、技术方案、实现进展
+- **[AutoSA 详细分析](docs/AUTOSA_ANALYSIS.md)** ⭐ **核心** - AutoSA 架构、算法、参数影响、代码生成流程
 - [技术方案重新设计](docs/TECHNICAL_REDESIGN.md) - 详细设计文档
 - [快速参考](docs/QUICK_REFERENCE.md) - 关键改进点总结
 - [文档索引](docs/DOCUMENT_INDEX.md) - 所有文档的导航

@@ -11,6 +11,7 @@
 | 文档 | 说明 | 行数 | 推荐度 |
 |------|------|------|--------|
 | [COMPREHENSIVE_SUMMARY.md](./COMPREHENSIVE_SUMMARY.md) | **⭐ 推荐入口** - 项目综合总结（AutoSA分析、技术方案、实现进展） | ~700 | ⭐⭐⭐⭐⭐ |
+| [AUTOSA_ANALYSIS.md](./AUTOSA_ANALYSIS.md) | **⭐ 核心** - AutoSA 详细分析（架构、算法、参数影响、代码生成） | ~1000 | ⭐⭐⭐⭐⭐ |
 | [AUTOSA_ARCHITECTURE.md](./AUTOSA_ARCHITECTURE.md) | **⭐ 重要** - AutoSA 两部分架构分析（Kernel + Host） | ~300 | ⭐⭐⭐⭐ |
 | [SCOP_REGION.md](./SCOP_REGION.md) | **⭐ 重要** - SCoP 区域说明（AutoSA 只处理 #pragma scop 区域） | ~200 | ⭐⭐⭐⭐ |
 | [POLYMER_INTEGRATION.md](./POLYMER_INTEGRATION.md) | **⭐ 核心** - Polymer 集成方案（为什么需要、如何集成） | ~300 | ⭐⭐⭐⭐⭐ |
