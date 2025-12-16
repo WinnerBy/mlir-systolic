@@ -94,7 +94,7 @@ struct PEArrayOpLowering : public OpConversionPattern<PEArrayOp> {
     // Build task name: e.g., "PE_array"
     std::string taskName = "PE_array";
     if (adaptor.getName())
-      taskName = adaptor.getName().str();
+      taskName = adaptor.getName()->str();
     
     LLVM_DEBUG(llvm::dbgs() << "Lowering PE array " << taskName << "\n");
     
