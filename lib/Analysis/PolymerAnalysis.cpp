@@ -26,6 +26,7 @@
 #include "mlir/IR/Operation.h"
 #include "mlir/IR/Value.h"
 #include "mlir/Pass/PassManager.h"
+#include "mlir/Pass/Pass.h"
 #include "mlir/Transforms/Passes.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/STLExtras.h"
@@ -41,6 +42,21 @@
 #include "polymer/Target/ISL.h"
 #include "polymer/Transforms/ExtractScopStmt.h"
 #include "polymer/Support/PolymerUtils.h"
+// Conditionally include OpenScop.h (requires Pluto)
+#if __has_include("pluto/internal/pluto.h")
+#include "polymer/Target/OpenScop.h"
+#include "polymer/Support/OslSymbolTable.h"
+#define POLYMER_OPENSCOP_AVAILABLE 1
+#else
+// Forward declarations for OpenScop (when Pluto is not available)
+namespace polymer {
+class OslScop;
+class PolymerSymbolTable;
+std::unique_ptr<OslScop> createOpenScopFromFuncOp(mlir::func::FuncOp funcOp,
+                                                  PolymerSymbolTable &symTable);
+}
+#define POLYMER_OPENSCOP_AVAILABLE 0
+#endif
 #define POLYMER_AVAILABLE 1
 #elif __has_include("polymer/Support/Scop.h")
 #include "polymer/Support/Scop.h"
@@ -52,12 +68,12 @@
 // ISL includes - Polymer provides forward declarations, but we need full declarations
 #if POLYMER_AVAILABLE
   // Try to find ISL headers
-  #if __has_include("isl/isl.h")
-    #include "isl/isl.h"
+#if __has_include("isl/isl.h")
+#include "isl/isl.h"
     #include "isl/schedule.h"
     #include "isl/schedule_node.h"
-  #elif __has_include("isl.h")
-    #include "isl.h"
+#elif __has_include("isl.h")
+#include "isl.h"
   #else
     // ISL headers not found - provide minimal forward declarations
     // Functions will be resolved at link time through Polymer libraries
@@ -107,6 +123,11 @@
 
 #define DEBUG_TYPE "polymer-analysis"
 
+// Define SCOP_STMT_ATTR_NAME if not already defined
+#ifndef SCOP_STMT_ATTR_NAME
+#define SCOP_STMT_ATTR_NAME "scop.stmt"
+#endif
+
 using namespace mlir;
 using namespace mlir::systolic;
 
@@ -127,12 +148,15 @@ std::unique_ptr<PolymerScop> PolymerScop::extract(func::FuncOp func) {
   LLVM_DEBUG(llvm::dbgs() << "Extracting SCoP with Polymer for function: "
                           << func.getName() << "\n");
   
-  // Step 1: Convert affine.for loops to scop.stmt format if needed
-  // createIslFromFuncOp requires functions with scop.stmt structure (function calls with scop.stmt callees)
-  // For direct affine.for loops, we need to run ExtractScopStmt pass first
+  // IMPORTANT: Following Polymer's design principle:
+  // - createIslFromFuncOp expects functions with scop.stmt structure
+  // - ExtractScopStmt should be run as a Pass BEFORE calling extract
+  // - We do NOT run ExtractScopStmt here, as that violates separation of concerns
+  
   mlir::ModuleOp module = cast<mlir::ModuleOp>(func->getParentOp());
   
-  // Check if function already has scop.stmt structure
+  // Check if function has scop.stmt structure
+  // This is required by createIslFromFuncOp
   bool hasScopStmt = false;
   func.walk([&](mlir::func::CallOp callOp) {
     if (auto callee = module.lookupSymbol<mlir::func::FuncOp>(callOp.getCallee())) {
@@ -143,64 +167,26 @@ std::unique_ptr<PolymerScop> PolymerScop::extract(func::FuncOp func) {
   });
   
   if (!hasScopStmt) {
-    LLVM_DEBUG(llvm::dbgs() << "Function does not have scop.stmt structure, "
-                            << "running ExtractScopStmt transformation...\n");
-    
-    // Run ExtractScopStmt transformation directly (same as ExtractScopStmtPass does)
-    // This is more efficient than using PassManager for a single function
-    OpBuilder builder(module.getContext());
-    
-    // First, replace uses by stored values (as done in ExtractScopStmtPass)
-    polymer::replaceUsesByStored(func, builder);
-    
-    // Then extract scop statements
-    unsigned numStmts = polymer::extractScopStmt(func, builder);
-    
-    if (numStmts == 0) {
-      LLVM_DEBUG(llvm::dbgs() << "ExtractScopStmt extracted 0 statements, "
-                              << "function may not have suitable affine.for loops\n");
-      return nullptr;
-    }
-    
-    LLVM_DEBUG(llvm::dbgs() << "ExtractScopStmt extracted " << numStmts 
-                            << " scop statements\n");
-    
-    // Verify that scop.stmt structure was created
-    hasScopStmt = false;
-    func.walk([&](mlir::func::CallOp callOp) {
-      if (auto callee = module.lookupSymbol<mlir::func::FuncOp>(callOp.getCallee())) {
-        if (callee->hasAttr(SCOP_STMT_ATTR_NAME)) {
-          hasScopStmt = true;
-          LLVM_DEBUG(llvm::dbgs() << "Found scop.stmt function: " << callee.getName() << "\n");
-        }
-      }
-    });
-    
-    if (!hasScopStmt) {
-      LLVM_DEBUG(llvm::dbgs() << "ExtractScopStmt did not create scop.stmt structure, "
-                              << "even though it extracted " << numStmts << " statements\n");
-      return nullptr;
-    }
-    
-    LLVM_DEBUG(llvm::dbgs() << "ExtractScopStmt successfully created scop.stmt structure\n");
-  } else {
-    LLVM_DEBUG(llvm::dbgs() << "Function already has scop.stmt structure\n");
-  }
-  
-  // Step 2: Use Polymer's createIslFromFuncOp which uses IslScopBuilder internally
-  // This handles all the context building, symbol table initialization, etc.
-  LLVM_DEBUG(llvm::dbgs() << "Calling polymer::createIslFromFuncOp...\n");
-  
-  auto scop = polymer::createIslFromFuncOp(func);
-  
-  if (!scop) {
-    LLVM_DEBUG(llvm::dbgs() << "createIslFromFuncOp returned nullptr\n");
-    LLVM_DEBUG(llvm::dbgs() << "This may indicate an issue with the function structure\n");
+    LLVM_DEBUG(llvm::dbgs() << "Function does not have scop.stmt structure\n");
+    LLVM_DEBUG(llvm::dbgs() << "  Note: ExtractScopStmt should be run as a Pass before calling extract\n");
+    LLVM_DEBUG(llvm::dbgs() << "  Example: polymer-opt -reg2mem -extract-scop-stmt <input.mlir>\n");
     return nullptr;
   }
   
-  LLVM_DEBUG(llvm::dbgs() << "Successfully built SCoP using Polymer's createIslFromFuncOp\n");
-  return std::unique_ptr<PolymerScop>(new PolymerScop(scop.release()));
+  LLVM_DEBUG(llvm::dbgs() << "Function has scop.stmt structure, calling createIslFromFuncOp...\n");
+  
+  // Directly call createIslFromFuncOp (following IslExternalTransform pattern)
+  // This is what Polymer's own passes do - they expect preprocessed input
+  auto islScop = polymer::createIslFromFuncOp(func);
+  
+  if (islScop) {
+    LLVM_DEBUG(llvm::dbgs() << "Successfully built ISL SCoP using Polymer's createIslFromFuncOp\n");
+    return std::unique_ptr<PolymerScop>(new PolymerScop(islScop.release()));
+  }
+  
+  LLVM_DEBUG(llvm::dbgs() << "createIslFromFuncOp returned nullptr\n");
+  LLVM_DEBUG(llvm::dbgs() << "  This may indicate an issue with the function structure or Polymer configuration\n");
+  return nullptr;
 #else
   LLVM_DEBUG(llvm::dbgs() << "Polymer not available (compiled without Polymer support)\n");
   return nullptr;
@@ -217,18 +203,18 @@ isl_schedule *PolymerScop::computeSchedule() {
     return nullptr;
   }
   
-  polymer::IslScop *scop = static_cast<polymer::IslScop*>(this->scop);
-  
+    polymer::IslScop *scop = static_cast<polymer::IslScop*>(this->scop);
+    
   // Get existing schedule if available (built during extraction)
-  isl_schedule *schedule = scop->getSchedule();
-  if (schedule) {
-    // Take ownership (ISL convention: caller takes ownership)
+    isl_schedule *schedule = scop->getSchedule();
+    if (schedule) {
+      // Take ownership (ISL convention: caller takes ownership)
     LLVM_DEBUG(llvm::dbgs() << "Using existing schedule from SCoP\n");
-    return isl_schedule_copy(schedule);
-  }
-  
+      return isl_schedule_copy(schedule);
+    }
+    
   // If schedule is not built, we need to compute it using ISL
-  // This requires:
+    // This requires:
   // 1. Get the domain (union of all statement domains)
   // 2. Get the dependences
   // 3. Call isl_schedule_compute_schedule() or similar
@@ -236,7 +222,7 @@ isl_schedule *PolymerScop::computeSchedule() {
   // For now, if schedule is not available, return nullptr
   LLVM_DEBUG(llvm::dbgs() << "Schedule not yet built during extraction\n");
   LLVM_DEBUG(llvm::dbgs() << "Note: Schedule should be built during SCoP extraction\n");
-  return nullptr;
+    return nullptr;
 #else
   return nullptr;
 #endif
@@ -329,8 +315,8 @@ isl_union_map *PolymerScop::computeDependences() {
     
     // TODO: Implement proper dependence computation
     // or reconstructing access relations from the MLIR operations
-    
-    return nullptr;
+  
+  return nullptr;
 #else
   return nullptr;
 #endif
@@ -355,7 +341,7 @@ isl_union_map *PolymerScop::computeDependenceDistances(isl_union_map *deps) {
     isl_union_map *scheduleMap = isl_schedule_get_map(schedule);
     if (!scheduleMap) {
       LLVM_DEBUG(llvm::dbgs() << "Failed to get schedule map\n");
-      return nullptr;
+  return nullptr;
     }
     
     // Compute dependence distances
@@ -448,9 +434,9 @@ LogicalResult systolic::analyzeScheduleTree(isl_schedule *schedule,
     });
     
     isl_schedule_node_free(root);
-    
+  
     LLVM_DEBUG(llvm::dbgs() << "Schedule tree analysis completed\n");
-    return success();
+  return success();
 #else
   return failure();
 #endif

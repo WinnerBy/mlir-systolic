@@ -18,7 +18,15 @@
 #include "systolic/Analysis/SystolicConfig.h"
 #include "systolic/Analysis/PolymerAnalysis.h"
 
+// Polymer includes (required)
+#ifdef SYSTOLIC_ENABLE_POLYMER
+#if __has_include("polymer/Transforms/ExtractScopStmt.h")
+#include "polymer/Transforms/ExtractScopStmt.h"
+#endif
+#endif
+
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
+#include "mlir/Pass/PassManager.h"
 #include "mlir/Dialect/Affine/Analysis/AffineAnalysis.h"
 #include "mlir/Dialect/Affine/Analysis/LoopAnalysis.h"
 #include "mlir/Dialect/Affine/Analysis/Utils.h"
@@ -146,8 +154,7 @@ static LogicalResult checkLegality(LoopBand &band) {
 //===----------------------------------------------------------------------===//
 
 /// Analyze dependence distances for each loop in the band.
-/// Uses Polymer/ISL for accurate polyhedral analysis when available,
-/// falls back to simplified heuristic analysis otherwise.
+/// REQUIRES Polymer for accurate polyhedral analysis - no fallback.
 static LogicalResult analyzeDependenceDistances(
     func::FuncOp func,
     LoopBand &band,
@@ -155,12 +162,21 @@ static LogicalResult analyzeDependenceDistances(
   
   depInfos.clear();
   
-  // Try to use Polymer for accurate analysis
-  if (systolic::isPolymerAvailable()) {
-    LLVM_DEBUG(llvm::dbgs() << "[Systolic] Using Polymer for dependence analysis\n");
+  // REQUIREMENT: Must use Polymer for dependence analysis
+  // No fallback to heuristic methods - Polymer is required
+  if (!systolic::isPolymerAvailable()) {
+    LLVM_DEBUG(llvm::dbgs() << "[Systolic] ERROR: Polymer is required but not available\n");
+    return failure();
+  }
+  
+  LLVM_DEBUG(llvm::dbgs() << "[Systolic] Using Polymer for dependence analysis (required)\n");
     
     SmallVector<systolic::LoopDependenceDistance, 8> polymerDistances;
-    if (succeeded(systolic::computeDependenceDistancesWithPolymer(func, polymerDistances))) {
+  if (failed(systolic::computeDependenceDistancesWithPolymer(func, polymerDistances))) {
+    LLVM_DEBUG(llvm::dbgs() << "[Systolic] ERROR: Polymer dependence analysis failed\n");
+    return failure();
+  }
+  
       // Convert Polymer results to LoopDepInfo
       for (const auto &pdist : polymerDistances) {
         LoopDepInfo info;
@@ -172,94 +188,16 @@ static LogicalResult analyzeDependenceDistances(
         depInfos.push_back(info);
       }
       
-      if (!depInfos.empty()) {
-        LLVM_DEBUG(llvm::dbgs() << "[Systolic] Polymer analysis successful\n");
-        return success();
-      }
-    }
-    
-    LLVM_DEBUG(llvm::dbgs() << "[Systolic] Polymer analysis failed, falling back to heuristic\n");
+  if (depInfos.empty()) {
+    LLVM_DEBUG(llvm::dbgs() << "[Systolic] ERROR: Polymer analysis returned no dependencies\n");
+    return failure();
   }
   
-  // Fallback: Simplified heuristic analysis
-  LLVM_DEBUG(llvm::dbgs() << "[Systolic] Using simplified heuristic analysis\n");
-  
-  // Get the innermost loop body for memory access analysis
-  AffineForOp innermostLoop = band.back();
-  Block *body = innermostLoop.getBody();
-  
-  // Collect all affine loads and stores
-  SmallVector<AffineLoadOp, 4> loads;
-  SmallVector<AffineStoreOp, 4> stores;
-  
-  body->walk([&](Operation *op) {
-    if (auto loadOp = dyn_cast<AffineLoadOp>(op))
-      loads.push_back(loadOp);
-    else if (auto storeOp = dyn_cast<AffineStoreOp>(op))
-      stores.push_back(storeOp);
-  });
-  
-  // For each loop dimension, analyze dependence distances
-  for (unsigned i = 0; i < band.size(); ++i) {
-    LoopDepInfo info;
-    info.loopIndex = i;
-    info.minDistance = 0;
-    info.maxDistance = 0;
-    info.isUniform = true;
-    
-    AffineForOp loop = band[i];
-    Value iv = loop.getInductionVar();
-    
-    // Check if induction variable appears in load/store affine maps
-    // For RAW deps: store writes, load reads -> distance = how many iterations apart
-    
-    bool foundDep = false;
-    for (auto storeOp : stores) {
-      Value memref = storeOp.getMemRef();
-      
-      // Find loads from the same memref
-      for (auto loadOp : loads) {
-        if (loadOp.getMemRef() != memref)
-          continue;
-        
-        // Check if both access the same indices
-        // For simple analysis, check if IV is used in both
-        bool storeUsesIV = false;
-        bool loadUsesIV = false;
-        
-        for (auto operand : storeOp.getMapOperands()) {
-          if (operand == iv) storeUsesIV = true;
-        }
-        for (auto operand : loadOp.getMapOperands()) {
-          if (operand == iv) loadUsesIV = true;
-        }
-        
-        // If same memref, and both use this IV -> potential dependence
-        if (storeUsesIV && loadUsesIV) {
-          foundDep = true;
-          // For a simple case like C[i,j] += A[i,k]*B[k,j]:
-          // - Loop k has no cross-iteration deps (distance = 0)
-          // - Loops i,j have output deps (distance = 0) for C
-          info.maxDistance = 0;
-          info.minDistance = 0;
-        }
-        
-        // Check for store[i] -> load[i+1] pattern (distance = 1)
-        if (storeUsesIV && loadUsesIV && storeOp.getMemRef() == loadOp.getMemRef()) {
-          // This is a simplified check - full analysis would compare maps
-          // For reduction patterns, distance is typically 0
-          info.maxDistance = std::max(info.maxDistance, (int64_t)0);
-        }
-      }
-    }
-    
-    // AutoSA: space loops are those with dependence distance <= 1
-    info.canBeSpaceLoop = (info.maxDistance <= 1);
-    
-    depInfos.push_back(info);
-  }
-  
+  LLVM_DEBUG(llvm::dbgs() << "[Systolic] Polymer analysis successful\n");
   return success();
+  
+  // NO FALLBACK - Polymer is required
+  // All heuristic analysis code has been removed
 }
 
 //===----------------------------------------------------------------------===//
@@ -641,6 +579,54 @@ struct SystolicTransformPass
     
     LLVM_DEBUG(llvm::dbgs() << "\n=== Systolic Transform Pass ===\n");
     LLVM_DEBUG(llvm::dbgs() << "Processing function: " << func.getName() << "\n");
+    
+    // REQUIREMENT: Polymer must be available and used
+    if (!systolic::isPolymerAvailable()) {
+      func.emitError("Polymer is required for SystolicTransform but is not available. "
+                     "Please ensure Polymer is built and linked.");
+      return signalPassFailure();
+    }
+    
+    // Step 0: Preprocess function with ExtractScopStmt if needed
+    // This is required by Polymer's createIslFromFuncOp
+    mlir::ModuleOp module = cast<mlir::ModuleOp>(func->getParentOp());
+    
+    // Check if function already has scop.stmt structure
+    bool hasScopStmt = false;
+    func.walk([&](mlir::func::CallOp callOp) {
+      if (auto callee = module.lookupSymbol<mlir::func::FuncOp>(callOp.getCallee())) {
+        if (callee->hasAttr("scop.stmt")) {
+          hasScopStmt = true;
+        }
+      }
+    });
+    
+    if (!hasScopStmt) {
+      LLVM_DEBUG(llvm::dbgs() << "Function does not have scop.stmt structure, "
+                              << "running ExtractScopStmt pass...\n");
+      
+#ifdef SYSTOLIC_ENABLE_POLYMER
+#if __has_include("polymer/Transforms/ExtractScopStmt.h")
+      // Run ExtractScopStmt pass to convert affine.for loops to scop.stmt format
+      PassManager pm(module.getContext());
+      pm.addPass(polymer::createExtractScopStmtPass());
+      if (failed(pm.run(module))) {
+        func.emitError("Failed to run ExtractScopStmt pass. This is required for Polymer.");
+        return signalPassFailure();
+      }
+      
+      LLVM_DEBUG(llvm::dbgs() << "ExtractScopStmt pass completed successfully\n");
+#else
+      func.emitError("ExtractScopStmt pass header not found. Please ensure Polymer Transforms library is built.");
+      return signalPassFailure();
+#endif
+#else
+      func.emitError("Polymer is not enabled. Please enable SYSTOLIC_ENABLE_POLYMER.");
+      return signalPassFailure();
+#endif
+    } else {
+      LLVM_DEBUG(llvm::dbgs() << "Function already has scop.stmt structure\n");
+    }
     LLVM_DEBUG({
       llvm::dbgs() << "Options:\n";
       llvm::dbgs() << "  space-time mode: " << options.spaceTimeMode << "\n";
@@ -698,7 +684,7 @@ struct SystolicTransformPass
       ProblemSize problemSize = inferProblemSize(band);
       
       // Step 2.3: Dependence analysis (AutoSA: get_dep_dis_at_node)
-      // Uses Polymer/ISL when available, falls back to heuristic otherwise
+      // REQUIRES Polymer - no fallback
       SmallVector<LoopDepInfo, 4> depInfos;
       if (failed(analyzeDependenceDistances(func, band, depInfos))) {
         LLVM_DEBUG(llvm::dbgs() << "Dependence analysis failed\n");
