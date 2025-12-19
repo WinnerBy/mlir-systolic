@@ -1221,25 +1221,27 @@ void SystolicHLSEmitter::emitTopKernel(func::FuncOp funcOp) {
   
   // Drain modules
   os << "  /* C drain modules */\n";
-  // L1 drain modules - boundary wrappers first (rightmost column)
-  for (unsigned i = 0; i < numPE; i++) {
-    os << "  C_drain_IO_L1_out_boundary_wrapper(\n";
-    os << "    /* module id */ " << i << ", \n";
-    os << "    /* module id */ " << (numPE - 1) << ", \n";
-    os << "    /* fifo */ fifo_C_drain_C_drain_IO_L1_out_" << i << "_" << (numPE - 1) << ", \n";
-    os << "    /* fifo */ fifo_C_drain_PE_" << i << "_" << (numPE - 1) << "\n";
-    os << "  );\n";
-    os << "  /* Module Call */\n\n";
-  }
-  // L1 drain modules - regular wrappers (left columns)
-  for (unsigned i = 0; i < numPE; i++) {
-    for (unsigned j = 0; j < numPE - 1; j++) {
+  // L1 drain modules - process by column (j), from rightmost to leftmost
+  for (unsigned j = numPE - 1; j > 0; j--) {
+    // First boundary wrapper for this column
+    for (unsigned i = 0; i < numPE; i++) {
+      if (j == numPE - 1) {
+        // Rightmost column: boundary wrapper
+        os << "  C_drain_IO_L1_out_boundary_wrapper(\n";
+        os << "    /* module id */ " << i << ", \n";
+        os << "    /* module id */ " << j << ", \n";
+        os << "    /* fifo */ fifo_C_drain_C_drain_IO_L1_out_" << i << "_" << j << ", \n";
+        os << "    /* fifo */ fifo_C_drain_PE_" << i << "_" << j << "\n";
+        os << "  );\n";
+        os << "  /* Module Call */\n\n";
+      }
+      // Regular wrapper for this column
       os << "  C_drain_IO_L1_out_wrapper(\n";
       os << "    /* module id */ " << i << ", \n";
-      os << "    /* module id */ " << j << ", \n";
-      os << "    /* fifo */ fifo_C_drain_C_drain_IO_L1_out_" << i << "_" << (j + 1) << ", \n";
+      os << "    /* module id */ " << (j - 1) << ", \n";
       os << "    /* fifo */ fifo_C_drain_C_drain_IO_L1_out_" << i << "_" << j << ", \n";
-      os << "    /* fifo */ fifo_C_drain_PE_" << i << "_" << j << "\n";
+      os << "    /* fifo */ fifo_C_drain_C_drain_IO_L1_out_" << i << "_" << (j - 1) << ", \n";
+      os << "    /* fifo */ fifo_C_drain_PE_" << i << "_" << (j - 1) << "\n";
       os << "  );\n";
       os << "  /* Module Call */\n\n";
     }
