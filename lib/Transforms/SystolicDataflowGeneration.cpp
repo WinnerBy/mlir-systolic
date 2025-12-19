@@ -426,7 +426,10 @@ void SystolicDataflowGenerationPass::runOnOperation() {
         // L2 with double buffering: Create DoubleBufferOp
         // Allocate ping and pong buffers
         MemRefType bufferType = group.memref.getType().cast<MemRefType>();
-        SmallVector<int64_t, 3> bufferShape = bufferType.getShape().vec();
+        SmallVector<int64_t, 3> bufferShape;
+        for (int64_t dim : bufferType.getShape()) {
+          bufferShape.push_back(dim);
+        }
         
         // Adjust buffer shape based on tile size
         if (bufferShape.size() >= 2 && tileSize.size() >= 2) {
@@ -560,10 +563,10 @@ void SystolicDataflowGenerationPass::runOnOperation() {
         // Clone the loop
         auto clonedLoop = builder.create<AffineForOp>(
             loc,
-            srcLoop.getLowerBoundMap(),
             srcLoop.getLowerBoundOperands(),
-            srcLoop.getUpperBoundMap(),
+            srcLoop.getLowerBoundMap(),
             srcLoop.getUpperBoundOperands(),
+            srcLoop.getUpperBoundMap(),
             srcLoop.getStep());
         
         mapping.map(srcLoop.getInductionVar(), clonedLoop.getInductionVar());

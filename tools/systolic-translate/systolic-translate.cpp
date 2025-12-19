@@ -108,7 +108,9 @@ private:
   void emitIOL3In(StringRef arrayName, StringRef typeName);
   void emitIOL2InIntraTrans(StringRef arrayName);
   void emitIOL2InInterTrans(StringRef arrayName);
+  void emitIOL2InInterTransBoundary(StringRef arrayName);
   void emitIOL2In(StringRef arrayName);
+  void emitIOL2InBoundary(StringRef arrayName);
   void emitPE();
   void emitPEWrapper();
   void emitDummyModules();
@@ -179,16 +181,34 @@ void SystolicHLSEmitter::emitModuleDeclarations() {
      << "hls::stream<A_t" << arrayPart << "> &fifo_A_local_out);\n";
   os << "void A_IO_L3_in_serialize(A_t16 *A, hls::stream<A_t" << arrayPart 
      << "> &fifo_A_local_out);\n";
+  os << "void A_IO_L2_in_intra_trans(int idx, int c0, int c1, int c2, A_t" << arrayPart 
+     << " local_A[" << latency << "][1], hls::stream<float> &fifo_A_local_out, bool intra_trans_en);\n";
+  os << "void A_IO_L2_in_inter_trans(int idx, int c0, int c1, int c2, A_t" << arrayPart 
+     << " local_A[" << latency << "][1], hls::stream<A_t" << arrayPart 
+     << "> &fifo_A_in, hls::stream<A_t" << arrayPart << "> &fifo_A_out, bool inter_trans_en);\n";
+  os << "void A_IO_L2_in_inter_trans_boundary(int idx, int c0, int c1, int c2, A_t" << arrayPart 
+     << " local_A[" << latency << "][1], hls::stream<A_t" << arrayPart << "> &fifo_A_in, bool inter_trans_en);\n";
   os << "void A_IO_L2_in(int idx, hls::stream<A_t" << arrayPart << "> &fifo_A_in, "
      << "hls::stream<A_t" << arrayPart << "> &fifo_A_out, "
      << "hls::stream<float> &fifo_A_local_out);\n";
+  os << "void A_IO_L2_in_boundary(int idx, hls::stream<A_t" << arrayPart 
+     << "> &fifo_A_in, hls::stream<float> &fifo_A_local_out);\n";
   os << "void B_IO_L3_in(hls::stream<B_t" << arrayPart << "> &fifo_B_in, "
      << "hls::stream<B_t" << arrayPart << "> &fifo_B_local_out);\n";
   os << "void B_IO_L3_in_serialize(B_t16 *B, hls::stream<B_t" << arrayPart 
      << "> &fifo_B_local_out);\n";
+  os << "void B_IO_L2_in_intra_trans(int idx, int c0, int c1, int c2, B_t" << arrayPart 
+     << " local_B[" << latency << "][1], hls::stream<float> &fifo_B_local_out, bool intra_trans_en);\n";
+  os << "void B_IO_L2_in_inter_trans(int idx, int c0, int c1, int c2, B_t" << arrayPart 
+     << " local_B[" << latency << "][1], hls::stream<B_t" << arrayPart 
+     << "> &fifo_B_in, hls::stream<B_t" << arrayPart << "> &fifo_B_out, bool inter_trans_en);\n";
+  os << "void B_IO_L2_in_inter_trans_boundary(int idx, int c0, int c1, int c2, B_t" << arrayPart 
+     << " local_B[" << latency << "][1], hls::stream<B_t" << arrayPart << "> &fifo_B_in, bool inter_trans_en);\n";
   os << "void B_IO_L2_in(int idx, hls::stream<B_t" << arrayPart << "> &fifo_B_in, "
      << "hls::stream<B_t" << arrayPart << "> &fifo_B_out, "
      << "hls::stream<float> &fifo_B_local_out);\n";
+  os << "void B_IO_L2_in_boundary(int idx, hls::stream<B_t" << arrayPart 
+     << "> &fifo_B_in, hls::stream<float> &fifo_B_local_out);\n";
   os << "void PE_wrapper(int idx, int idy, "
      << "hls::stream<float> &fifo_A_in, hls::stream<float> &fifo_A_out, "
      << "hls::stream<float> &fifo_B_in, hls::stream<float> &fifo_B_out, "
@@ -255,6 +275,322 @@ void SystolicHLSEmitter::emitIOL3In(StringRef arrayName, StringRef typeName) {
   os << "          }\n";
   os << "        }\n";
   os << "      }\n";
+  os << "}\n";
+  os << "/* Module Definition */\n\n";
+}
+
+void SystolicHLSEmitter::emitIOL2InIntraTrans(StringRef arrayName) {
+  unsigned c5Bound = arrayPart / simd;
+  
+  os << "/* Module Definition */\n";
+  os << "void " << arrayName << "_IO_L2_in_intra_trans(int idx, int c0, int c1, int c2, "
+     << arrayName << "_t" << arrayPart << " local_" << arrayName << "[" << latency << "][1], "
+     << "hls::stream<float> &fifo_" << arrayName << "_local_out, bool intra_trans_en) {\n";
+  os << "#pragma HLS INLINE OFF\n";
+  os << "  /* Variable Declaration */\n";
+  os << "  int p0 = idx; // module id\n";
+  os << "  ap_uint<32> data_split[" << arrayPart << "];\n";
+  os << "  #pragma HLS ARRAY_PARTITION variable=data_split complete\n";
+  os << "  /* Variable Declaration */\n\n";
+  os << "  if (!intra_trans_en) return;\n\n";
+  os << "  // io_L2\n";
+  os << "  // io_L1\n";
+  os << "  // pe\n";
+  os << "  for (ap_uint<4> c5 = 0; c5 <= " << (c5Bound - 1) << "; c5 += 1) {\n";
+  os << "    // latency\n";
+  os << "    for (ap_uint<3> c6 = 0; c6 <= " << (latency - 1) << "; c6 += 1) {\n";
+  os << "      // latency\n";
+  os << "      for (ap_uint<3> c7 = 0; c7 <= " << (latency - 1) << "; c7 += 1) {\n";
+  os << "      #pragma HLS PIPELINE II=1\n";
+  os << "        {\n";
+  os << "          " << arrayName << "_t" << arrayPart << " in_data;\n";
+  os << "          " << arrayName << "_t1 out_data;\n";
+  os << "          in_data = local_" << arrayName << "[c7][0];\n";
+  os << "          for (ap_uint<4> n = 0; n < " << arrayPart << "; n++) {\n";
+  os << "          #pragma HLS UNROLL\n";
+  os << "            data_split[n] = in_data(31, 0);\n";
+  os << "            in_data = in_data >> 32;\n";
+  os << "          }\n";
+  os << "          int split_idx = (c5) % " << arrayPart << ";\n";
+  os << "          union {unsigned int ui; float ut;} u;\n";
+  os << "          u.ui = (unsigned int)data_split[split_idx];\n";
+  os << "          out_data = u.ut;\n";
+  os << "          fifo_" << arrayName << "_local_out.write(out_data);\n";
+  os << "        }\n";
+  os << "      }\n";
+  os << "    }\n";
+  os << "  }\n";
+  os << "}\n";
+  os << "/* Module Definition */\n\n";
+}
+
+void SystolicHLSEmitter::emitIOL2InInterTrans(StringRef arrayName) {
+  os << "/* Module Definition */\n";
+  os << "void " << arrayName << "_IO_L2_in_inter_trans(int idx, int c0, int c1, int c2, "
+     << arrayName << "_t" << arrayPart << " local_" << arrayName << "[" << latency << "][1], "
+     << "hls::stream<" << arrayName << "_t" << arrayPart << "> &fifo_" << arrayName << "_in, "
+     << "hls::stream<" << arrayName << "_t" << arrayPart << "> &fifo_" << arrayName << "_out, "
+     << "bool inter_trans_en) {\n";
+  os << "#pragma HLS INLINE OFF\n";
+  os << "  /* Variable Declaration */\n";
+  os << "  int p0 = idx; // module id\n";
+  os << "  /* Variable Declaration */\n\n";
+  os << "  if (!inter_trans_en) return;\n\n";
+  os << "  for (ap_uint<2> c3 = p0; c3 <= " << (numPE - 1) << "; c3 += 1) {\n";
+  os << "    // io_L2\n";
+  os << "    if (c3 == p0) {\n";
+  os << "      for (ap_uint<3> c4 = 0; c4 <= " << (latency - 1) << "; c4 += 1) {\n";
+  os << "      #pragma HLS PIPELINE II=1\n";
+  os << "        // access_coalesce\n";
+  os << "        {\n";
+  os << "          " << arrayName << "_t" << arrayPart << " in_data;\n";
+  os << "          " << arrayName << "_t" << arrayPart << " out_data;\n";
+  os << "          in_data = fifo_" << arrayName << "_in.read();\n";
+  os << "          out_data = in_data;\n";
+  os << "          local_" << arrayName << "[c4][0] = out_data;\n";
+  os << "        }\n";
+  os << "      }\n";
+  os << "    } else {\n";
+  os << "      for (ap_uint<3> c4 = 0; c4 <= " << (latency - 1) << "; c4 += 1) {\n";
+  os << "      #pragma HLS PIPELINE II=1\n";
+  os << "        // access_coalesce\n";
+  os << "        {\n";
+  os << "          " << arrayName << "_t" << arrayPart << " in_data;\n";
+  os << "          " << arrayName << "_t" << arrayPart << " out_data;\n";
+  os << "          in_data = fifo_" << arrayName << "_in.read();\n";
+  os << "          out_data = in_data;\n";
+  os << "          fifo_" << arrayName << "_out.write(out_data);\n";
+  os << "        }\n";
+  os << "      }\n";
+  os << "    }\n";
+  os << "  }\n";
+  os << "}\n";
+  os << "/* Module Definition */\n\n";
+}
+
+void SystolicHLSEmitter::emitIOL2InInterTransBoundary(StringRef arrayName) {
+  os << "/* Module Definition */\n";
+  os << "void " << arrayName << "_IO_L2_in_inter_trans_boundary(int idx, int c0, int c1, int c2, "
+     << arrayName << "_t" << arrayPart << " local_" << arrayName << "[" << latency << "][1], "
+     << "hls::stream<" << arrayName << "_t" << arrayPart << "> &fifo_" << arrayName << "_in, "
+     << "bool inter_trans_en) {\n";
+  os << "#pragma HLS INLINE OFF\n";
+  os << "  /* Variable Declaration */\n";
+  os << "  int p0 = idx; // module id\n";
+  os << "  /* Variable Declaration */\n\n";
+  os << "  if (!inter_trans_en) return;\n\n";
+  os << "  for (ap_uint<2> c3 = p0; c3 <= " << (numPE - 1) << "; c3 += 1)\n";
+  os << "    if (c3 == p0) {\n";
+  os << "      // io_L2\n";
+  os << "      for (ap_uint<3> c4 = 0; c4 <= " << (latency - 1) << "; c4 += 1) {\n";
+  os << "      #pragma HLS PIPELINE II=1\n";
+  os << "        // access_coalesce\n";
+  os << "        {\n";
+  os << "          " << arrayName << "_t" << arrayPart << " in_data;\n";
+  os << "          " << arrayName << "_t" << arrayPart << " out_data;\n";
+  os << "          in_data = fifo_" << arrayName << "_in.read();\n";
+  os << "          out_data = in_data;\n";
+  os << "          local_" << arrayName << "[c4][0] = out_data;\n";
+  os << "        }\n";
+  os << "      }\n";
+  os << "    }\n";
+  os << "}\n";
+  os << "/* Module Definition */\n\n";
+}
+
+void SystolicHLSEmitter::emitIOL2In(StringRef arrayName) {
+  os << "/* Module Definition */\n";
+  os << "void " << arrayName << "_IO_L2_in(int idx, hls::stream<" << arrayName << "_t" << arrayPart 
+     << "> &fifo_" << arrayName << "_in, hls::stream<" << arrayName << "_t" << arrayPart 
+     << "> &fifo_" << arrayName << "_out, hls::stream<float> &fifo_" << arrayName << "_local_out) {\n";
+  os << "#pragma HLS INLINE OFF\n";
+  os << "  /* Variable Declaration */\n";
+  os << "  int p0 = idx; // module id\n";
+  os << "  " << arrayName << "_t" << arrayPart << " local_" << arrayName << "_ping[" << latency << "][1];\n";
+  os << "  #pragma HLS RESOURCE variable=local_" << arrayName << "_ping core=RAM_2P_BRAM\n";
+  os << "  " << arrayName << "_t" << arrayPart << " local_" << arrayName << "_pong[" << latency << "][1];\n";
+  os << "  #pragma HLS RESOURCE variable=local_" << arrayName << "_pong core=RAM_2P_BRAM\n";
+  os << "  bool arb = 0;\n";
+  os << "  bool inter_trans_en = 1;\n";
+  os << "  bool intra_trans_en = 0;\n";
+  os << "  int c0, c0_prev;\n";
+  os << "  int c1, c1_prev;\n";
+  os << "  int c2, c2_prev;\n";
+  os << "  /* Variable Declaration */\n\n";
+  os << "  {\n";
+  os << "    for (ap_uint<3> c0 = 0; c0 <= " << (numTiles - 1) << "; c0 += 1)\n";
+  os << "      for (ap_uint<3> c1 = 0; c1 <= " << (numTiles - 1) << "; c1 += 1)\n";
+  os << "        for (ap_uint<3> c2 = 0; c2 <= " << (numTiles - 1) << "; c2 += 1) {\n";
+  os << "          // array\n";
+  os << "          // io_L3\n";
+  os << "          {\n";
+  os << "            if (arb == 0) {\n";
+  os << "              " << arrayName << "_IO_L2_in_inter_trans(\n";
+  os << "                /* module id */ idx, \n";
+  os << "                /* host iter */ c0, \n";
+  os << "                /* host iter */ c1, \n";
+  os << "                /* host iter */ c2, \n";
+  os << "                /* array */ local_" << arrayName << "_pong, \n";
+  os << "                /* fifo */ fifo_" << arrayName << "_in, \n";
+  os << "                /* fifo */ fifo_" << arrayName << "_out, \n";
+  os << "                /* enable */ inter_trans_en\n";
+  os << "              );\n";
+  os << "              " << arrayName << "_IO_L2_in_intra_trans(\n";
+  os << "                /* module id */ idx, \n";
+  os << "                /* host iter */ c0_prev, \n";
+  os << "                /* host iter */ c1_prev, \n";
+  os << "                /* host iter */ c2_prev, \n";
+  os << "                /* array */ local_" << arrayName << "_ping, \n";
+  os << "                /* fifo */ fifo_" << arrayName << "_local_out, \n";
+  os << "                /* enable */ intra_trans_en\n";
+  os << "              );\n";
+  os << "            } else {\n";
+  os << "              " << arrayName << "_IO_L2_in_inter_trans(\n";
+  os << "                /* module id */ idx, \n";
+  os << "                /* host iter */ c0, \n";
+  os << "                /* host iter */ c1, \n";
+  os << "                /* host iter */ c2, \n";
+  os << "                /* array */ local_" << arrayName << "_ping, \n";
+  os << "                /* fifo */ fifo_" << arrayName << "_in, \n";
+  os << "                /* fifo */ fifo_" << arrayName << "_out, \n";
+  os << "                /* enable */ inter_trans_en\n";
+  os << "              );\n";
+  os << "              " << arrayName << "_IO_L2_in_intra_trans(\n";
+  os << "                /* module id */ idx, \n";
+  os << "                /* host iter */ c0_prev, \n";
+  os << "                /* host iter */ c1_prev, \n";
+  os << "                /* host iter */ c2_prev, \n";
+  os << "                /* array */ local_" << arrayName << "_pong, \n";
+  os << "                /* fifo */ fifo_" << arrayName << "_local_out, \n";
+  os << "                /* enable */ intra_trans_en\n";
+  os << "              );\n";
+  os << "            }\n";
+  os << "            intra_trans_en = 1;\n";
+  os << "            arb = !arb;\n";
+  os << "            c0_prev = c0;\n";
+  os << "            c1_prev = c1;\n";
+  os << "            c2_prev = c2;\n";
+  os << "          }\n";
+  os << "        }\n";
+  os << "    if (arb == 0) {\n";
+  os << "      " << arrayName << "_IO_L2_in_intra_trans(\n";
+  os << "        /* module id */ idx, \n";
+  os << "        /* host iter */ c0_prev, \n";
+  os << "        /* host iter */ c1_prev, \n";
+  os << "        /* host iter */ c2_prev, \n";
+  os << "        /* array */ local_" << arrayName << "_ping, \n";
+  os << "        /* fifo */ fifo_" << arrayName << "_local_out, \n";
+  os << "        /* enable */ intra_trans_en\n";
+  os << "      );\n";
+  os << "    } else {\n";
+  os << "      " << arrayName << "_IO_L2_in_intra_trans(\n";
+  os << "        /* module id */ idx, \n";
+  os << "        /* host iter */ c0_prev, \n";
+  os << "        /* host iter */ c1_prev, \n";
+  os << "        /* host iter */ c2_prev, \n";
+  os << "        /* array */ local_" << arrayName << "_pong, \n";
+  os << "        /* fifo */ fifo_" << arrayName << "_local_out, \n";
+  os << "        /* enable */ intra_trans_en\n";
+  os << "      );\n";
+  os << "    }\n";
+  os << "  }\n";
+  os << "}\n";
+  os << "/* Module Definition */\n\n";
+}
+
+void SystolicHLSEmitter::emitIOL2InBoundary(StringRef arrayName) {
+  os << "/* Module Definition */\n";
+  os << "void " << arrayName << "_IO_L2_in_boundary(int idx, hls::stream<" << arrayName << "_t" << arrayPart 
+     << "> &fifo_" << arrayName << "_in, hls::stream<float> &fifo_" << arrayName << "_local_out) {\n";
+  os << "#pragma HLS INLINE OFF\n";
+  os << "  /* Variable Declaration */\n";
+  os << "  int p0 = idx; // module id\n";
+  os << "  " << arrayName << "_t" << arrayPart << " local_" << arrayName << "_ping[" << latency << "][1];\n";
+  os << "  #pragma HLS RESOURCE variable=local_" << arrayName << "_ping core=RAM_2P_BRAM\n";
+  os << "  " << arrayName << "_t" << arrayPart << " local_" << arrayName << "_pong[" << latency << "][1];\n";
+  os << "  #pragma HLS RESOURCE variable=local_" << arrayName << "_pong core=RAM_2P_BRAM\n";
+  os << "  bool arb = 0;\n";
+  os << "  bool inter_trans_en = 1;\n";
+  os << "  bool intra_trans_en = 0;\n";
+  os << "  int c0, c0_prev;\n";
+  os << "  int c1, c1_prev;\n";
+  os << "  int c2, c2_prev;\n";
+  os << "  /* Variable Declaration */\n\n";
+  os << "  {\n";
+  os << "    for (ap_uint<3> c0 = 0; c0 <= " << (numTiles - 1) << "; c0 += 1)\n";
+  os << "      for (ap_uint<3> c1 = 0; c1 <= " << (numTiles - 1) << "; c1 += 1)\n";
+  os << "        for (ap_uint<3> c2 = 0; c2 <= " << (numTiles - 1) << "; c2 += 1) {\n";
+  os << "          // array\n";
+  os << "          // io_L3\n";
+  os << "          {\n";
+  os << "            if (arb == 0) {\n";
+  os << "              " << arrayName << "_IO_L2_in_inter_trans_boundary(\n";
+  os << "                /* module id */ idx, \n";
+  os << "                /* host iter */ c0, \n";
+  os << "                /* host iter */ c1, \n";
+  os << "                /* host iter */ c2, \n";
+  os << "                /* array */ local_" << arrayName << "_pong, \n";
+  os << "                /* fifo */ fifo_" << arrayName << "_in, \n";
+  os << "                /* enable */ inter_trans_en\n";
+  os << "              );\n";
+  os << "              " << arrayName << "_IO_L2_in_intra_trans(\n";
+  os << "                /* module id */ idx, \n";
+  os << "                /* host iter */ c0_prev, \n";
+  os << "                /* host iter */ c1_prev, \n";
+  os << "                /* host iter */ c2_prev, \n";
+  os << "                /* array */ local_" << arrayName << "_ping, \n";
+  os << "                /* fifo */ fifo_" << arrayName << "_local_out, \n";
+  os << "                /* enable */ intra_trans_en\n";
+  os << "              );\n";
+  os << "            } else {\n";
+  os << "              " << arrayName << "_IO_L2_in_inter_trans_boundary(\n";
+  os << "                /* module id */ idx, \n";
+  os << "                /* host iter */ c0, \n";
+  os << "                /* host iter */ c1, \n";
+  os << "                /* host iter */ c2, \n";
+  os << "                /* array */ local_" << arrayName << "_ping, \n";
+  os << "                /* fifo */ fifo_" << arrayName << "_in, \n";
+  os << "                /* enable */ inter_trans_en\n";
+  os << "              );\n";
+  os << "              " << arrayName << "_IO_L2_in_intra_trans(\n";
+  os << "                /* module id */ idx, \n";
+  os << "                /* host iter */ c0_prev, \n";
+  os << "                /* host iter */ c1_prev, \n";
+  os << "                /* host iter */ c2_prev, \n";
+  os << "                /* array */ local_" << arrayName << "_pong, \n";
+  os << "                /* fifo */ fifo_" << arrayName << "_local_out, \n";
+  os << "                /* enable */ intra_trans_en\n";
+  os << "              );\n";
+  os << "            }\n";
+  os << "            intra_trans_en = 1;\n";
+  os << "            arb = !arb;\n";
+  os << "            c0_prev = c0;\n";
+  os << "            c1_prev = c1;\n";
+  os << "            c2_prev = c2;\n";
+  os << "          }\n";
+  os << "        }\n";
+  os << "    if (arb == 0) {\n";
+  os << "      " << arrayName << "_IO_L2_in_intra_trans(\n";
+  os << "        /* module id */ idx, \n";
+  os << "        /* host iter */ c0_prev, \n";
+  os << "        /* host iter */ c1_prev, \n";
+  os << "        /* host iter */ c2_prev, \n";
+  os << "        /* array */ local_" << arrayName << "_ping, \n";
+  os << "        /* fifo */ fifo_" << arrayName << "_local_out, \n";
+  os << "        /* enable */ intra_trans_en\n";
+  os << "      );\n";
+  os << "    } else {\n";
+  os << "      " << arrayName << "_IO_L2_in_intra_trans(\n";
+  os << "        /* module id */ idx, \n";
+  os << "        /* host iter */ c0_prev, \n";
+  os << "        /* host iter */ c1_prev, \n";
+  os << "        /* host iter */ c2_prev, \n";
+  os << "        /* array */ local_" << arrayName << "_pong, \n";
+  os << "        /* fifo */ fifo_" << arrayName << "_local_out, \n";
+  os << "        /* enable */ intra_trans_en\n";
+  os << "      );\n";
+  os << "    }\n";
+  os << "  }\n";
   os << "}\n";
   os << "/* Module Definition */\n\n";
 }
@@ -446,9 +782,9 @@ void SystolicHLSEmitter::emitTopKernel(func::FuncOp funcOp) {
   
   os << "  B_IO_L3_in_serialize(B, fifo_B_B_IO_L3_in_serialize);\n";
   os << "  B_IO_L3_in(fifo_B_B_IO_L3_in_serialize, fifo_B_B_IO_L2_in_0);\n";
-  for (unsigned i = 0; i < numPE - 1; i++) {
-    os << "  B_IO_L2_in(" << i << ", fifo_B_B_IO_L2_in_" << i 
-       << ", fifo_B_B_IO_L2_in_" << (i + 1) << ", fifo_B_PE_0_" << i << ");\n";
+  for (unsigned j = 0; j < numPE - 1; j++) {
+    os << "  B_IO_L2_in(" << j << ", fifo_B_B_IO_L2_in_" << j 
+       << ", fifo_B_B_IO_L2_in_" << (j + 1) << ", fifo_B_PE_0_" << j << ");\n";
   }
   os << "  B_IO_L2_in_boundary(" << (numPE - 1) << ", fifo_B_B_IO_L2_in_" 
      << (numPE - 1) << ", fifo_B_PE_0_" << (numPE - 1) << ");\n\n";
@@ -494,10 +830,20 @@ LogicalResult SystolicHLSEmitter::emit(ModuleOp module) {
   emitModuleDeclarations();
   
   // Emit module implementations
-  emitIOL3InSerialize("A", "float", 32);
+  emitIOL3InSerialize("A", "float", size);
   emitIOL3In("A", "float");
-  emitIOL3InSerialize("B", "float", 32);
+  emitIOL2InIntraTrans("A");
+  emitIOL2InInterTrans("A");
+  emitIOL2InInterTransBoundary("A");
+  emitIOL2In("A");
+  emitIOL2InBoundary("A");
+  emitIOL3InSerialize("B", "float", size);
   emitIOL3In("B", "float");
+  emitIOL2InIntraTrans("B");
+  emitIOL2InInterTrans("B");
+  emitIOL2InInterTransBoundary("B");
+  emitIOL2In("B");
+  emitIOL2InBoundary("B");
   emitPE();
   emitPEWrapper();
   emitDummyModules();
