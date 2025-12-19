@@ -1,20 +1,19 @@
 #!/bin/bash
-# 开发模式：统一构建 Polygeist + Polymer（使用 Polygeist 的 llvm-project submodule）
-# 参考 Polygeist README Option 2: 统一构建方式
-# 使用方法: ./scripts/build-polygeist-dev.sh
+# 构建 Polygeist + Polymer（统一构建方式）
+# 参考 Polygeist README Option 2
+# 使用方法: ./scripts/build-polygeist.sh
 
-set -e  # 遇到错误立即退出
+set -e
 
 # 颜色输出
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}Polygeist 开发模式构建脚本${NC}"
+echo -e "${GREEN}构建 Polygeist + Polymer${NC}"
 echo -e "${GREEN}（统一构建 LLVM/MLIR/Polly/Polygeist/Polymer）${NC}"
-echo -e "${GREEN}（只构建 Polymer 需要的库）${NC}"
 echo -e "${GREEN}========================================${NC}"
 
 # 进入项目根目录
@@ -31,7 +30,7 @@ if [ ! -d "$POLYGEIST_DIR" ]; then
     exit 1
 fi
 
-# 检查 llvm-project submodule 是否存在
+# 检查 llvm-project submodule
 LLVM_PROJECT_DIR="$POLYGEIST_DIR/llvm-project"
 if [ ! -d "$LLVM_PROJECT_DIR" ]; then
     echo -e "${RED}错误: 找不到 llvm-project submodule: $LLVM_PROJECT_DIR${NC}"
@@ -39,14 +38,11 @@ if [ ! -d "$LLVM_PROJECT_DIR" ]; then
     exit 1
 fi
 
-# 检查内存
+# 检查内存并选择并行度
 echo -e "${YELLOW}检查系统内存...${NC}"
-free -h
-
 AVAIL_MEM=$(free -g | awk '/^Mem:/{print $7}')
 echo -e "${YELLOW}可用内存: ${AVAIL_MEM}GB${NC}"
 
-# 根据内存选择并行度
 if [ "$AVAIL_MEM" -lt 4 ]; then
     JOBS=1
     echo -e "${RED}警告: 内存不足 4GB，使用单线程构建${NC}"
@@ -62,11 +58,13 @@ else
 fi
 
 # 清理旧构建（可选）
-read -p "是否清理旧构建？(y/N): " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo -e "${YELLOW}清理旧构建...${NC}"
-    rm -rf "$POLYGEIST_DIR/build"
+if [ -d "$POLYGEIST_DIR/build" ]; then
+    read -p "是否清理旧构建？(y/N): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${YELLOW}清理旧构建...${NC}"
+        rm -rf "$POLYGEIST_DIR/build"
+    fi
 fi
 
 # 创建构建目录
@@ -76,9 +74,6 @@ cd build
 
 # 配置 CMake（统一构建方式，参考 Polygeist README Option 2）
 echo -e "${GREEN}配置 CMake（统一构建方式）...${NC}"
-echo -e "${YELLOW}使用 Polygeist 的 llvm-project submodule 统一构建${NC}"
-echo -e "${YELLOW}使用系统编译器（clang 或 gcc）编译 LLVM/MLIR/Polly/Polygeist${NC}"
-
 cmake -G Ninja ../llvm-project/llvm \
   -DLLVM_ENABLE_PROJECTS="clang;mlir;polly" \
   -DLLVM_EXTERNAL_PROJECTS="polygeist" \
@@ -89,35 +84,40 @@ cmake -G Ninja ../llvm-project/llvm \
   -DPOLYGEIST_ENABLE_POLYMER=1 \
   -DPOLYGEIST_POLYMER_ENABLE_ISL=1
 
-# 只构建 Polymer 需要的库（加快构建速度）
-echo -e "${GREEN}构建 Polymer 库（使用 $JOBS 个并行任务）...${NC}"
-echo -e "${YELLOW}只构建需要的库，加快构建速度...${NC}"
+# 构建 Polymer 库和必要的 MLIR 库
+echo -e "${GREEN}构建 Polymer 库和必要的 MLIR 库（使用 $JOBS 个并行任务）...${NC}"
 echo -e "${YELLOW}注意: 首次构建可能需要较长时间（需要先构建 LLVM/MLIR 基础库）${NC}"
 
-# 先构建一些基础依赖（如果需要）
+# 先构建基础依赖
 echo -e "${YELLOW}构建基础依赖...${NC}"
 ninja -j$JOBS LLVMSupport LLVMCore || true
 
 # 构建 Polymer 库
+echo -e "${YELLOW}构建 Polymer 库...${NC}"
 ninja -j$JOBS PolymerSupport PolymerTargetISL PolymerTransforms
+
+# 构建 mlir-systolic 需要的 MLIR 库
+echo -e "${YELLOW}构建必要的 MLIR 库...${NC}"
+ninja -j$JOBS \
+  MLIRArithTransforms \
+  MLIRArithValueBoundsOpInterfaceImpl \
+  MLIROptLib
 
 # 验证构建
 echo -e "${GREEN}验证构建结果...${NC}"
 if [ -f "lib/libPolymerSupport.a" ] && \
    [ -f "lib/libPolymerTargetISL.a" ] && \
-   [ -f "lib/libPolymerTransforms.a" ]; then
-    echo -e "${GREEN}✅ Polymer 库构建成功！${NC}"
-    ls -lh lib/libPolymer*.a
+   [ -f "lib/libPolymerTransforms.a" ] && \
+   [ -f "lib/libMLIRArithTransforms.a" ] && \
+   [ -f "lib/libMLIRArithValueBoundsOpInterfaceImpl.a" ] && \
+   [ -f "lib/libMLIROptLib.a" ]; then
+    echo -e "${GREEN}✅ 构建成功！${NC}"
+    ls -lh lib/libPolymer*.a lib/libMLIRArith*.a lib/libMLIROptLib.a 2>/dev/null | head -10
     echo ""
     echo -e "${GREEN}下一步:${NC}"
-    echo -e "  1. 设置环境变量: export POLYGEIST_BUILD=$POLYGEIST_DIR/build"
-    echo -e "  2. 构建 mlir-systolic: cd $PROJECT_ROOT && ./scripts/build-systolic-dev.sh"
-    echo ""
-    echo -e "${GREEN}提示:${NC}"
-    echo -e "  - LLVM/MLIR 已构建在: $POLYGEIST_DIR/build"
-    echo -e "  - 后续构建 mlir-systolic 可以使用这个构建目录中的 LLVM/MLIR"
+    echo -e "  构建 mlir-systolic: cd $PROJECT_ROOT && ./scripts/build-systolic.sh"
 else
-    echo -e "${RED}❌ Polymer 库构建失败${NC}"
+    echo -e "${RED}❌ 构建失败：缺少必需的库文件${NC}"
     exit 1
 fi
 

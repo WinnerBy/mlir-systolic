@@ -162,9 +162,47 @@ if(SYSTOLIC_ENABLE_POLYMER)
         link_directories(${POLYGEIST_BUILD_DIR}/lib)
         
         # Find GMP (required by Polymer)
-        find_package(GMP REQUIRED)
+        # Try multiple methods to find GMP
+        find_package(GMP QUIET)
+        if(NOT GMP_FOUND)
+          # Try pkg-config
+          find_package(PkgConfig QUIET)
+          if(PKG_CONFIG_FOUND)
+            pkg_check_modules(GMP QUIET gmp)
+            if(GMP_FOUND)
+              message(STATUS "Found GMP via pkg-config: ${GMP_LIBRARIES}")
+            endif()
+          endif()
+        endif()
+        
+        # If still not found, try to find it manually
+        if(NOT GMP_FOUND)
+          find_library(GMP_LIBRARY
+            NAMES gmp libgmp
+            PATHS /usr/lib /usr/local/lib /usr/lib/x86_64-linux-gnu
+            NO_DEFAULT_PATH
+          )
+          find_path(GMP_INCLUDE_DIR
+            NAMES gmp.h
+            PATHS /usr/include /usr/local/include /usr/include/x86_64-linux-gnu
+            NO_DEFAULT_PATH
+          )
+          if(GMP_LIBRARY AND GMP_INCLUDE_DIR)
+            set(GMP_FOUND TRUE)
+            set(GMP_LIBRARIES ${GMP_LIBRARY})
+            set(GMP_INCLUDE_DIRS ${GMP_INCLUDE_DIR})
+            message(STATUS "Found GMP manually: ${GMP_LIBRARIES}")
+            message(STATUS "GMP include dir: ${GMP_INCLUDE_DIRS}")
+          endif()
+        endif()
+        
         if(GMP_FOUND)
-          message(STATUS "Found GMP: ${GMP_LIBRARIES}")
+          if(GMP_INCLUDE_DIRS)
+            include_directories(${GMP_INCLUDE_DIRS})
+          endif()
+          message(STATUS "GMP integration enabled")
+        else()
+          message(FATAL_ERROR "GMP not found. Please install libgmp-dev: sudo apt-get install libgmp-dev")
         endif()
         
         # Find ISL headers (from Polly in LLVM build)

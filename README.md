@@ -179,52 +179,113 @@ AutoSA 包含两个主要部分：
 
 ## 构建
 
-### 方式 1: 使用 Git Submodule（推荐）
+本项目使用 **统一构建方式**（参考 [Polygeist README Option 2](third_party/Polygeist/README.md#option-2-using-unified-llvm-mlir-clang-and-polygeist-build)），一次性构建 LLVM/MLIR/Polly/Polygeist/Polymer 和 mlir-systolic。
+
+### 快速开始
 
 ```bash
-# 1. 克隆仓库并初始化 submodule
-git clone --recursive <repository-url>
-# 或者如果已经克隆，运行：
+# 1. 初始化 submodule
 git submodule update --init --recursive
 
-# 2. 构建 Polygeist（如果尚未构建）
-cd third_party/Polygeist
-mkdir build && cd build
-cmake .. \
-  -DMLIR_DIR=<path-to-mlir>/lib/cmake/mlir \
-  -DLLVM_DIR=<path-to-llvm>/lib/cmake/llvm \
-  -GNinja
-ninja
+# 2. 构建 Polygeist + Polymer
+./scripts/build-polygeist.sh
 
-# 3. 设置 Polygeist 构建目录（可选，CMake 会自动检测）
-export POLYGEIST_BUILD=$(pwd)
-
-# 4. 构建本项目
-cd ../../..  # 回到项目根目录
-mkdir build && cd build
-cmake .. \
-  -DMLIR_DIR=$POLYGEIST_BUILD/lib/cmake/mlir \
-  -DLLVM_DIR=$POLYGEIST_BUILD/lib/cmake/llvm \
-  -GNinja
-ninja
+# 3. 构建 mlir-systolic
+./scripts/build-systolic.sh
 ```
 
-### 方式 2: 使用外部 Polygeist
+### 详细说明
+
+#### 步骤 1: 构建 Polygeist + Polymer
+
+使用统一构建方式（参考 Polygeist README Option 2）：
 
 ```bash
-# 如果 Polygeist 在其他位置，设置环境变量
-export POLYGEIST_BUILD=/path/to/Polygeist/build
-
-# 构建本项目
-mkdir build && cd build
-cmake .. \
-  -DMLIR_DIR=$POLYGEIST_BUILD/lib/cmake/mlir \
-  -DLLVM_DIR=$POLYGEIST_BUILD/lib/cmake/llvm \
-  -GNinja
-ninja
+./scripts/build-polygeist.sh
 ```
 
-**注意**: 如果使用 submodule，CMake 会自动检测 `third_party/Polygeist` 目录。如果找不到，会回退到使用 `POLYGEIST_BUILD` 环境变量。
+这个脚本会：
+- 使用 Polygeist 的 `llvm-project` submodule 统一构建 LLVM/MLIR/Polly/Polygeist/Polymer
+- 自动检测系统内存并选择合适的并行度（防止 WSL 卡死）
+- 构建 Polymer 库和 mlir-systolic 需要的 MLIR 库
+
+**手动构建**（如果脚本不适用）：
+
+```bash
+cd third_party/Polygeist
+mkdir -p build && cd build
+
+cmake -G Ninja ../llvm-project/llvm \
+  -DLLVM_ENABLE_PROJECTS="clang;mlir;polly" \
+  -DLLVM_EXTERNAL_PROJECTS="polygeist" \
+  -DLLVM_EXTERNAL_POLYGEIST_SOURCE_DIR=.. \
+  -DLLVM_TARGETS_TO_BUILD="host" \
+  -DLLVM_ENABLE_ASSERTIONS=OFF \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DPOLYGEIST_ENABLE_POLYMER=1 \
+  -DPOLYGEIST_POLYMER_ENABLE_ISL=1
+
+# 构建 Polymer 库和必要的 MLIR 库
+ninja -j2 PolymerSupport PolymerTargetISL PolymerTransforms \
+  MLIRArithTransforms MLIRArithValueBoundsOpInterfaceImpl MLIROptLib
+```
+
+#### 步骤 2: 构建 mlir-systolic
+
+```bash
+./scripts/build-systolic.sh
+```
+
+这个脚本会：
+- 自动检测 Polygeist 构建目录
+- 配置 CMake 并构建 mlir-systolic
+
+**手动构建**（如果脚本不适用）：
+
+```bash
+mkdir -p build && cd build
+
+cmake .. \
+  -DMLIR_DIR=../third_party/Polygeist/build/lib/cmake/mlir \
+  -DLLVM_DIR=../third_party/Polygeist/build/lib/cmake/llvm \
+  -DPOLYGEIST_BUILD=../third_party/Polygeist/build
+
+cmake --build . -j2
+```
+
+### 验证构建
+
+构建完成后，检查工具是否可用：
+
+```bash
+./build/bin/systolic-opt --help
+./build/bin/systolic-translate --help
+```
+
+### 故障排除
+
+**问题 1: 找不到 MLIR_DIR**
+
+确保 Polygeist 已构建完成，并且路径正确：
+```bash
+ls third_party/Polygeist/build/lib/cmake/mlir/MLIRConfig.cmake
+```
+
+**问题 2: 找不到 Polymer 库**
+
+确保构建了 Polymer 库：
+```bash
+ls third_party/Polygeist/build/lib/libPolymer*.a
+```
+
+**问题 3: 构建时 WSL 卡死**
+
+使用更少的并行任务：
+```bash
+ninja -j1  # 单线程，最安全
+```
+
+更多信息请参考 `docs/BUILD_STEPS.md`。
 
 ## 使用示例
 
@@ -292,21 +353,24 @@ mlir-systolic/
 - [x] 项目结构
 - [x] HLS Dialect 定义 (TableGen)
 - [x] 分析接口设计
+- [x] 构建系统重构 ✅ **最新完成**
 
-### Phase 2: 核心实现 (重新设计)
+### Phase 2: Polymer 集成 ⭐ **进行中**
+- [x] Polymer 集成框架 ✅
+- [x] SCoP 提取（使用 Polymer）✅
+- [x] 强制使用 Polymer（移除启发式方法）✅
+- [x] 自动预处理（ExtractScopStmt）✅
+- [ ] 完善依赖距离提取
+- [ ] 实现基于调度树的 task 分解
+- [ ] 测试各种循环嵌套模式
+
+### Phase 3: 核心实现
 - [ ] SystolicDataflow Dialect 定义 (TableGen)
 - [ ] SystolicDataflow Dialect 实现
-- [ ] SystolicTransform.cpp - 变换 Pass
+- [ ] SystolicTransform.cpp - 变换 Pass（部分完成）
 - [ ] SystolicDataflowGeneration.cpp - 数据流抽象生成 ⭐
 - [ ] SystolicDataflowToHLS.cpp - Dialect 降级 ⭐
 - [ ] EmitHLSCpp.cpp - 代码生成
-
-### Phase 3: Polymer 集成 ⭐ **最高优先级**
-- [ ] 集成 Polymer ISL 接口（获取调度树）
-- [ ] 实现依赖距离分析（使用 ISL）
-- [ ] 实现空间循环自动选择（依赖距离 ≤ 1）
-- [ ] **基于调度树分解 task**（生成多个独立函数）
-- [ ] 详见：[Polymer 集成方案](docs/POLYMER_INTEGRATION.md)
 
 ### Phase 4: 验证
 - [ ] MatMul 端到端测试
@@ -317,21 +381,23 @@ mlir-systolic/
 - [ ] OpenCL Host 代码生成接口
 - [ ] 其他目标平台支持接口
 
+**最新进展**：详见 [项目进展总结](docs/PROJECT_STATUS.md)
+
 ## 技术方案
 
 详细的技术方案和设计思路请参考：
 
-- **[项目综合总结](docs/COMPREHENSIVE_SUMMARY.md)** ⭐ **推荐** - 包含 AutoSA 分析、技术方案、实现进展
+- **[项目进展总结](docs/PROJECT_STATUS.md)** ⭐ **最新** - 当前项目状态和最新更新
+- **[构建指南](docs/BUILD_STEPS.md)** ⭐ **推荐** - 详细的构建步骤和故障排除
 - **[AutoSA 详细分析](docs/AUTOSA_ANALYSIS.md)** ⭐ **核心** - AutoSA 架构、算法、参数影响、代码生成流程
 - [技术方案重新设计](docs/TECHNICAL_REDESIGN.md) - 详细设计文档
-- [快速参考](docs/QUICK_REFERENCE.md) - 关键改进点总结
-- [文档索引](docs/DOCUMENT_INDEX.md) - 所有文档的导航
 
 **核心改进**：
 1. 引入 `SystolicDataflow` Dialect 作为中间抽象层
 2. 支持多层（L1/L2/L3）双缓冲 IO 模块
 3. 充分利用 MLIR 的 dialect 系统和 pass 组合能力
 4. 清晰的抽象层级，便于扩展和优化
+5. ✅ **统一构建系统** - 使用 Polygeist 统一构建方式，确保版本兼容性
 
 ## 参考项目
 
