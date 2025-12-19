@@ -383,14 +383,25 @@ mlir-systolic/
 
 **最新进展**：详见 [项目进展总结](docs/PROJECT_STATUS.md)
 
-## 技术方案
+## 文档
 
 详细的技术方案和设计思路请参考：
 
+### 核心文档
 - **[项目进展总结](docs/PROJECT_STATUS.md)** ⭐ **最新** - 当前项目状态和最新更新
 - **[构建指南](docs/BUILD_STEPS.md)** ⭐ **推荐** - 详细的构建步骤和故障排除
+- **[快速参考](docs/QUICK_REFERENCE.md)** ⭐ **推荐** - 常用命令和参数配置快速查找
+- **[架构设计](docs/ARCHITECTURE.md)** - 项目架构和设计理念
+- **[开发指南](docs/DEVELOPMENT_GUIDE.md)** - 开发流程和代码结构
+
+### AutoSA 相关
 - **[AutoSA 详细分析](docs/AUTOSA_ANALYSIS.md)** ⭐ **核心** - AutoSA 架构、算法、参数影响、代码生成流程
-- [技术方案重新设计](docs/TECHNICAL_REDESIGN.md) - 详细设计文档
+- **[AutoSA Spacetime 分析](docs/AUTOSA_SPACETIME_ANALYSIS.md)** - Spacetime 参数详细分析（0-5）
+- **[AutoSA 测试生成指南](docs/AUTOSA_TEST_GENERATION_GUIDE.md)** - 生成不同 Spacetime 和参数的测试用例
+- **[随机读取问题分析](docs/RANDOM_ACCESS_ISSUE_ANALYSIS.md)** - MTTKRP 等 Kernel 的随机读取问题分析和修复方法
+
+### 完整文档索引
+请查看 [docs/README.md](docs/README.md) 获取完整的文档列表和分类。
 
 **核心改进**：
 1. 引入 `SystolicDataflow` Dialect 作为中间抽象层
