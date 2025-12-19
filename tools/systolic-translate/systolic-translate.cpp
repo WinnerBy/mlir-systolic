@@ -213,10 +213,28 @@ void SystolicHLSEmitter::emitModuleDeclarations() {
      << "hls::stream<float> &fifo_A_in, hls::stream<float> &fifo_A_out, "
      << "hls::stream<float> &fifo_B_in, hls::stream<float> &fifo_B_out, "
      << "hls::stream<float> &fifo_C_drain_out);\n";
+  os << "void C_drain_IO_L1_out_intra_trans(int idx, int idy, int c0, int c1, C_t" << latency 
+     << " local_C[" << latency << "][1], hls::stream<float> &fifo_C_drain_local_in);\n";
+  os << "void C_drain_IO_L1_out_inter_trans(int idx, int idy, int c0, int c1, C_t" << latency 
+     << " local_C[" << latency << "][1], hls::stream<C_t" << latency 
+     << "> &fifo_C_drain_in, hls::stream<C_t" << latency << "> &fifo_C_drain_out);\n";
+  os << "void C_drain_IO_L1_out_inter_trans_boundary(int idx, int idy, int c0, int c1, C_t" << latency 
+     << " local_C[" << latency << "][1], hls::stream<C_t" << latency << "> &fifo_C_drain_out);\n";
   os << "void C_drain_IO_L1_out_wrapper(int idx, int idy, "
      << "hls::stream<C_t" << latency << "> &fifo_C_drain_in, "
      << "hls::stream<C_t" << latency << "> &fifo_C_drain_out, "
      << "hls::stream<float> &fifo_C_drain_local_in);\n";
+  os << "void C_drain_IO_L1_out_boundary_wrapper(int idx, int idy, "
+     << "hls::stream<C_t" << latency << "> &fifo_C_drain_out, "
+     << "hls::stream<float> &fifo_C_drain_local_in);\n";
+  os << "void C_drain_IO_L2_out(int idx, hls::stream<C_t" << latency 
+     << "> &fifo_C_drain_in, hls::stream<C_t" << latency 
+     << "> &fifo_C_drain_out, hls::stream<C_t" << latency << "> &fifo_C_drain_local_in);\n";
+  os << "void C_drain_IO_L2_out_boundary(int idx, hls::stream<C_t" << latency 
+     << "> &fifo_C_drain_out, hls::stream<C_t" << latency << "> &fifo_C_drain_local_in);\n";
+  os << "void C_drain_IO_L3_out(hls::stream<C_t" << latency 
+     << "> &fifo_C_drain_out, hls::stream<C_t" << latency << "> &fifo_C_drain_local_in);\n";
+  os << "void C_drain_IO_L3_out_serialize(C_t16 *C, hls::stream<C_t" << latency << "> &fifo_C_drain_local_in);\n";
   os << "/* Module Declarations */\n\n";
 }
 
@@ -712,6 +730,381 @@ void SystolicHLSEmitter::emitDummyModules() {
   os << "/* Module Definition */\n\n";
 }
 
+void SystolicHLSEmitter::emitDrainIOL1(StringRef arrayName) {
+  // C_drain_IO_L1_out_intra_trans
+  os << "/* Module Definition */\n";
+  os << "void " << arrayName << "_drain_IO_L1_out_intra_trans(int idx, int idy, int c0, int c1, "
+     << arrayName << "_t" << latency << " local_" << arrayName << "[" << latency << "][1], "
+     << "hls::stream<float> &fifo_" << arrayName << "_drain_local_in) {\n";
+  os << "#pragma HLS INLINE\n";
+  os << "  /* Variable Declaration */\n";
+  os << "  int p0 = idx, p1 = idy; // module id\n";
+  os << "  ap_uint<32> data_split[" << latency << "];\n";
+  os << "  #pragma HLS ARRAY_PARTITION variable=data_split complete\n";
+  os << "  /* Variable Declaration */\n\n";
+  os << "  // io_L1\n";
+  os << "  // pe\n";
+  os << "  // latency\n";
+  os << "  for (ap_uint<3> c6 = 0; c6 <= " << (latency - 1) << "; c6 += 1) {\n";
+  os << "    // latency\n";
+  os << "    for (ap_uint<3> c7 = 0; c7 <= " << (latency - 1) << "; c7 += 1) {\n";
+  os << "    #pragma HLS PIPELINE II=1\n";
+  os << "      {\n";
+  os << "        " << arrayName << "_t1 in_data;\n";
+  os << "        " << arrayName << "_t" << latency << " out_data;\n";
+  os << "        in_data = fifo_" << arrayName << "_drain_local_in.read();\n";
+  os << "        int split_idx = (c6) % " << latency << ";\n";
+  os << "        out_data = local_" << arrayName << "[c7][c6 / " << latency << "];\n";
+  os << "        for (ap_uint<3> n = 0; n < " << latency << "; n++) {\n";
+  os << "        #pragma HLS UNROLL\n";
+  os << "          data_split[n] = out_data(31, 0);\n";
+  os << "          out_data = out_data >> 32;\n";
+  os << "        }\n";
+  os << "        union {unsigned int ui; float ut;} u;\n";
+  os << "        u.ut = in_data;\n";
+  os << "        data_split[split_idx] = ap_uint<32>(u.ui);\n";
+  os << "        out_data = (";
+  for (unsigned i = latency - 1; i > 0; i--) {
+    os << "data_split[" << i << "], ";
+  }
+  os << "data_split[0]);\n";
+  os << "        local_" << arrayName << "[c7][c6 / " << latency << "] = out_data;\n";
+  os << "      }\n";
+  os << "    }\n";
+  os << "  }\n";
+  os << "}\n";
+  os << "/* Module Definition */\n\n";
+  
+  // C_drain_IO_L1_out_inter_trans
+  os << "/* Module Definition */\n";
+  os << "void " << arrayName << "_drain_IO_L1_out_inter_trans(int idx, int idy, int c0, int c1, "
+     << arrayName << "_t" << latency << " local_" << arrayName << "[" << latency << "][1], "
+     << "hls::stream<" << arrayName << "_t" << latency << "> &fifo_" << arrayName 
+     << "_drain_in, hls::stream<" << arrayName << "_t" << latency << "> &fifo_" << arrayName 
+     << "_drain_out) {\n";
+  os << "#pragma HLS INLINE\n";
+  os << "  /* Variable Declaration */\n";
+  os << "  int p0 = idx, p1 = idy; // module id\n";
+  os << "  /* Variable Declaration */\n\n";
+  os << "  for (ap_uint<2> c4 = p1; c4 <= " << (numPE - 1) << "; c4 += 1) {\n";
+  os << "    // io_L1\n";
+  os << "    if (c4 == p1) {\n";
+  os << "      for (ap_uint<3> c5 = 0; c5 <= " << (latency - 1) << "; c5 += 1) {\n";
+  os << "      #pragma HLS PIPELINE II=1\n";
+  os << "        // access_coalesce\n";
+  os << "        {\n";
+  os << "          " << arrayName << "_t" << latency << " in_data;\n";
+  os << "          " << arrayName << "_t" << latency << " out_data;\n";
+  os << "          in_data = local_" << arrayName << "[c5][0];\n";
+  os << "          out_data = in_data;\n";
+  os << "          fifo_" << arrayName << "_drain_out.write(out_data);\n";
+  os << "        }\n";
+  os << "      }\n";
+  os << "    } else {\n";
+  os << "      for (ap_uint<3> c5 = 0; c5 <= " << (latency - 1) << "; c5 += 1) {\n";
+  os << "      #pragma HLS PIPELINE II=1\n";
+  os << "        // access_coalesce\n";
+  os << "        {\n";
+  os << "          " << arrayName << "_t" << latency << " in_data;\n";
+  os << "          " << arrayName << "_t" << latency << " out_data;\n";
+  os << "          in_data = fifo_" << arrayName << "_drain_in.read();\n";
+  os << "          out_data = in_data;\n";
+  os << "          fifo_" << arrayName << "_drain_out.write(out_data);\n";
+  os << "        }\n";
+  os << "      }\n";
+  os << "    }\n";
+  os << "  }\n";
+  os << "}\n";
+  os << "/* Module Definition */\n\n";
+  
+  // C_drain_IO_L1_out_inter_trans_boundary
+  os << "/* Module Definition */\n";
+  os << "void " << arrayName << "_drain_IO_L1_out_inter_trans_boundary(int idx, int idy, int c0, int c1, "
+     << arrayName << "_t" << latency << " local_" << arrayName << "[" << latency << "][1], "
+     << "hls::stream<" << arrayName << "_t" << latency << "> &fifo_" << arrayName << "_drain_out) {\n";
+  os << "#pragma HLS INLINE\n";
+  os << "  /* Variable Declaration */\n";
+  os << "  int p0 = idx, p1 = idy; // module id\n";
+  os << "  /* Variable Declaration */\n\n";
+  os << "  for (ap_uint<2> c4 = p1; c4 <= " << (numPE - 1) << "; c4 += 1)\n";
+  os << "    if (c4 == p1) {\n";
+  os << "      // io_L1\n";
+  os << "      for (ap_uint<3> c5 = 0; c5 <= " << (latency - 1) << "; c5 += 1) {\n";
+  os << "      #pragma HLS PIPELINE II=1\n";
+  os << "        // access_coalesce\n";
+  os << "        {\n";
+  os << "          " << arrayName << "_t" << latency << " in_data;\n";
+  os << "          " << arrayName << "_t" << latency << " out_data;\n";
+  os << "          in_data = local_" << arrayName << "[c5][0];\n";
+  os << "          out_data = in_data;\n";
+  os << "          fifo_" << arrayName << "_drain_out.write(out_data);\n";
+  os << "        }\n";
+  os << "      }\n";
+  os << "    }\n";
+  os << "}\n";
+  os << "/* Module Definition */\n\n";
+  
+  // C_drain_IO_L1_out
+  os << "/* Module Definition */\n";
+  os << "void " << arrayName << "_drain_IO_L1_out(int idx, int idy, "
+     << "hls::stream<" << arrayName << "_t" << latency << "> &fifo_" << arrayName << "_drain_in, "
+     << "hls::stream<" << arrayName << "_t" << latency << "> &fifo_" << arrayName << "_drain_out, "
+     << "hls::stream<float> &fifo_" << arrayName << "_drain_local_in) {\n";
+  os << "#pragma HLS INLINE OFF\n";
+  os << "  /* Variable Declaration */\n";
+  os << "  int p0 = idx, p1 = idy; // module id\n";
+  os << "  " << arrayName << "_t" << latency << " local_" << arrayName << "[" << latency << "][1];\n";
+  os << "  #pragma HLS RESOURCE variable=local_" << arrayName << " core=RAM_2P_BRAM\n";
+  os << "  /* Variable Declaration */\n\n";
+  os << "  for (ap_uint<3> c0 = 0; c0 <= " << (numTiles - 1) << "; c0 += 1)\n";
+  os << "    for (ap_uint<3> c1 = 0; c1 <= " << (numTiles - 1) << "; c1 += 1) {\n";
+  os << "      // array\n";
+  os << "      // io_L3\n";
+  os << "      // io_L2\n";
+  os << "      " << arrayName << "_drain_IO_L1_out_intra_trans(\n";
+  os << "        /* module id */ idx, \n";
+  os << "        /* module id */ idy, \n";
+  os << "        /* host iter */ c0, \n";
+  os << "        /* host iter */ c1, \n";
+  os << "        /* array */ local_" << arrayName << ", \n";
+  os << "        /* fifo */ fifo_" << arrayName << "_drain_local_in\n";
+  os << "      );\n";
+  os << "      " << arrayName << "_drain_IO_L1_out_inter_trans(\n";
+  os << "        /* module id */ idx, \n";
+  os << "        /* module id */ idy, \n";
+  os << "        /* host iter */ c0, \n";
+  os << "        /* host iter */ c1, \n";
+  os << "        /* array */ local_" << arrayName << ", \n";
+  os << "        /* fifo */ fifo_" << arrayName << "_drain_in, \n";
+  os << "        /* fifo */ fifo_" << arrayName << "_drain_out\n";
+  os << "      );\n";
+  os << "    }\n";
+  os << "}\n";
+  os << "/* Module Definition */\n\n";
+  
+  // C_drain_IO_L1_out_wrapper
+  os << "/* Module Definition */\n";
+  os << "void " << arrayName << "_drain_IO_L1_out_wrapper(int idx, int idy, "
+     << "hls::stream<" << arrayName << "_t" << latency << "> &fifo_" << arrayName << "_drain_in, "
+     << "hls::stream<" << arrayName << "_t" << latency << "> &fifo_" << arrayName << "_drain_out, "
+     << "hls::stream<float> &fifo_" << arrayName << "_drain_local_in) {\n";
+  os << "  " << arrayName << "_drain_IO_L1_out(\n";
+  os << "    /* module id */ idx, \n";
+  os << "    /* module id */ idy, \n";
+  os << "    /* fifo */ fifo_" << arrayName << "_drain_in, \n";
+  os << "    /* fifo */ fifo_" << arrayName << "_drain_out, \n";
+  os << "    /* fifo */ fifo_" << arrayName << "_drain_local_in);\n";
+  os << "}\n";
+  os << "/* Module Definition */\n\n";
+  
+  // C_drain_IO_L1_out_boundary
+  os << "/* Module Definition */\n";
+  os << "void " << arrayName << "_drain_IO_L1_out_boundary(int idx, int idy, "
+     << "hls::stream<" << arrayName << "_t" << latency << "> &fifo_" << arrayName << "_drain_out, "
+     << "hls::stream<float> &fifo_" << arrayName << "_drain_local_in) {\n";
+  os << "#pragma HLS INLINE\n";
+  os << "  /* Variable Declaration */\n";
+  os << "  int p0 = idx, p1 = idy; // module id\n";
+  os << "  " << arrayName << "_t" << latency << " local_" << arrayName << "[" << latency << "][1];\n";
+  os << "  #pragma HLS RESOURCE variable=local_" << arrayName << " core=RAM_2P_BRAM\n";
+  os << "  /* Variable Declaration */\n\n";
+  os << "  for (ap_uint<3> c0 = 0; c0 <= " << (numTiles - 1) << "; c0 += 1)\n";
+  os << "    for (ap_uint<3> c1 = 0; c1 <= " << (numTiles - 1) << "; c1 += 1) {\n";
+  os << "      // array\n";
+  os << "      // io_L3\n";
+  os << "      " << arrayName << "_drain_IO_L1_out_intra_trans(\n";
+  os << "        /* module id */ idx, \n";
+  os << "        /* module id */ idy, \n";
+  os << "        /* host iter */ c0, \n";
+  os << "        /* host iter */ c1, \n";
+  os << "        /* array */ local_" << arrayName << ", \n";
+  os << "        /* fifo */ fifo_" << arrayName << "_drain_local_in\n";
+  os << "      );\n";
+  os << "      " << arrayName << "_drain_IO_L1_out_inter_trans_boundary(\n";
+  os << "        /* module id */ idx, \n";
+  os << "        /* module id */ idy, \n";
+  os << "        /* host iter */ c0, \n";
+  os << "        /* host iter */ c1, \n";
+  os << "        /* array */ local_" << arrayName << ", \n";
+  os << "        /* fifo */ fifo_" << arrayName << "_drain_out\n";
+  os << "      );\n";
+  os << "    }\n";
+  os << "}\n";
+  os << "/* Module Definition */\n\n";
+  
+  // C_drain_IO_L1_out_boundary_wrapper
+  os << "/* Module Definition */\n";
+  os << "void " << arrayName << "_drain_IO_L1_out_boundary_wrapper(int idx, int idy, "
+     << "hls::stream<" << arrayName << "_t" << latency << "> &fifo_" << arrayName << "_drain_out, "
+     << "hls::stream<float> &fifo_" << arrayName << "_drain_local_in) {\n";
+  os << "  " << arrayName << "_drain_IO_L1_out_boundary(\n";
+  os << "    /* module id */ idx, \n";
+  os << "    /* module id */ idy, \n";
+  os << "    /* fifo */ fifo_" << arrayName << "_drain_out, \n";
+  os << "    /* fifo */ fifo_" << arrayName << "_drain_local_in);\n";
+  os << "}\n";
+  os << "/* Module Definition */\n\n";
+}
+
+void SystolicHLSEmitter::emitDrainIOL2(StringRef arrayName) {
+  // C_drain_IO_L2_out
+  os << "/* Module Definition */\n";
+  os << "void " << arrayName << "_drain_IO_L2_out(int idx, hls::stream<" << arrayName << "_t" << latency 
+     << "> &fifo_" << arrayName << "_drain_in, hls::stream<" << arrayName << "_t" << latency 
+     << "> &fifo_" << arrayName << "_drain_out, hls::stream<" << arrayName << "_t" << latency 
+     << "> &fifo_" << arrayName << "_drain_local_in) {\n";
+  os << "#pragma HLS INLINE OFF\n";
+  os << "  /* Variable Declaration */\n";
+  os << "  int p0 = idx; // module id\n";
+  os << "  /* Variable Declaration */\n\n";
+  os << "  for (ap_uint<3> c0 = 0; c0 <= " << (numTiles - 1) << "; c0 += 1)\n";
+  os << "    for (ap_uint<3> c1 = 0; c1 <= " << (numTiles - 1) << "; c1 += 1) {\n";
+  os << "      // array\n";
+  os << "      // io_L3\n";
+  os << "      for (ap_uint<2> c3 = p0; c3 <= " << (numPE - 1) << "; c3 += 1) {\n";
+  os << "        // io_L2\n";
+  os << "        if (c3 == p0) {\n";
+  os << "          for (ap_uint<2> c4 = 0; c4 <= " << (numPE - 1) << "; c4 += 1) {\n";
+  os << "            // io_L1\n";
+  os << "            for (ap_uint<3> c5 = 0; c5 <= " << (latency - 1) << "; c5 += 1) {\n";
+  os << "            #pragma HLS PIPELINE II=1\n";
+  os << "              // access_coalesce\n";
+  os << "              {\n";
+  os << "                " << arrayName << "_t" << latency << " in_data;\n";
+  os << "                " << arrayName << "_t" << latency << " out_data;\n";
+  os << "                in_data = fifo_" << arrayName << "_drain_local_in.read();\n";
+  os << "                out_data = in_data;\n";
+  os << "                fifo_" << arrayName << "_drain_out.write(out_data);\n";
+  os << "              }\n";
+  os << "            }\n";
+  os << "          }\n";
+  os << "        } else {\n";
+  os << "          for (ap_uint<2> c4 = 0; c4 <= " << (numPE - 1) << "; c4 += 1) {\n";
+  os << "            // io_L1\n";
+  os << "            for (ap_uint<3> c5 = 0; c5 <= " << (latency - 1) << "; c5 += 1) {\n";
+  os << "            #pragma HLS PIPELINE II=1\n";
+  os << "              // access_coalesce\n";
+  os << "              {\n";
+  os << "                " << arrayName << "_t" << latency << " in_data;\n";
+  os << "                " << arrayName << "_t" << latency << " out_data;\n";
+  os << "                in_data = fifo_" << arrayName << "_drain_in.read();\n";
+  os << "                out_data = in_data;\n";
+  os << "                fifo_" << arrayName << "_drain_out.write(out_data);\n";
+  os << "              }\n";
+  os << "            }\n";
+  os << "          }\n";
+  os << "        }\n";
+  os << "      }\n";
+  os << "    }\n";
+  os << "}\n";
+  os << "/* Module Definition */\n\n";
+  
+  // C_drain_IO_L2_out_boundary
+  os << "/* Module Definition */\n";
+  os << "void " << arrayName << "_drain_IO_L2_out_boundary(int idx, hls::stream<" << arrayName << "_t" << latency 
+     << "> &fifo_" << arrayName << "_drain_out, hls::stream<" << arrayName << "_t" << latency 
+     << "> &fifo_" << arrayName << "_drain_local_in) {\n";
+  os << "#pragma HLS INLINE OFF\n";
+  os << "  /* Variable Declaration */\n";
+  os << "  int p0 = idx; // module id\n";
+  os << "  /* Variable Declaration */\n\n";
+  os << "  for (ap_uint<3> c0 = 0; c0 <= " << (numTiles - 1) << "; c0 += 1)\n";
+  os << "    for (ap_uint<3> c1 = 0; c1 <= " << (numTiles - 1) << "; c1 += 1) {\n";
+  os << "      // array\n";
+  os << "      // io_L3\n";
+  os << "      for (ap_uint<2> c3 = p0; c3 <= " << (numPE - 1) << "; c3 += 1)\n";
+  os << "        if (c3 == p0) {\n";
+  os << "          // io_L2\n";
+  os << "          for (ap_uint<2> c4 = 0; c4 <= " << (numPE - 1) << "; c4 += 1) {\n";
+  os << "            // io_L1\n";
+  os << "            for (ap_uint<3> c5 = 0; c5 <= " << (latency - 1) << "; c5 += 1) {\n";
+  os << "            #pragma HLS PIPELINE II=1\n";
+  os << "              // access_coalesce\n";
+  os << "              {\n";
+  os << "                " << arrayName << "_t" << latency << " in_data;\n";
+  os << "                " << arrayName << "_t" << latency << " out_data;\n";
+  os << "                in_data = fifo_" << arrayName << "_drain_local_in.read();\n";
+  os << "                out_data = in_data;\n";
+  os << "                fifo_" << arrayName << "_drain_out.write(out_data);\n";
+  os << "              }\n";
+  os << "            }\n";
+  os << "          }\n";
+  os << "        }\n";
+  os << "    }\n";
+  os << "}\n";
+  os << "/* Module Definition */\n\n";
+}
+
+void SystolicHLSEmitter::emitDrainIOL3(StringRef arrayName) {
+  // C_drain_IO_L3_out
+  os << "/* Module Definition */\n";
+  os << "void " << arrayName << "_drain_IO_L3_out(hls::stream<" << arrayName << "_t" << latency 
+     << "> &fifo_" << arrayName << "_drain_out, hls::stream<" << arrayName << "_t" << latency 
+     << "> &fifo_" << arrayName << "_drain_local_in) {\n";
+  os << "#pragma HLS INLINE OFF\n";
+  os << "  /* Variable Declaration */\n";
+  os << "  /* Variable Declaration */\n\n";
+  os << "  for (ap_uint<3> c0 = 0; c0 <= " << (numTiles - 1) << "; c0 += 1)\n";
+  os << "    for (ap_uint<3> c1 = 0; c1 <= " << (numTiles - 1) << "; c1 += 1) {\n";
+  os << "      // array\n";
+  os << "      // io_L3\n";
+  os << "      for (ap_uint<2> c3 = 0; c3 <= " << (numPE - 1) << "; c3 += 1) {\n";
+  os << "        // io_L2\n";
+  os << "        for (ap_uint<2> c4 = 0; c4 <= " << (numPE - 1) << "; c4 += 1) {\n";
+  os << "          // io_L1\n";
+  os << "          for (ap_uint<3> c5 = 0; c5 <= " << (latency - 1) << "; c5 += 1) {\n";
+  os << "          #pragma HLS PIPELINE II=1\n";
+  os << "            // access_coalesce\n";
+  os << "            // access_serialize\n";
+  os << "            {\n";
+  os << "              " << arrayName << "_t" << latency << " in_data;\n";
+  os << "              " << arrayName << "_t" << latency << " out_data;\n";
+  os << "              in_data = fifo_" << arrayName << "_drain_local_in.read();\n";
+  os << "              out_data = in_data;\n";
+  os << "              fifo_" << arrayName << "_drain_out.write(out_data);\n";
+  os << "            }\n";
+  os << "          }\n";
+  os << "        }\n";
+  os << "      }\n";
+  os << "    }\n";
+  os << "}\n";
+  os << "/* Module Definition */\n\n";
+}
+
+void SystolicHLSEmitter::emitDrainSerialize(StringRef arrayName, unsigned totalSize) {
+  // C_drain_IO_L3_out_serialize
+  // C_t16 = 512 bits, C_t4 = 128 bits, so 512 / 128 = 4
+  unsigned packFactor = 16 / latency;  // 16 / 4 = 4
+  unsigned iterations = (totalSize * totalSize * 4) / 64;  // 512 bits = 64 bytes
+  os << "/* Module Definition */\n";
+  os << "void " << arrayName << "_drain_IO_L3_out_serialize(" << arrayName 
+     << "_t16 *" << arrayName << ", hls::stream<" << arrayName << "_t" << latency 
+     << "> &fifo_" << arrayName << "_drain_local_in) {\n";
+  os << "#pragma HLS INLINE OFF\n";
+  os << "  /* Variable Declaration */\n";
+  os << "  /* Variable Declaration */\n\n";
+  os << "  for (ap_uint<" << (unsigned)ceil(log2(iterations + 1)) << "> i = 0; i < " 
+     << iterations << "; i++) {\n";
+  os << "  #pragma HLS PIPELINE II=1\n";
+  os << "    " << arrayName << "_t" << latency << " fifo_data;\n";
+  os << "    " << arrayName << "_t16 mem_data;\n";
+  os << "    " << arrayName << "_t" << latency << " mem_data_split[" << packFactor << "];\n";
+  os << "    #pragma HLS ARRAY_PARTITION variable=mem_data_split complete\n";
+  os << "    for (ap_uint<3> p = 0; p < " << packFactor << "; p++) {\n";
+  os << "      fifo_data = fifo_" << arrayName << "_drain_local_in.read();\n";
+  os << "      mem_data_split[p] = fifo_data;\n";
+  os << "    }\n";
+  os << "    mem_data = (";
+  for (unsigned i = packFactor - 1; i > 0; i--) {
+    os << "mem_data_split[" << i << "], ";
+  }
+  os << "mem_data_split[0]);\n";
+  os << "    " << arrayName << "[i] = mem_data;\n";
+  os << "  }\n";
+  os << "}\n";
+  os << "/* Module Definition */\n\n";
+}
+
 void SystolicHLSEmitter::emitTopKernel(func::FuncOp funcOp) {
   os << "extern \"C\" {\n";
   os << "void kernel0(A_t16 *A, B_t16 *B, C_t16 *C) {\n";
@@ -731,7 +1124,8 @@ void SystolicHLSEmitter::emitTopKernel(func::FuncOp funcOp) {
   os << "  hls::stream<B_t" << arrayPart << "> fifo_B_B_IO_L3_in_serialize;\n";
   os << "  #pragma HLS STREAM variable=fifo_B_B_IO_L3_in_serialize depth=2\n";
   os << "  hls::stream<C_t" << latency << "> fifo_C_drain_C_drain_IO_L3_out_serialize;\n";
-  os << "  #pragma HLS STREAM variable=fifo_C_drain_C_drain_IO_L3_out_serialize depth=2\n\n";
+  os << "  #pragma HLS STREAM variable=fifo_C_drain_C_drain_IO_L3_out_serialize depth=2\n";
+  os << "  #pragma HLS RESOURCE variable=fifo_C_drain_C_drain_IO_L3_out_serialize core=FIFO_SRL\n\n";
   
   // L2 FIFOs
   for (unsigned i = 0; i <= numPE; i++) {
@@ -766,6 +1160,20 @@ void SystolicHLSEmitter::emitTopKernel(func::FuncOp funcOp) {
       os << "  #pragma HLS STREAM variable=fifo_C_drain_PE_" << i << "_" << j << " depth=2\n";
       os << "  #pragma HLS RESOURCE variable=fifo_C_drain_PE_" << i << "_" << j << " core=FIFO_SRL\n";
     }
+  }
+  // Drain L1 FIFOs
+  for (unsigned i = 0; i < numPE; i++) {
+    for (unsigned j = 0; j <= numPE; j++) {
+      os << "  hls::stream<C_t" << latency << "> fifo_C_drain_C_drain_IO_L1_out_" << i << "_" << j << ";\n";
+      os << "  #pragma HLS STREAM variable=fifo_C_drain_C_drain_IO_L1_out_" << i << "_" << j << " depth=2\n";
+      os << "  #pragma HLS RESOURCE variable=fifo_C_drain_C_drain_IO_L1_out_" << i << "_" << j << " core=FIFO_SRL\n";
+    }
+  }
+  // Drain L2 FIFOs
+  for (unsigned i = 0; i <= numPE; i++) {
+    os << "  hls::stream<C_t" << latency << "> fifo_C_drain_C_drain_IO_L2_out_" << i << ";\n";
+    os << "  #pragma HLS STREAM variable=fifo_C_drain_C_drain_IO_L2_out_" << i << " depth=2\n";
+    os << "  #pragma HLS RESOURCE variable=fifo_C_drain_C_drain_IO_L2_out_" << i << " core=FIFO_SRL\n";
   }
   os << "  /* FIFO Declaration */\n\n";
   
@@ -811,9 +1219,60 @@ void SystolicHLSEmitter::emitTopKernel(func::FuncOp funcOp) {
   }
   os << "\n";
   
-  // Drain modules (simplified)
-  os << "  /* C drain modules - simplified */\n";
-  os << "  C_drain_IO_L3_out_serialize(C, fifo_C_drain_C_drain_IO_L3_out_serialize);\n";
+  // Drain modules
+  os << "  /* C drain modules */\n";
+  // L1 drain modules - boundary wrappers first (rightmost column)
+  for (unsigned i = 0; i < numPE; i++) {
+    os << "  C_drain_IO_L1_out_boundary_wrapper(\n";
+    os << "    /* module id */ " << i << ", \n";
+    os << "    /* module id */ " << (numPE - 1) << ", \n";
+    os << "    /* fifo */ fifo_C_drain_C_drain_IO_L1_out_" << i << "_" << (numPE - 1) << ", \n";
+    os << "    /* fifo */ fifo_C_drain_PE_" << i << "_" << (numPE - 1) << "\n";
+    os << "  );\n";
+    os << "  /* Module Call */\n\n";
+  }
+  // L1 drain modules - regular wrappers (left columns)
+  for (unsigned i = 0; i < numPE; i++) {
+    for (unsigned j = 0; j < numPE - 1; j++) {
+      os << "  C_drain_IO_L1_out_wrapper(\n";
+      os << "    /* module id */ " << i << ", \n";
+      os << "    /* module id */ " << j << ", \n";
+      os << "    /* fifo */ fifo_C_drain_C_drain_IO_L1_out_" << i << "_" << (j + 1) << ", \n";
+      os << "    /* fifo */ fifo_C_drain_C_drain_IO_L1_out_" << i << "_" << j << ", \n";
+      os << "    /* fifo */ fifo_C_drain_PE_" << i << "_" << j << "\n";
+      os << "  );\n";
+      os << "  /* Module Call */\n\n";
+    }
+  }
+  // L2 drain modules - boundary first
+  os << "  C_drain_IO_L2_out_boundary(\n";
+  os << "    /* module id */ " << (numPE - 1) << ", \n";
+  os << "    /* fifo */ fifo_C_drain_C_drain_IO_L2_out_" << (numPE - 1) << ", \n";
+  os << "    /* fifo */ fifo_C_drain_C_drain_IO_L1_out_" << (numPE - 1) << "_0\n";
+  os << "  );\n";
+  os << "  /* Module Call */\n\n";
+  // L2 drain modules - regular
+  for (unsigned i = 0; i < numPE - 1; i++) {
+    os << "  C_drain_IO_L2_out(\n";
+    os << "    /* module id */ " << i << ", \n";
+    os << "    /* fifo */ fifo_C_drain_C_drain_IO_L2_out_" << (i + 1) << ", \n";
+    os << "    /* fifo */ fifo_C_drain_C_drain_IO_L2_out_" << i << ", \n";
+    os << "    /* fifo */ fifo_C_drain_C_drain_IO_L1_out_" << i << "_0\n";
+    os << "  );\n";
+    os << "  /* Module Call */\n\n";
+  }
+  // L3 drain modules
+  os << "  C_drain_IO_L3_out(\n";
+  os << "    /* fifo */ fifo_C_drain_C_drain_IO_L3_out_serialize, \n";
+  os << "    /* fifo */ fifo_C_drain_C_drain_IO_L2_out_0\n";
+  os << "  );\n";
+  os << "  /* Module Call */\n\n";
+  // L3 serialize
+  os << "  C_drain_IO_L3_out_serialize(\n";
+  os << "    /* array */ C, \n";
+  os << "    /* fifo */ fifo_C_drain_C_drain_IO_L3_out_serialize\n";
+  os << "  );\n";
+  os << "  /* Module Call */\n\n";
   
   os << "}\n";
   os << "}\n";
@@ -847,6 +1306,10 @@ LogicalResult SystolicHLSEmitter::emit(ModuleOp module) {
   emitPE();
   emitPEWrapper();
   emitDummyModules();
+  emitDrainIOL1("C");
+  emitDrainIOL2("C");
+  emitDrainIOL3("C");
+  emitDrainSerialize("C", size);
   
   // Emit top kernel
   for (auto func : module.getOps<func::FuncOp>()) {
