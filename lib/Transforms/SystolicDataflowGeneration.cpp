@@ -374,12 +374,33 @@ void SystolicDataflowGenerationPass::runOnOperation() {
     }
   }
   
+  // Find the innermost computation loop nest (for PE array)
+  AffineForOp innermostLoop = nullptr;
+  int maxDepth = -1;
+  func.walk([&](AffineForOp forOp) {
+    int depth = 0;
+    Operation *parent = forOp->getParentOp();
+    while (parent) {
+      if (isa<AffineForOp>(parent)) {
+        depth++;
+      }
+      parent = parent->getParentOp();
+    }
+    if (depth > maxDepth) {
+      maxDepth = depth;
+      innermostLoop = forOp;
+    }
+  });
+  
   OpBuilder builder(func.getContext());
   builder.setInsertionPointToStart(&func.getBody().front());
   
   Location loc = func.getLoc();
   
   // Step 3: Generate IO modules for input arrays (L1, L2, L3)
+  // Store created IO modules for later use
+  llvm::DenseMap<Value, dataflow::IOModuleOp> ioModules;
+  
   for (const auto &group : groups) {
     if (group.type == ArrayRefGroup::IO_GROUP && group.ioLevel > 0) {
       // Create IO module
@@ -400,26 +421,98 @@ void SystolicDataflowGenerationPass::runOnOperation() {
       Block *bodyBlock = builder.createBlock(&ioModule.getBody());
       builder.setInsertionPointToStart(bodyBlock);
       
-      // Create yield terminator
-      builder.create<dataflow::IOModuleYieldOp>(loc);
+      // Generate IO module content based on level
+      if (group.ioLevel == 2 && group.needsDoubleBuffer) {
+        // L2 with double buffering: Create DoubleBufferOp
+        // Allocate ping and pong buffers
+        MemRefType bufferType = group.memref.getType().cast<MemRefType>();
+        SmallVector<int64_t, 3> bufferShape = bufferType.getShape().vec();
+        
+        // Adjust buffer shape based on tile size
+        if (bufferShape.size() >= 2 && tileSize.size() >= 2) {
+          bufferShape[0] = tileSize[0];
+          bufferShape[1] = tileSize[1];
+        }
+        
+        MemRefType pingType = MemRefType::get(bufferShape, bufferType.getElementType());
+        MemRefType pongType = MemRefType::get(bufferShape, bufferType.getElementType());
+        MemRefType arbiterType = MemRefType::get({}, builder.getI1Type());
+        MemRefType intraEnableType = MemRefType::get({}, builder.getI1Type());
+        
+        // Allocate buffers (using memref.alloc for now, will be converted later)
+        auto pingBuffer = builder.create<memref::AllocOp>(loc, pingType);
+        auto pongBuffer = builder.create<memref::AllocOp>(loc, pongType);
+        auto arbiter = builder.create<memref::AllocOp>(loc, arbiterType);
+        auto intraEnable = builder.create<memref::AllocOp>(loc, intraEnableType);
+        
+        // Initialize arbiter to false (ping is active)
+        auto falseVal = builder.create<arith::ConstantOp>(
+            loc, builder.getBoolAttr(false));
+        builder.create<memref::StoreOp>(loc, falseVal, arbiter);
+        
+        // Initialize intraEnable to false
+        builder.create<memref::StoreOp>(loc, falseVal, intraEnable);
+        
+        // Create DoubleBufferOp
+        auto doubleBuffer = builder.create<dataflow::DoubleBufferOp>(
+            loc,
+            pingBuffer, pongBuffer, arbiter, intraEnable);
+        
+        // Create inter-transfer region (loading data)
+        Block *interBlock = builder.createBlock(&doubleBuffer.getInterTransfer());
+        builder.setInsertionPointToStart(interBlock);
+        
+        // Generate load operations for the IO group
+        // For now, create a simple loop to load data
+        // TODO: Generate proper load logic based on access pattern
+        builder.create<dataflow::DoubleBufferYieldOp>(loc);
+        
+        // Create intra-transfer region (sending data to PE)
+        Block *intraBlock = builder.createBlock(&doubleBuffer.getIntraTransfer());
+        builder.setInsertionPointToStart(intraBlock);
+        
+        // Generate send operations
+        // TODO: Generate proper send logic
+        builder.create<dataflow::DoubleBufferYieldOp>(loc);
+        
+        builder.setInsertionPointToStart(bodyBlock);
+        builder.create<dataflow::IOModuleYieldOp>(loc);
+        
+        LLVM_DEBUG(llvm::dbgs() << "Created IO module with double buffering for " 
+                                << group.arrayName << " at level " << group.ioLevel << "\n");
+      } else {
+        // L1 or L3: Simple IO module without double buffering
+        // Generate load/store operations based on access pattern
+        if (group.isInput && !group.loads.empty()) {
+          // For input arrays, generate load operations
+          // TODO: Generate proper load logic based on access pattern
+        }
+        
+        builder.create<dataflow::IOModuleYieldOp>(loc);
+        
+        LLVM_DEBUG(llvm::dbgs() << "Created IO module for " << group.arrayName
+                                << " at level " << group.ioLevel << "\n");
+      }
       
-      LLVM_DEBUG(llvm::dbgs() << "Created IO module for " << group.arrayName
-                              << " at level " << group.ioLevel << "\n");
+      ioModules[group.memref] = ioModule;
     }
   }
   
   // Step 4: Generate PE Array
   // Find PE group (accumulator arrays with both loads and stores)
   bool hasPEGroup = false;
-  for (const auto &group : groups) {
+  ArrayRefGroup *peGroup = nullptr;
+  for (auto &group : groups) {
     if (group.type == ArrayRefGroup::PE_GROUP) {
       hasPEGroup = true;
+      peGroup = &group;
       break;
     }
   }
   
+  dataflow::PEArrayOp peArray;
   if (hasPEGroup) {
-    auto peArray = builder.create<dataflow::PEArrayOp>(
+    peArray = builder.create<dataflow::PEArrayOp>(
         loc,
         /*arraySize=*/builder.getI64ArrayAttr(peArraySize),
         /*tileSize=*/builder.getI64ArrayAttr(tileSize),
@@ -429,7 +522,87 @@ void SystolicDataflowGenerationPass::runOnOperation() {
     Block *bodyBlock = builder.createBlock(&peArray.getBody());
     builder.setInsertionPointToStart(bodyBlock);
     
+    // Migrate computation loop body to PE array
+    if (innermostLoop) {
+      // Find the outermost loop that contains the computation
+      // Typically, after SystolicTransform, we have a tiled loop nest
+      // We want to clone the innermost computation loops (typically the k-loop for MatMul)
+      
+      // Find the loop nest starting from innermost
+      SmallVector<AffineForOp, 4> loopNest;
+      AffineForOp current = innermostLoop;
+      while (current && loopNest.size() < 4) {
+        loopNest.push_back(current);
+        // Find parent loop
+        Operation *parent = current->getParentOp();
+        while (parent && !isa<AffineForOp>(parent)) {
+          parent = parent->getParentOp();
+        }
+        if (auto parentFor = dyn_cast_or_null<AffineForOp>(parent)) {
+          current = parentFor;
+        } else {
+          break;
+        }
+      }
+      
+      // Reverse to get from outermost to innermost
+      std::reverse(loopNest.begin(), loopNest.end());
+      
+      // Clone the innermost 1-2 loops (computation loops, typically k-loop for MatMul)
+      // Skip the outer tile loops as they are handled by the PE array structure
+      IRMapping mapping;
+      int startIdx = std::max(0, (int)loopNest.size() - 2);  // Clone last 2 loops
+      
+      AffineForOp lastClonedLoop;
+      for (int i = startIdx; i < (int)loopNest.size(); ++i) {
+        AffineForOp srcLoop = loopNest[i];
+        
+        // Clone the loop
+        auto clonedLoop = builder.create<AffineForOp>(
+            loc,
+            srcLoop.getLowerBoundMap(),
+            srcLoop.getLowerBoundOperands(),
+            srcLoop.getUpperBoundMap(),
+            srcLoop.getUpperBoundOperands(),
+            srcLoop.getStep());
+        
+        mapping.map(srcLoop.getInductionVar(), clonedLoop.getInductionVar());
+        
+        // Clone loop body operations (excluding nested loops and yield)
+        builder.setInsertionPointToStart(clonedLoop.getBody());
+        for (auto &op : srcLoop.getBody()->getOperations()) {
+          if (isa<AffineYieldOp>(op)) {
+            // Skip yield, will be added at the end
+            continue;
+          }
+          if (auto nestedFor = dyn_cast<AffineForOp>(op)) {
+            // Skip nested loops that we're not cloning
+            if (i + 1 < (int)loopNest.size() && nestedFor == loopNest[i + 1]) {
+              // This is the next loop we'll clone, skip it here
+              continue;
+            }
+          }
+          builder.clone(op, mapping);
+        }
+        
+        lastClonedLoop = clonedLoop;
+      }
+      
+      // If no loops were cloned, clone the innermost loop body operations
+      if (!lastClonedLoop) {
+        for (auto &op : innermostLoop.getBody()->getOperations()) {
+          if (!isa<AffineYieldOp>(op) && !isa<AffineForOp>(op)) {
+            builder.clone(op, mapping);
+          }
+        }
+      }
+    } else {
+      // No loop found, create empty PE array body
+      LLVM_DEBUG(llvm::dbgs() << "Warning: No innermost loop found for PE array\n");
+    }
+    
     // Create yield terminator
+    builder.setInsertionPointToEnd(bodyBlock);
     builder.create<dataflow::PEArrayYieldOp>(loc);
     
     LLVM_DEBUG(llvm::dbgs() << "Created PE array with size [" 
@@ -454,6 +627,19 @@ void SystolicDataflowGenerationPass::runOnOperation() {
       // Create body block
       Block *bodyBlock = builder.createBlock(&drainModule.getBody());
       builder.setInsertionPointToStart(bodyBlock);
+      
+      // Generate drain logic: collect results from PE array and write to memory
+      // For now, create a placeholder
+      // TODO: Generate proper drain logic based on store operations
+      if (!group.stores.empty()) {
+        // Clone store operations
+        IRMapping mapping;
+        for (auto storeOp : group.stores) {
+          // TODO: Map values correctly and clone store operations
+          LLVM_DEBUG(llvm::dbgs() << "  Drain module will handle store for " 
+                                  << group.arrayName << "\n");
+        }
+      }
       
       // Create yield terminator
       builder.create<dataflow::DrainModuleYieldOp>(loc);
