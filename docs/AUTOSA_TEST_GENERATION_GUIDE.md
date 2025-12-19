@@ -3,13 +3,51 @@
 > **最后更新**: 2024-12  
 > **目的**: 提供 AutoSA 测试用例生成脚本和参数配置
 
+**重要更新**：
+- ✅ 脚本会自动创建 AutoSA 要求的目录结构（src, latency_est, resource_est, tuning）
+- ✅ 生成后会自动收集所有 HLS C 文件到统一目录 `collected_hls_files/`，方便提取和对比
+
 ---
 
 ## 1. 问题 1：生成不同 Spacetime 和参数的测试用例
 
 ### 1.1 生成脚本
 
-创建脚本 `scripts/generate_autosa_tests.sh`：
+脚本位置：`scripts/generate_autosa_tests.sh`
+
+**功能特性**：
+1. **自动创建目录结构**：为每个输出目录创建 AutoSA 要求的文件夹（src, latency_est, resource_est, tuning）
+2. **自动收集 HLS 文件**：生成后自动将所有 HLS C++ 文件（.cpp, .h）收集到 `collected_hls_files/` 目录，按测试用例名称组织
+
+**使用方法**：
+```bash
+# 设置环境变量（可选）
+export AUTOSA_ROOT=/home/user/work/AutoSA
+export OUTPUT_DIR=./autosa_reference_samples
+
+# 运行脚本
+./scripts/generate_autosa_tests.sh
+```
+
+**输出结构**：
+```
+autosa_reference_samples/
+├── mm_st0_I32_J32_K32_ap32_lat8_simd2/
+│   ├── src/              # AutoSA 生成的 HLS 文件
+│   ├── latency_est/     # AutoSA 要求的目录
+│   ├── resource_est/     # AutoSA 要求的目录
+│   └── tuning/           # AutoSA 要求的目录
+├── mm_st1_.../
+├── ...
+└── collected_hls_files/  # 统一收集的 HLS 文件
+    ├── mm_st0_I32_J32_K32_ap32_lat8_simd2/
+    │   ├── kernel.cpp
+    │   └── kernel.h
+    ├── mm_st1_.../
+    └── ...
+```
+
+**脚本内容**：
 
 ```bash
 #!/bin/bash

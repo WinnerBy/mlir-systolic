@@ -24,6 +24,42 @@ check_autosa() {
     fi
 }
 
+# 创建 AutoSA 要求的目录结构
+create_autosa_dirs() {
+    local output_dir=$1
+    mkdir -p "$output_dir/src"
+    mkdir -p "$output_dir/latency_est"
+    mkdir -p "$output_dir/resource_est"
+    mkdir -p "$output_dir/tuning"
+}
+
+# 收集 HLS C 文件到统一目录
+collect_hls_files() {
+    local output_dir=$1
+    local test_name=$2
+    local collected_dir="$OUTPUT_DIR/collected_hls_files"
+    
+    mkdir -p "$collected_dir"
+    
+    # 查找所有 .cpp 和 .h 文件
+    local hls_files=$(find "$output_dir/src" -name "*.cpp" -o -name "*.h" 2>/dev/null)
+    
+    if [ -n "$hls_files" ]; then
+        # 创建测试用例子目录
+        local test_dir="$collected_dir/$test_name"
+        mkdir -p "$test_dir"
+        
+        # 拷贝文件
+        for file in $hls_files; do
+            if [ -f "$file" ]; then
+                cp "$file" "$test_dir/"
+            fi
+        done
+        
+        echo "  Collected HLS files to: $test_dir"
+    fi
+}
+
 # 生成 CNN 测试用例
 generate_cnn() {
     local kernel_file="$AUTOSA_ROOT/autosa_tests/cnn/kernel.c"
@@ -31,14 +67,17 @@ generate_cnn() {
     local config_file="$AUTOSA_ROOT/autosa_config/autosa_config.json"
     
     echo -e "${YELLOW}Generating CNN...${NC}"
+    local output_dir="$OUTPUT_DIR/cnn_st4_ap8_8_4_8_lat4_2_4_simd1_1_1_2"
+    create_autosa_dirs "$output_dir"
     "$AUTOSA_ROOT/autosa" "$kernel_file" \
         --config="$config_file" \
         --target=autosa_hls_c \
-        --output-dir="$OUTPUT_DIR/cnn_st4_ap8_8_4_8_lat4_2_4_simd1_1_1_2" \
+        --output-dir="$output_dir" \
         --sa-sizes="{kernel[]->space_time[4];kernel[]->array_part[8,8,4,8];kernel[]->latency[4,2,4];kernel[]->simd[1,1,1,2]}" \
         --simd-info="$simd_info" \
         --host-serialize \
         --hls 2>&1 | tee "$OUTPUT_DIR/cnn.log" || echo -e "${RED}Failed${NC}"
+    collect_hls_files "$output_dir" "cnn_st4_ap8_8_4_8_lat4_2_4_simd1_1_1_2"
 }
 
 # 生成 DNN Ops 测试用例
@@ -48,14 +87,17 @@ generate_dnn_ops() {
     local config_file="$AUTOSA_ROOT/autosa_config/autosa_config.json"
     
     echo -e "${YELLOW}Generating DNN Ops...${NC}"
+    local output_dir="$OUTPUT_DIR/dnn_ops_st4_ap8_8_4_8_lat4_4_4_simd1_1_1_2"
+    create_autosa_dirs "$output_dir"
     "$AUTOSA_ROOT/autosa" "$kernel_file" \
         --config="$config_file" \
         --target=autosa_hls_c \
-        --output-dir="$OUTPUT_DIR/dnn_ops_st4_ap8_8_4_8_lat4_4_4_simd1_1_1_2" \
+        --output-dir="$output_dir" \
         --sa-sizes="{kernel[]->space_time[4];kernel[]->array_part[8,8,4,8];kernel[]->latency[4,4,4];kernel[]->simd[1,1,1,2]}" \
         --simd-info="$simd_info" \
         --host-serialize \
         --hls 2>&1 | tee "$OUTPUT_DIR/dnn_ops.log" || echo -e "${RED}Failed${NC}"
+    collect_hls_files "$output_dir" "dnn_ops_st4_ap8_8_4_8_lat4_4_4_simd1_1_1_2"
 }
 
 # 生成 MTTKRP 测试用例
@@ -65,14 +107,17 @@ generate_mttkrp() {
     local config_file="$AUTOSA_ROOT/autosa_config/autosa_config.json"
     
     echo -e "${YELLOW}Generating MTTKRP (注意：可能存在随机读取问题)...${NC}"
+    local output_dir="$OUTPUT_DIR/mttkrp_st3_ap128_128_2_lat16_8_simd8_1"
+    create_autosa_dirs "$output_dir"
     "$AUTOSA_ROOT/autosa" "$kernel_file" \
         --config="$config_file" \
         --target=autosa_hls_c \
-        --output-dir="$OUTPUT_DIR/mttkrp_st3_ap128_128_2_lat16_8_simd8_1" \
+        --output-dir="$output_dir" \
         --sa-sizes="{kernel[]->space_time[3];kernel[]->array_part[128,128,2];kernel[]->latency[16,8];kernel[]->simd[8,1]}" \
         --simd-info="$simd_info" \
         --host-serialize \
         --hls 2>&1 | tee "$OUTPUT_DIR/mttkrp.log" || echo -e "${RED}Failed${NC}"
+    collect_hls_files "$output_dir" "mttkrp_st3_ap128_128_2_lat16_8_simd8_1"
 }
 
 # 生成 TTMc 测试用例
@@ -82,14 +127,17 @@ generate_ttmc() {
     local config_file="$AUTOSA_ROOT/autosa_config/autosa_config.json"
     
     echo -e "${YELLOW}Generating TTMc (注意：可能存在随机读取问题)...${NC}"
+    local output_dir="$OUTPUT_DIR/ttmc_st4_ap16_64_16_32_lat1_8_8_simd8_1"
+    create_autosa_dirs "$output_dir"
     "$AUTOSA_ROOT/autosa" "$kernel_file" \
         --config="$config_file" \
         --target=autosa_hls_c \
-        --output-dir="$OUTPUT_DIR/ttmc_st4_ap16_64_16_32_lat1_8_8_simd8_1" \
+        --output-dir="$output_dir" \
         --sa-sizes="{kernel[]->space_time[4];kernel[]->array_part[16,64,16,32];kernel[]->latency[1,8,8];kernel[]->simd[8,1]}" \
         --simd-info="$simd_info" \
         --host-serialize \
         --hls 2>&1 | tee "$OUTPUT_DIR/ttmc.log" || echo -e "${RED}Failed${NC}"
+    collect_hls_files "$output_dir" "ttmc_st4_ap16_64_16_32_lat1_8_8_simd8_1"
 }
 
 # 主函数
@@ -116,6 +164,7 @@ main() {
     echo "=========================================="
     echo -e "${GREEN}所有 Kernel 生成完成${NC}"
     echo "输出目录: $OUTPUT_DIR"
+    echo "收集的 HLS 文件目录: $OUTPUT_DIR/collected_hls_files"
     echo "=========================================="
 }
 

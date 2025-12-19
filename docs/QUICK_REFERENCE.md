@@ -18,6 +18,10 @@ export OUTPUT_DIR=./autosa_reference_samples
 ./scripts/generate_autosa_tests.sh
 ```
 
+**输出说明**：
+- 每个测试用例在 `OUTPUT_DIR/` 下创建独立目录，包含 AutoSA 要求的文件夹结构
+- 所有 HLS C++ 文件自动收集到 `OUTPUT_DIR/collected_hls_files/` 目录，方便提取和对比
+
 **生成的用例**：
 - `mm_st0_*` - Spacetime=0: [i] - 1D
 - `mm_st1_*` - Spacetime=1: [j] - 1D
