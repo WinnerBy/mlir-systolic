@@ -180,15 +180,64 @@ static LogicalResult analyzeArrayReferences(
       group.isOutput = true;
     }
     
-    // Determine IO level based on loop nesting depth
-    // TODO: More sophisticated analysis using Polymer/ISL
+    // Determine IO level based on access pattern and loop nesting
+    // Heuristic: Analyze the loop nesting depth where the array is accessed
     if (group.type == ArrayRefGroup::IO_GROUP || 
         group.type == ArrayRefGroup::DRAIN_GROUP) {
-      // For now, use a simple heuristic: L2 for most cases
-      group.ioLevel = 2;
-      if (group.type == ArrayRefGroup::IO_GROUP) {
-        group.needsDoubleBuffer = true; // L2 typically needs double buffering
+      
+      // Find the minimum loop nesting depth for this array's accesses
+      int minDepth = 1000;  // Large number
+      int maxDepth = 0;
+      
+      for (auto loadOp : group.loads) {
+        int depth = 0;
+        Operation *parent = loadOp->getParentOp();
+        while (parent) {
+          if (isa<AffineForOp>(parent)) {
+            depth++;
+          }
+          parent = parent->getParentOp();
+        }
+        minDepth = std::min(minDepth, depth);
+        maxDepth = std::max(maxDepth, depth);
       }
+      
+      for (auto storeOp : group.stores) {
+        int depth = 0;
+        Operation *parent = storeOp->getParentOp();
+        while (parent) {
+          if (isa<AffineForOp>(parent)) {
+            depth++;
+          }
+          parent = parent->getParentOp();
+        }
+        minDepth = std::min(minDepth, depth);
+        maxDepth = std::max(maxDepth, depth);
+      }
+      
+      // Determine IO level based on access depth:
+      // - L1: Accesses at innermost loops (PE interface)
+      // - L2: Accesses at middle loops (double buffering)
+      // - L3: Accesses at outermost loops (global memory)
+      // Typical MatMul: L3 (outermost) -> L2 (middle) -> L1 (innermost) -> PE
+      if (minDepth >= 4) {
+        // Access at very outer loops -> L3 (global memory interface)
+        group.ioLevel = 3;
+        group.needsDoubleBuffer = false;  // L3 typically doesn't need double buffer
+      } else if (minDepth >= 2) {
+        // Access at middle loops -> L2 (double buffering)
+        group.ioLevel = 2;
+        group.needsDoubleBuffer = true;  // L2 typically needs double buffering
+      } else {
+        // Access at inner loops -> L1 (PE interface)
+        group.ioLevel = 1;
+        group.needsDoubleBuffer = false;  // L1 typically doesn't need double buffer
+      }
+      
+      LLVM_DEBUG(llvm::dbgs() << "  " << group.arrayName 
+                              << ": minDepth=" << minDepth 
+                              << ", maxDepth=" << maxDepth
+                              << ", ioLevel=" << group.ioLevel << "\n");
     }
   }
   
@@ -242,50 +291,85 @@ void SystolicDataflowGenerationPass::runOnOperation() {
     return;
   }
   
-  // Step 2: Extract loop nest information for PE array dimensions
-  // Find the outermost affine.for loop to get tiling information
-  AffineForOp outermostLoop = nullptr;
-  func.walk([&](AffineForOp forOp) {
-    if (!forOp->getParentOfType<AffineForOp>()) {
-      outermostLoop = forOp;
-      return WalkResult::interrupt();
-    }
-    return WalkResult::advance();
-  });
+  // Step 2: Extract configuration from function attributes (set by SystolicTransform)
+  SmallVector<int64_t, 2> peArraySize = {2, 2};  // Default
+  SmallVector<int64_t, 2> tileSize = {8, 8};     // Default (latency factors)
+  SmallVector<int64_t, 3> arrayPart = {16, 16, 16};  // Default
+  SmallVector<int64_t, 2> latency = {8, 8};      // Default
   
-  // Extract PE array dimensions from loop structure
-  // For MatMul with array_part=[16,16,16] and latency=[8,8]:
-  // PE array size = array_part / latency = [2, 2]
-  SmallVector<int64_t, 2> peArraySize = {2, 2};  // Default, should be extracted from config
-  SmallVector<int64_t, 2> tileSize = {8, 8};     // Default, should be extracted from config
-  
-  // Try to infer from loop bounds if available
-  if (outermostLoop) {
-    SmallVector<AffineForOp, 3> loopNest;
-    AffineForOp current = outermostLoop;
-    while (current && loopNest.size() < 3) {
-      loopNest.push_back(current);
-      // Find next nested loop
-      AffineForOp inner = nullptr;
-      for (auto &op : *current.getBody()) {
-        if (auto nestedFor = dyn_cast<AffineForOp>(op)) {
-          inner = nestedFor;
-          break;
-        }
+  // Try to read from function attributes first (set by SystolicTransform)
+  if (auto peArrayAttr = func->getAttrOfType<ArrayAttr>("systolic.pe_array_size")) {
+    peArraySize.clear();
+    for (auto attr : peArrayAttr) {
+      if (auto intAttr = attr.dyn_cast<IntegerAttr>()) {
+        peArraySize.push_back(intAttr.getInt());
       }
-      current = inner;
     }
+    LLVM_DEBUG(llvm::dbgs() << "Read PE array size from attributes: ["
+                            << peArraySize[0] << ", " << peArraySize[1] << "]\n");
+  }
+  
+  if (auto latencyAttr = func->getAttrOfType<ArrayAttr>("systolic.latency")) {
+    tileSize.clear();
+    latency.clear();
+    for (auto attr : latencyAttr) {
+      if (auto intAttr = attr.dyn_cast<IntegerAttr>()) {
+        int64_t val = intAttr.getInt();
+        tileSize.push_back(val);
+        latency.push_back(val);
+      }
+    }
+    LLVM_DEBUG(llvm::dbgs() << "Read latency/tile size from attributes: ["
+                            << tileSize[0] << ", " << tileSize[1] << "]\n");
+  }
+  
+  if (auto arrayPartAttr = func->getAttrOfType<ArrayAttr>("systolic.array_part")) {
+    arrayPart.clear();
+    for (auto attr : arrayPartAttr) {
+      if (auto intAttr = attr.dyn_cast<IntegerAttr>()) {
+        arrayPart.push_back(intAttr.getInt());
+      }
+    }
+    LLVM_DEBUG(llvm::dbgs() << "Read array_part from attributes: ["
+                            << arrayPart[0] << ", " << arrayPart[1] << ", "
+                            << arrayPart[2] << "]\n");
+  }
+  
+  // Fallback: Try to infer from loop structure if attributes not available
+  if (peArraySize[0] == 2 && peArraySize[1] == 2) {  // Still using defaults
+    AffineForOp outermostLoop = nullptr;
+    func.walk([&](AffineForOp forOp) {
+      if (!forOp->getParentOfType<AffineForOp>()) {
+        outermostLoop = forOp;
+        return WalkResult::interrupt();
+      }
+      return WalkResult::advance();
+    });
     
-    // If we have at least 2 loops, use their bounds for PE array size
-    if (loopNest.size() >= 2) {
-      if (loopNest[0].hasConstantUpperBound() && loopNest[1].hasConstantUpperBound()) {
-        int64_t bound0 = loopNest[0].getConstantUpperBound();
-        int64_t bound1 = loopNest[1].getConstantUpperBound();
-        // Assume these are tile loops, PE array is typically smaller
-        peArraySize[0] = std::max((int64_t)1, bound0 / 8);
-        peArraySize[1] = std::max((int64_t)1, bound1 / 8);
-        tileSize[0] = 8;  // Default tile size
-        tileSize[1] = 8;
+    if (outermostLoop) {
+      SmallVector<AffineForOp, 3> loopNest;
+      AffineForOp current = outermostLoop;
+      while (current && loopNest.size() < 3) {
+        loopNest.push_back(current);
+        AffineForOp inner = nullptr;
+        for (auto &op : *current.getBody()) {
+          if (auto nestedFor = dyn_cast<AffineForOp>(op)) {
+            inner = nestedFor;
+            break;
+          }
+        }
+        current = inner;
+      }
+      
+      if (loopNest.size() >= 2) {
+        if (loopNest[0].hasConstantUpperBound() && loopNest[1].hasConstantUpperBound()) {
+          int64_t bound0 = loopNest[0].getConstantUpperBound();
+          int64_t bound1 = loopNest[1].getConstantUpperBound();
+          peArraySize[0] = std::max((int64_t)1, bound0 / 8);
+          peArraySize[1] = std::max((int64_t)1, bound1 / 8);
+          LLVM_DEBUG(llvm::dbgs() << "Inferred PE array size from loop bounds: ["
+                                  << peArraySize[0] << ", " << peArraySize[1] << "]\n");
+        }
       }
     }
   }

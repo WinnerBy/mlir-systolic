@@ -721,6 +721,38 @@ struct SystolicTransformPass
       int64_t numPE_I = options.arrayPart[0] / options.latency[0];
       int64_t numPE_J = options.arrayPart[1] / options.latency[1];
       
+      // Store configuration information as function attributes for later passes
+      // This allows SystolicDataflowGeneration to access the configuration
+      OpBuilder builder(func.getContext());
+      builder.setInsertionPointToStart(&func.getBody().front());
+      
+      // Store array partitioning factors
+      func->setAttr("systolic.array_part", 
+                    builder.getI64ArrayAttr(options.arrayPart));
+      
+      // Store latency hiding factors
+      func->setAttr("systolic.latency", 
+                    builder.getI64ArrayAttr(options.latency));
+      
+      // Store PE array dimensions
+      SmallVector<int64_t, 2> peArraySize = {numPE_I, numPE_J};
+      func->setAttr("systolic.pe_array_size", 
+                    builder.getI64ArrayAttr(peArraySize));
+      
+      // Store space-time mode
+      func->setAttr("systolic.space_time_mode", 
+                    builder.getI32IntegerAttr(options.spaceTimeMode));
+      
+      LLVM_DEBUG(llvm::dbgs() << "[Systolic] Stored configuration:\n");
+      LLVM_DEBUG(llvm::dbgs() << "  array_part: [" 
+                              << options.arrayPart[0] << ", "
+                              << options.arrayPart[1] << ", "
+                              << options.arrayPart[2] << "]\n");
+      LLVM_DEBUG(llvm::dbgs() << "  latency: [" 
+                              << options.latency[0] << ", "
+                              << options.latency[1] << "]\n");
+      LLVM_DEBUG(llvm::dbgs() << "  PE array size: " << numPE_I << " x " << numPE_J << "\n");
+      
       llvm::outs() << "[Systolic] Transformation complete:\n";
       llvm::outs() << "  PE array size: " << numPE_I << " x " << numPE_J << "\n";
       llvm::outs() << "  Total loops after tiling: " << tiledBand.size() << "\n";
