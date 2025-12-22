@@ -140,6 +140,48 @@ generate_ttmc() {
     collect_hls_files "$output_dir" "ttmc_st4_ap16_64_16_32_lat1_8_8_simd8_1"
 }
 
+# 生成 TTM 测试用例
+generate_ttm() {
+    local kernel_file="$AUTOSA_ROOT/autosa_tests/large/ttm/kernel.c"
+    local simd_info="$AUTOSA_ROOT/autosa_tests/large/ttm/simd_info.json"
+    local config_file="$AUTOSA_ROOT/autosa_config/autosa_config.json"
+    
+    echo -e "${YELLOW}Generating TTM (注意：可能存在随机读取问题)...${NC}"
+    local output_dir="$OUTPUT_DIR/ttm_st4_ap16_64_16_32_lat1_8_8_simd8_1"
+    create_autosa_dirs "$output_dir"
+    "$AUTOSA_ROOT/autosa" "$kernel_file" \
+        --config="$config_file" \
+        --target=autosa_hls_c \
+        --output-dir="$output_dir" \
+        --sa-sizes="{kernel[]->space_time[4];kernel[]->array_part[16,64,16,32];kernel[]->latency[1,8,8];kernel[]->simd[8,1]}" \
+        --simd-info="$simd_info" \
+        --host-serialize \
+        --hls 2>&1 | tee "$OUTPUT_DIR/ttm.log" || echo -e "${RED}Failed${NC}"
+    collect_hls_files "$output_dir" "ttm_st4_ap16_64_16_32_lat1_8_8_simd8_1"
+}
+
+# 生成 LU 分解测试用例
+generate_lu() {
+    local kernel_file="$AUTOSA_ROOT/autosa_tests/lu/kernel.c"
+    local simd_info="$AUTOSA_ROOT/autosa_tests/lu/simd_info.json"
+    local config_file="$AUTOSA_ROOT/autosa_config/autosa_config.json"
+    
+    echo -e "${YELLOW}Generating LU Decomposition...${NC}"
+    local output_dir="$OUTPUT_DIR/lu_st3_ap_auto_lat_auto"
+    create_autosa_dirs "$output_dir"
+    "$AUTOSA_ROOT/autosa" "$kernel_file" \
+        --config="$config_file" \
+        --target=autosa_hls_c \
+        --output-dir="$output_dir" \
+        --sa-sizes="{kernel[]->space_time[3];kernel[]->array_part[-1,-1,-1];kernel[]->latency[]}" \
+        --simd-info="$simd_info" \
+        --use-cplusplus-template \
+        --no-reschedule \
+        --live-range-reordering \
+        --hls 2>&1 | tee "$OUTPUT_DIR/lu.log" || echo -e "${RED}Failed${NC}"
+    collect_hls_files "$output_dir" "lu_st3_ap_auto_lat_auto"
+}
+
 # 主函数
 main() {
     echo "=========================================="
@@ -159,6 +201,8 @@ main() {
     generate_dnn_ops
     generate_mttkrp
     generate_ttmc
+    generate_ttm
+    generate_lu
     
     echo ""
     echo "=========================================="
