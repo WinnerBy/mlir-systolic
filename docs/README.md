@@ -20,6 +20,7 @@
 - **[AutoSA Spacetime 分析](AUTOSA_SPACETIME_ANALYSIS.md)** - Spacetime 参数详细分析（0-5）
 - **[AutoSA 测试生成指南](AUTOSA_TEST_GENERATION_GUIDE.md)** - 生成不同 Spacetime 和参数的测试用例
 - **[随机读取问题分析](RANDOM_ACCESS_ISSUE_ANALYSIS.md)** - MTTKRP 等 Kernel 的随机读取问题分析和修复方法
+- **[随机读取理论分析](RANDOM_ACCESS_THEORETICAL_ANALYSIS.md)** ⭐ **新增** - 基于数学表达式和 AutoSA 原理的理论分析
 - **[三个问题解决方案](THREE_QUESTIONS_SOLUTION.md)** - 测试用例生成、其他 Kernel 验证、随机读取问题检查
 
 ### 🔧 技术文档
@@ -52,7 +53,8 @@
 |------|------|--------|
 | [AUTOSA_SPACETIME_ANALYSIS.md](AUTOSA_SPACETIME_ANALYSIS.md) | Spacetime 参数分析 | ⭐⭐⭐ |
 | [AUTOSA_TEST_GENERATION_GUIDE.md](AUTOSA_TEST_GENERATION_GUIDE.md) | 测试用例生成指南 | ⭐⭐⭐ |
-| [RANDOM_ACCESS_ISSUE_ANALYSIS.md](RANDOM_ACCESS_ISSUE_ANALYSIS.md) | 随机读取问题分析 | ⭐⭐ |
+| [RANDOM_ACCESS_ISSUE_ANALYSIS.md](RANDOM_ACCESS_ISSUE_ANALYSIS.md) | 随机读取问题分析 | ⭐⭐⭐ |
+| [RANDOM_ACCESS_THEORETICAL_ANALYSIS.md](RANDOM_ACCESS_THEORETICAL_ANALYSIS.md) | 随机读取理论分析 | ⭐⭐⭐ |
 | [THREE_QUESTIONS_SOLUTION.md](THREE_QUESTIONS_SOLUTION.md) | 三个问题解决方案 | ⭐⭐ |
 
 ### 集成和分析
