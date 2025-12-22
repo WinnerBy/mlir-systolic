@@ -3,36 +3,36 @@ cmake_minimum_required(VERSION 3.20)
 # Check if this is a unified build (as external LLVM project) or standalone build
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   # Standalone build: find MLIR/LLVM via find_package
-  project(mlir-systolic LANGUAGES CXX C)
-  
-  set(CMAKE_CXX_STANDARD 17)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
-  
+project(mlir-systolic LANGUAGES CXX C)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
   # Find MLIR and LLVM
-  find_package(MLIR REQUIRED CONFIG)
-  find_package(LLVM REQUIRED CONFIG)
-  
+find_package(MLIR REQUIRED CONFIG)
+find_package(LLVM REQUIRED CONFIG)
+
   message(STATUS "Standalone build mode")
-  message(STATUS "Using MLIRConfig.cmake in: ${MLIR_DIR}")
-  message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
-  
+message(STATUS "Using MLIRConfig.cmake in: ${MLIR_DIR}")
+message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+
   set(LLVM_SOURCE_DIR ${CMAKE_SOURCE_DIR}/third_party/Polygeist/llvm-project/llvm)
-  
-  list(APPEND CMAKE_MODULE_PATH "${MLIR_CMAKE_DIR}")
-  list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
-  
-  include(TableGen)
-  include(AddLLVM)
-  include(AddMLIR)
-  include(HandleLLVMOptions)
-  
-  include_directories(${LLVM_INCLUDE_DIRS})
-  include_directories(${MLIR_INCLUDE_DIRS})
-  include_directories(${PROJECT_SOURCE_DIR}/include)
-  include_directories(${PROJECT_BINARY_DIR}/include)
-  
-  link_directories(${LLVM_BUILD_LIBRARY_DIR})
-  add_definitions(${LLVM_DEFINITIONS})
+
+list(APPEND CMAKE_MODULE_PATH "${MLIR_CMAKE_DIR}")
+list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
+
+include(TableGen)
+include(AddLLVM)
+include(AddMLIR)
+include(HandleLLVMOptions)
+
+include_directories(${LLVM_INCLUDE_DIRS})
+include_directories(${MLIR_INCLUDE_DIRS})
+include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_BINARY_DIR}/include)
+
+link_directories(${LLVM_BUILD_LIBRARY_DIR})
+add_definitions(${LLVM_DEFINITIONS})
   
   set(MLIR_BINARY_DIR ${CMAKE_BINARY_DIR})
   set(LLVM_RUNTIME_OUTPUT_INTDIR ${CMAKE_BINARY_DIR}/bin)

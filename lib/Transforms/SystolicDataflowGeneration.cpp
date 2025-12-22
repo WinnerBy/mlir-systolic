@@ -226,7 +226,7 @@ static LogicalResult analyzeArrayReferences(
         group.needsDoubleBuffer = false;  // L3 typically doesn't need double buffer
       } else if (minDepth >= 2) {
         // Access at middle loops -> L2 (double buffering)
-        group.ioLevel = 2;
+      group.ioLevel = 2;
         group.needsDoubleBuffer = true;  // L2 typically needs double buffering
       } else {
         // Access at inner loops -> L1 (PE interface)
@@ -337,36 +337,36 @@ void SystolicDataflowGenerationPass::runOnOperation() {
   
   // Fallback: Try to infer from loop structure if attributes not available
   if (peArraySize[0] == 2 && peArraySize[1] == 2) {  // Still using defaults
-    AffineForOp outermostLoop = nullptr;
-    func.walk([&](AffineForOp forOp) {
-      if (!forOp->getParentOfType<AffineForOp>()) {
-        outermostLoop = forOp;
-        return WalkResult::interrupt();
-      }
-      return WalkResult::advance();
-    });
-    
-    if (outermostLoop) {
-      SmallVector<AffineForOp, 3> loopNest;
-      AffineForOp current = outermostLoop;
-      while (current && loopNest.size() < 3) {
-        loopNest.push_back(current);
-        AffineForOp inner = nullptr;
-        for (auto &op : *current.getBody()) {
-          if (auto nestedFor = dyn_cast<AffineForOp>(op)) {
-            inner = nestedFor;
-            break;
-          }
+  AffineForOp outermostLoop = nullptr;
+  func.walk([&](AffineForOp forOp) {
+    if (!forOp->getParentOfType<AffineForOp>()) {
+      outermostLoop = forOp;
+      return WalkResult::interrupt();
+    }
+    return WalkResult::advance();
+  });
+  
+  if (outermostLoop) {
+    SmallVector<AffineForOp, 3> loopNest;
+    AffineForOp current = outermostLoop;
+    while (current && loopNest.size() < 3) {
+      loopNest.push_back(current);
+      AffineForOp inner = nullptr;
+      for (auto &op : *current.getBody()) {
+        if (auto nestedFor = dyn_cast<AffineForOp>(op)) {
+          inner = nestedFor;
+          break;
         }
-        current = inner;
       }
-      
-      if (loopNest.size() >= 2) {
-        if (loopNest[0].hasConstantUpperBound() && loopNest[1].hasConstantUpperBound()) {
-          int64_t bound0 = loopNest[0].getConstantUpperBound();
-          int64_t bound1 = loopNest[1].getConstantUpperBound();
-          peArraySize[0] = std::max((int64_t)1, bound0 / 8);
-          peArraySize[1] = std::max((int64_t)1, bound1 / 8);
+      current = inner;
+    }
+    
+    if (loopNest.size() >= 2) {
+      if (loopNest[0].hasConstantUpperBound() && loopNest[1].hasConstantUpperBound()) {
+        int64_t bound0 = loopNest[0].getConstantUpperBound();
+        int64_t bound1 = loopNest[1].getConstantUpperBound();
+        peArraySize[0] = std::max((int64_t)1, bound0 / 8);
+        peArraySize[1] = std::max((int64_t)1, bound1 / 8);
           LLVM_DEBUG(llvm::dbgs() << "Inferred PE array size from loop bounds: ["
                                   << peArraySize[0] << ", " << peArraySize[1] << "]\n");
         }
@@ -385,7 +385,7 @@ void SystolicDataflowGenerationPass::runOnOperation() {
         depth++;
       }
       parent = parent->getParentOp();
-    }
+      }
     if (depth > maxDepth) {
       maxDepth = depth;
       innermostLoop = forOp;
@@ -491,10 +491,10 @@ void SystolicDataflowGenerationPass::runOnOperation() {
           // TODO: Generate proper load logic based on access pattern
         }
         
-        builder.create<dataflow::IOModuleYieldOp>(loc);
-        
-        LLVM_DEBUG(llvm::dbgs() << "Created IO module for " << group.arrayName
-                                << " at level " << group.ioLevel << "\n");
+      builder.create<dataflow::IOModuleYieldOp>(loc);
+      
+      LLVM_DEBUG(llvm::dbgs() << "Created IO module for " << group.arrayName
+                              << " at level " << group.ioLevel << "\n");
       }
       
       ioModules[group.memref] = ioModule;
