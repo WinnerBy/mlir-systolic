@@ -300,10 +300,23 @@ in_data = local_A[c7][0];  // 线性索引
 ## 相关文件
 
 - `tools/systolic-translate/systolic-translate.cpp`：
-  - `emitDataTypes()` - 需要添加 A_t{simd} 和 B_t{simd}
-  - `emitIOL2InIntraTrans()` - 需要修改输出类型和拆分逻辑
-  - `emitPE()` - 需要实现 SIMD 展开
-  - `emitPEWrapper()` - 需要修改签名
+  - `emitTypeDefinitions()` (line 161) - 需要添加 A_t{simd} 和 B_t{simd}
+  - `emitModuleDeclarations()` (line 178) - 需要修改函数签名
+  - `emitIOL2InIntraTrans()` (line 300) - 需要修改输出类型和拆分逻辑
+  - `emitPE()` (line 616) - 需要实现 SIMD 展开
+  - `emitPEWrapper()` (line 665) - 需要修改签名
+
+## 文件路径
+
+**生成文件路径**：
+```
+/home/user/work/mlir-systolic/test/output/mm_st3_I32_J32_K32_ap8_lat4_simd2_kernel.cpp
+```
+
+**参考文件路径**：
+```
+/home/user/work/mlir-systolic/test/reference-samples/mm_st3_I32_J32_K32_ap8_lat4_simd2_kernel.cpp
+```
 
 ---
 
