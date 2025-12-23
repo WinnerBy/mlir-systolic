@@ -9,6 +9,7 @@
 ### 🚀 快速开始
 - **[快速参考](QUICK_REFERENCE.md)** ⭐ - 常用命令和参数配置快速查找
 - **[构建指南](BUILD_STEPS.md)** ⭐ - 详细的构建步骤和故障排除
+- **[项目目录结构](../PROJECT_STRUCTURE.md)** ⭐ **新增** - 项目目录结构说明
 
 ### 📖 核心文档
 - **[项目进展总结](PROJECT_STATUS.md)** ⭐ - 项目当前状态和最新更新
@@ -41,6 +42,7 @@
 | [QUICK_REFERENCE.md](QUICK_REFERENCE.md) | 快速参考指南 | ⭐⭐⭐ |
 | [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md) | 开发指南 | ⭐⭐ |
 | [PROJECT_STATUS.md](PROJECT_STATUS.md) | 项目进展总结 | ⭐⭐⭐ |
+| [../PROJECT_STRUCTURE.md](../PROJECT_STRUCTURE.md) | 项目目录结构说明 | ⭐⭐ |
 
 ### 架构和设计
 | 文档 | 说明 | 优先级 |
