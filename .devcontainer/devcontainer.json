@@ -1,0 +1,35 @@
+{
+	"name": "MLIR Systolic Dev",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"remoteUser": "user",
+	
+	// 容器创建后执行的命令：确保子模块被拉取（防止你忘记）
+	"postCreateCommand": "git submodule update --init --recursive --depth 1",
+
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "zsh",
+				"cmake.configureOnOpen": false,
+				// 针对 LLVM 项目的性能优化
+				"files.watcherExclude": {
+					"**/build/**": true,
+					"**/llvm-project/**": true
+				}
+			},
+			"extensions": [
+				"llvm-vs-code-extensions.vscode-clangd",
+				"vadimcn.vscode-lldb",
+				"twxs.cmake",
+				"ms-vscode.cmake-tools",
+				"eamodio.gitlens"
+			]
+		}
+	},
+	// 启用 Git 凭证转发
+	"features": {
+		"ghcr.io/devcontainers/features/git:1": {}
+	}
+}
