@@ -6,7 +6,7 @@
 	"remoteUser": "user",
 	
 	// 容器创建后执行的命令：确保子模块被拉取（防止你忘记）
-	"postCreateCommand": "git submodule update --init --recursive --depth 1",
+	// "postCreateCommand": "git submodule update --init --recursive --depth 1",
 
 	"customizations": {
 		"vscode": {
