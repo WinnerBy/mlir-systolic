@@ -34,18 +34,15 @@ export OUTPUT_DIR=./autosa_reference_samples
 
 ### 1.2 其他 Kernel 类型
 
-```bash
-# 运行脚本
-./scripts/generate_other_kernels.sh
-```
+**重要更新**：其他 kernel 类型的生成已合并到统一脚本 `scripts/generate_autosa_tests.sh`
 
 **生成的用例**：
-- `cnn_*` - 卷积神经网络（⚠️ 需要检查随机读取问题）
-- `dnn_ops_*` - 深度神经网络操作（⚠️ 需要检查）
-- `mttkrp_*` - 张量矩阵乘法（🔴 已确认随机读取问题）
-- `ttmc_*` - 张量链乘法（🔴 高度可能存在随机读取问题）
-- `ttm_*` - 张量矩阵乘法（🟡 可能存在随机读取问题）
-- `lu_*` - LU 分解（🟡 可能存在随机读取问题）
+- `cnn_*` - 卷积神经网络（⚠️ 需要检查随机读取问题）✅
+- `dnn_ops_*` - 深度神经网络操作（❌ 生成失败）
+- `mttkrp_*` - 张量矩阵乘法（🔴 已确认随机读取问题）✅
+- `ttmc_*` - 张量链乘法（🔴 高度可能存在随机读取问题）✅
+- `ttm_*` - 张量矩阵乘法（🟡 可能存在随机读取问题）✅
+- `lu_*` - LU 分解（🟡 可能存在随机读取问题）✅
 
 ---
 
@@ -75,7 +72,7 @@ export OUTPUT_DIR=./autosa_reference_samples
 - 🟡 **LU** - 可能存在（3 维临时数组 + 不规则访问）
 - 🟢 **DNN Ops** - 需要检查（取决于具体操作）
 
-**详细分析**：参见 [随机读取问题理论分析](RANDOM_ACCESS_THEORETICAL_ANALYSIS.md)
+**详细分析**：参见 [随机读取问题分析](RANDOM_ACCESS_ANALYSIS.md)
 
 ---
 
@@ -113,20 +110,22 @@ export OUTPUT_DIR=./autosa_reference_samples
 
 ## 4. 相关文档
 
-- **测试生成指南**: `docs/AUTOSA_TEST_GENERATION_GUIDE.md`
-- **随机读取问题分析**: `docs/RANDOM_ACCESS_ISSUE_ANALYSIS.md` - MTTKRP 的具体问题和修复方法
-- **随机读取理论分析**: `docs/RANDOM_ACCESS_THEORETICAL_ANALYSIS.md` ⭐ **新增** - 基于数学表达式的理论分析
+- **Scripts 说明**: `docs/SCRIPTS.md` - 各个脚本的用途和使用方法
+- **测试生成指南**: `docs/AUTOSA_TEST_GENERATION_GUIDE.md` - 参数配置参考
+- **随机读取问题分析**: `docs/RANDOM_ACCESS_ANALYSIS.md` - 随机读取问题分析和修复方法
 - **Spacetime 分析**: `docs/AUTOSA_SPACETIME_ANALYSIS.md`
-- **三个问题解决方案**: `docs/THREE_QUESTIONS_SOLUTION.md`
+- **Reference Samples**: `docs/REFERENCE_SAMPLES.md` - Reference samples 说明
 
 ---
 
 ## 5. 常用命令
 
 ```bash
-# 生成所有测试用例
+# 生成所有测试用例（统一脚本，包含所有 kernel 类型）
 ./scripts/generate_autosa_tests.sh
-./scripts/generate_other_kernels.sh
+
+# 整理生成的 samples 到 test/reference-samples/
+./scripts/organize_reference_samples.sh
 
 # 检查随机读取问题
 ./scripts/check_random_access.sh /path/to/kernel.cpp
