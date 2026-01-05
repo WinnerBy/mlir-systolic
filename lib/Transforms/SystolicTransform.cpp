@@ -785,8 +785,12 @@ std::unique_ptr<Pass> createSpaceTimeTransformPass(const SystolicConfig &config)
 
 void registerSystolicPasses() {
   PassRegistration<SystolicTransformPass>();
-  // SystolicDataflowGenerationPass and SystolicDataflowToHLSPass
-  // are registered in their own files
+  // SystolicDataflowGenerationPass is registered via static PassRegistration
+  // in SystolicDataflowGeneration.cpp. To ensure the static registration
+  // is linked, we explicitly reference the create function to prevent
+  // the linker from removing the unused symbol.
+  (void)createSystolicDataflowGenerationPass();
+  // SystolicDataflowToHLSPass is registered in its own file
 }
 
 } // namespace systolic

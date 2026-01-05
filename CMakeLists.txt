@@ -177,14 +177,46 @@ if(SYSTOLIC_ENABLE_POLYMER)
         
         # If still not found, try to find it manually
         if(NOT GMP_FOUND)
+          # Detect architecture for multiarch paths
+          if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+            set(ARCH_SUFFIX "aarch64-linux-gnu")
+          elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|amd64")
+            set(ARCH_SUFFIX "x86_64-linux-gnu")
+          else()
+            set(ARCH_SUFFIX "")
+          endif()
+          
+          # Search paths including architecture-specific paths
+          set(GMP_LIB_PATHS
+            /usr/lib
+            /usr/local/lib
+          )
+          if(ARCH_SUFFIX)
+            list(APPEND GMP_LIB_PATHS
+              /usr/lib/${ARCH_SUFFIX}
+              /usr/local/lib/${ARCH_SUFFIX}
+            )
+          endif()
+          
+          set(GMP_INCLUDE_PATHS
+            /usr/include
+            /usr/local/include
+          )
+          if(ARCH_SUFFIX)
+            list(APPEND GMP_INCLUDE_PATHS
+              /usr/include/${ARCH_SUFFIX}
+              /usr/local/include/${ARCH_SUFFIX}
+            )
+          endif()
+          
           find_library(GMP_LIBRARY
             NAMES gmp libgmp
-            PATHS /usr/lib /usr/local/lib /usr/lib/x86_64-linux-gnu
+            PATHS ${GMP_LIB_PATHS}
             NO_DEFAULT_PATH
           )
           find_path(GMP_INCLUDE_DIR
             NAMES gmp.h
-            PATHS /usr/include /usr/local/include /usr/include/x86_64-linux-gnu
+            PATHS ${GMP_INCLUDE_PATHS}
             NO_DEFAULT_PATH
           )
           if(GMP_LIBRARY AND GMP_INCLUDE_DIR)

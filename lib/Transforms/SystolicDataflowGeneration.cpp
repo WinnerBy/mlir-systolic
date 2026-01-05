@@ -15,6 +15,7 @@
 #include "systolic/Transforms/Passes.h"
 #include "systolic/Analysis/SpaceTimeAnalysis.h"
 #include "systolic/Analysis/SystolicConfig.h"
+#include "systolic/Analysis/WriteTimeReorderingAnalysis.h"
 #include "systolic/Dialect/SystolicDataflow/SystolicDataflow.h"
 
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
@@ -291,6 +292,46 @@ void SystolicDataflowGenerationPass::runOnOperation() {
     return;
   }
   
+  // Step 1.5: Analyze write-time reordering opportunities
+  // This analysis runs on Affine IR, before creating SystolicDataflow operations
+  // So it doesn't require the SystolicDataflow dialect to be loaded
+  WriteTimeReorderingAnalyzer reorderingAnalyzer(func);
+  if (failed(reorderingAnalyzer.analyze())) {
+    LLVM_DEBUG(llvm::dbgs() << "Warning: Failed to analyze write-time reordering\n");
+  } else {
+    // Store reordering information in function attributes
+    for (const auto &pattern : reorderingAnalyzer.getPatterns()) {
+      if (pattern.hasNonLinearAccess && !pattern.reorderedDims.empty()) {
+        // Store reordering info as function attributes
+        // Format: "systolic.reorder.<arrayName>.dims" = [dim0, dim1, dim2]
+        //         "systolic.reorder.<arrayName>.perm" = [perm0, perm1, perm2]
+        std::string dimsAttrName = "systolic.reorder." + pattern.arrayName + ".dims";
+        std::string permAttrName = "systolic.reorder." + pattern.arrayName + ".perm";
+        
+        SmallVector<Attribute, 3> dimAttrs;
+        for (int64_t dim : pattern.reorderedDims) {
+          dimAttrs.push_back(IntegerAttr::get(IntegerType::get(func.getContext(), 64), dim));
+        }
+        func->setAttr(dimsAttrName, ArrayAttr::get(func.getContext(), dimAttrs));
+        
+        SmallVector<Attribute, 3> permAttrs;
+        for (unsigned perm : pattern.dimPermutation) {
+          permAttrs.push_back(IntegerAttr::get(IntegerType::get(func.getContext(), 32), perm));
+        }
+        func->setAttr(permAttrName, ArrayAttr::get(func.getContext(), permAttrs));
+        
+        LLVM_DEBUG(llvm::dbgs() << "Stored reordering info for " << pattern.arrayName 
+                                << " in function attributes: dims=[" 
+                                << pattern.reorderedDims[0] << ", "
+                                << pattern.reorderedDims[1] << ", "
+                                << pattern.reorderedDims[2] << "], perm=["
+                                << pattern.dimPermutation[0] << ", "
+                                << pattern.dimPermutation[1] << ", "
+                                << pattern.dimPermutation[2] << "]\n");
+      }
+    }
+  }
+  
   // Step 2: Extract configuration from function attributes (set by SystolicTransform)
   SmallVector<int64_t, 2> peArraySize = {2, 2};  // Default
   SmallVector<int64_t, 2> tileSize = {8, 8};     // Default (latency factors)
@@ -392,7 +433,14 @@ void SystolicDataflowGenerationPass::runOnOperation() {
     }
   });
   
-  OpBuilder builder(func.getContext());
+  // Ensure all necessary dialects are loaded before creating operations
+  MLIRContext *ctx = func.getContext();
+  ctx->getOrLoadDialect<affine::AffineDialect>();
+  ctx->getOrLoadDialect<arith::ArithDialect>();
+  ctx->getOrLoadDialect<memref::MemRefDialect>();
+  ctx->getOrLoadDialect<dataflow::SystolicDataflowDialect>();
+  
+  OpBuilder builder(ctx);
   builder.setInsertionPointToStart(&func.getBody().front());
   
   Location loc = func.getLoc();
@@ -478,7 +526,8 @@ void SystolicDataflowGenerationPass::runOnOperation() {
         // TODO: Generate proper send logic
         builder.create<dataflow::DoubleBufferYieldOp>(loc);
         
-        builder.setInsertionPointToStart(bodyBlock);
+        // Set insertion point back to body block and add yield at the end
+        builder.setInsertionPointToEnd(bodyBlock);
         builder.create<dataflow::IOModuleYieldOp>(loc);
         
         LLVM_DEBUG(llvm::dbgs() << "Created IO module with double buffering for " 
@@ -491,7 +540,9 @@ void SystolicDataflowGenerationPass::runOnOperation() {
           // TODO: Generate proper load logic based on access pattern
         }
         
-      builder.create<dataflow::IOModuleYieldOp>(loc);
+        // Add yield at the end of body block
+        builder.setInsertionPointToEnd(bodyBlock);
+        builder.create<dataflow::IOModuleYieldOp>(loc);
       
       LLVM_DEBUG(llvm::dbgs() << "Created IO module for " << group.arrayName
                               << " at level " << group.ioLevel << "\n");

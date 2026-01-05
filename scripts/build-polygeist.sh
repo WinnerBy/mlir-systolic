@@ -101,6 +101,7 @@ echo -e "${YELLOW}构建必要的 MLIR 库...${NC}"
 ninja -j$JOBS \
   MLIRArithTransforms \
   MLIRArithValueBoundsOpInterfaceImpl \
+  MLIRAffineTransformOps \
   MLIROptLib
 
 # 验证构建
@@ -110,9 +111,10 @@ if [ -f "lib/libPolymerSupport.a" ] && \
    [ -f "lib/libPolymerTransforms.a" ] && \
    [ -f "lib/libMLIRArithTransforms.a" ] && \
    [ -f "lib/libMLIRArithValueBoundsOpInterfaceImpl.a" ] && \
+   [ -f "lib/libMLIRAffineTransformOps.a" ] && \
    [ -f "lib/libMLIROptLib.a" ]; then
     echo -e "${GREEN}✅ 构建成功！${NC}"
-    ls -lh lib/libPolymer*.a lib/libMLIRArith*.a lib/libMLIROptLib.a 2>/dev/null | head -10
+    ls -lh lib/libPolymer*.a lib/libMLIRArith*.a lib/libMLIRAffineTransformOps.a lib/libMLIROptLib.a 2>/dev/null | head -10
     echo ""
     echo -e "${GREEN}下一步:${NC}"
     echo -e "  构建 mlir-systolic: cd $PROJECT_ROOT && ./scripts/build-systolic.sh"

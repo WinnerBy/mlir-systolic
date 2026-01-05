@@ -3,6 +3,7 @@
 add_mlir_library(SystolicAnalysis
   SpaceTimeAnalysis.cpp
   PolymerAnalysis.cpp
+  WriteTimeReorderingAnalysis.cpp
 
   ADDITIONAL_HEADER_DIRS
   ${PROJECT_SOURCE_DIR}/include/systolic/Analysis

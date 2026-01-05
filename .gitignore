@@ -1,3 +1,7 @@
+# AutoSA reference
+autosa_reference_samples/
+autosa_hls_output/
+
 # Build directories
 build/
 cmake-build-*/

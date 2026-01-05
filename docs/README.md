@@ -1,94 +1,129 @@
 # mlir-systolic 文档索引
 
-> **最后更新**: 2024-12
+> **最后更新**: 2026-01-05  
+> **文档已按事项/功能分类整理**
 
 ---
 
-## 📚 快速导航
+## 📚 文档目录结构
 
-### 🚀 快速开始
-- **[快速参考](QUICK_REFERENCE.md)** ⭐ - 常用命令和参数配置快速查找
-- **[构建指南](BUILD_STEPS.md)** ⭐ - 详细的构建步骤和故障排除
-- **[Scripts 说明](SCRIPTS.md)** ⭐ - 各个脚本的用途和使用方法
+所有文档已按事项/功能分类整理到以下目录：
 
-### 📖 核心文档
-- **[项目进展总结](PROJECT_STATUS.md)** ⭐ - 项目当前状态和最新更新
-- **[架构设计](ARCHITECTURE.md)** - 项目架构和设计理念
-- **[开发指南](DEVELOPMENT_GUIDE.md)** - 开发流程和代码结构
+```
+docs/
+├── README.md (本文件)
+├── DOCUMENT_ORGANIZATION.md (文档组织说明)
+├── write-time-reordering/ (写时重排功能)
+│   ├── README.md ⭐
+│   ├── RANDOM_ACCESS_ANALYSIS.md (随机访问问题)
+│   ├── DOCUMENTATION_CHECKLIST.md (文档清单)
+│   └── ... (其他写时重排相关文档)
+├── spacetime/ (Space-time 实现)
+│   ├── README.md
+│   ├── SPACETIME_IMPLEMENTATION_PLAN.md ⭐
+│   └── ... (Space-time 相关文档)
+├── autosa/ (AutoSA 参考)
+│   ├── README.md
+│   ├── AUTOSA_ANALYSIS.md ⭐
+│   └── ... (AutoSA 相关文档)
+├── project/ (项目基础)
+│   ├── README.md
+│   ├── BUILD_STEPS.md ⭐
+│   ├── ARCHITECTURE.md
+│   ├── DEVELOPMENT_GUIDE.md
+│   ├── PROJECT_STATUS.md ⭐
+│   └── ... (架构、构建、开发、规划、分析总结)
+├── testing/ (测试验证)
+│   ├── README.md
+│   ├── TEST_RESULTS.md ⭐
+│   └── REFERENCE_SAMPLES.md
+└── other-issues/ (其他问题)
+    ├── README.md
+    ├── SIMD2_ISSUE_ANALYSIS.md
+    └── DATA_REUSE_STRATEGY.md
+```
 
-### 🔬 AutoSA 相关
-- **[AutoSA 分析](AUTOSA_ANALYSIS.md)** ⭐ - AutoSA 架构、算法、参数影响分析
-- **[AutoSA Spacetime 分析](AUTOSA_SPACETIME_ANALYSIS.md)** - Spacetime 参数详细分析（0-5）
-- **[AutoSA 测试生成指南](AUTOSA_TEST_GENERATION_GUIDE.md)** - 参数配置参考
-- **[AutoSA 架构参考](AUTOSA_ARCHITECTURE.md)** - AutoSA 架构详细分析
-
-### 🔍 问题分析
-- **[随机读取问题分析](RANDOM_ACCESS_ANALYSIS.md)** - 随机读取问题分析和修复方法
-- **[SIMD=2 代码生成问题分析](SIMD2_ISSUE_ANALYSIS.md)** - SIMD=2 代码生成与 AutoSA 参考代码的差异分析
-
-### 📦 Reference Samples
-- **[Reference Samples 说明](REFERENCE_SAMPLES.md)** - Reference samples 概述
-- **[详细说明](../test/reference-samples/README.md)** - 完整的 samples 列表和配置
-
-### 🔧 技术文档
-- **[与 AutoSA 对比](comparison_with_autosa.md)** - mlir-systolic 与 AutoSA 的功能对比
-- **[Allo 集成分析](ALLO_INTEGRATION_ANALYSIS.md)** - Allo 项目集成方案分析
-- **[Polymer 库要求](POLYMER_LIBRARIES_REQUIRED.md)** - Polymer 库依赖说明
+⭐ = 推荐优先阅读
 
 ---
 
-## 📋 文档分类
+## 🚀 快速导航
 
-### 构建和开发
-| 文档 | 说明 | 优先级 |
-|------|------|--------|
-| [BUILD_STEPS.md](BUILD_STEPS.md) | 完整的构建步骤指南 | ⭐⭐⭐ |
-| [QUICK_REFERENCE.md](QUICK_REFERENCE.md) | 快速参考指南 | ⭐⭐⭐ |
-| [SCRIPTS.md](SCRIPTS.md) | Scripts 说明 | ⭐⭐⭐ |
-| [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md) | 开发指南 | ⭐⭐ |
-| [PROJECT_STATUS.md](PROJECT_STATUS.md) | 项目进展总结 | ⭐⭐⭐ |
+### 新用户快速开始
 
-### 架构和设计
-| 文档 | 说明 | 优先级 |
-|------|------|--------|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | 项目架构设计 | ⭐⭐⭐ |
-| [AUTOSA_ANALYSIS.md](AUTOSA_ANALYSIS.md) | AutoSA 详细分析 | ⭐⭐⭐ |
-| [AUTOSA_ARCHITECTURE.md](AUTOSA_ARCHITECTURE.md) | AutoSA 架构参考 | ⭐⭐ |
+1. **[快速参考](project/QUICK_REFERENCE.md)** ⭐ - 常用命令和参数配置
+2. **[构建指南](project/BUILD_STEPS.md)** ⭐ - 详细的构建步骤
+3. **[项目状态](project/PROJECT_STATUS.md)** ⭐ - 了解项目当前状态
 
-### AutoSA 参数和测试
-| 文档 | 说明 | 优先级 |
-|------|------|--------|
-| [AUTOSA_SPACETIME_ANALYSIS.md](AUTOSA_SPACETIME_ANALYSIS.md) | Spacetime 参数分析 | ⭐⭐⭐ |
-| [AUTOSA_TEST_GENERATION_GUIDE.md](AUTOSA_TEST_GENERATION_GUIDE.md) | 参数配置参考 | ⭐⭐ |
-| [REFERENCE_SAMPLES.md](REFERENCE_SAMPLES.md) | Reference samples 说明 | ⭐⭐ |
+### 按事项查找
 
-### 问题分析
-| 文档 | 说明 | 优先级 |
-|------|------|--------|
-| [RANDOM_ACCESS_ANALYSIS.md](RANDOM_ACCESS_ANALYSIS.md) | 随机读取问题分析 | ⭐⭐⭐ |
-| [SIMD2_ISSUE_ANALYSIS.md](SIMD2_ISSUE_ANALYSIS.md) | SIMD=2 问题分析 | ⭐⭐ |
+- **写时重排** → [write-time-reordering/](write-time-reordering/) - 包括随机访问问题、实现方案等
+- **Space-time 实现** → [spacetime/](spacetime/) - Space-time 实现和测试
+- **AutoSA 参考** → [autosa/](autosa/) - AutoSA 分析和参考
+- **项目基础** → [project/](project/) - 架构、构建、开发、规划
+- **测试验证** → [testing/](testing/) - 测试结果和参考样本
+- **其他问题** → [other-issues/](other-issues/) - SIMD2、数据重用等问题
 
-### 集成和分析
-| 文档 | 说明 | 优先级 |
-|------|------|--------|
-| [ALLO_INTEGRATION_ANALYSIS.md](ALLO_INTEGRATION_ANALYSIS.md) | Allo 集成分析 | ⭐ |
-| [comparison_with_autosa.md](comparison_with_autosa.md) | 与 AutoSA 对比 | ⭐⭐ |
-| [POLYMER_LIBRARIES_REQUIRED.md](POLYMER_LIBRARIES_REQUIRED.md) | Polymer 库要求 | ⭐ |
+---
+
+## 📖 核心文档推荐
+
+### 快速开始（必读）
+
+| 文档 | 说明 | 位置 |
+|------|------|------|
+| **快速参考** | 常用命令和参数配置 | [project/QUICK_REFERENCE.md](project/QUICK_REFERENCE.md) |
+| **构建指南** | 详细的构建步骤 | [project/BUILD_STEPS.md](project/BUILD_STEPS.md) |
+| **项目状态** | 项目当前状态 | [project/PROJECT_STATUS.md](project/PROJECT_STATUS.md) |
+
+### 核心功能文档
+
+| 文档 | 说明 | 位置 |
+|------|------|------|
+| **架构设计** | 项目架构和设计理念 | [project/ARCHITECTURE.md](project/ARCHITECTURE.md) |
+| **开发指南** | 开发流程和代码结构 | [project/DEVELOPMENT_GUIDE.md](project/DEVELOPMENT_GUIDE.md) |
+| **写时重排** | 写时重排功能（包括随机访问问题） | [write-time-reordering/](write-time-reordering/) |
+| **Space-time 实现** | Space-time 实现计划 | [spacetime/SPACETIME_IMPLEMENTATION_PLAN.md](spacetime/SPACETIME_IMPLEMENTATION_PLAN.md) |
+| **AutoSA 分析** | AutoSA 架构、算法分析 | [autosa/AUTOSA_ANALYSIS.md](autosa/AUTOSA_ANALYSIS.md) |
+
+### 问题分析和测试
+
+| 文档 | 说明 | 位置 |
+|------|------|------|
+| **随机访问问题** | 随机读取问题分析 | [write-time-reordering/RANDOM_ACCESS_ANALYSIS.md](write-time-reordering/RANDOM_ACCESS_ANALYSIS.md) |
+| **测试结果** | 测试结果和下一步工作 | [testing/TEST_RESULTS.md](testing/TEST_RESULTS.md) |
+| **SIMD2 问题** | SIMD=2 代码生成问题 | [other-issues/SIMD2_ISSUE_ANALYSIS.md](other-issues/SIMD2_ISSUE_ANALYSIS.md) |
+| **数据重用策略** | 数据重用策略分析 | [other-issues/DATA_REUSE_STRATEGY.md](other-issues/DATA_REUSE_STRATEGY.md) |
 
 ---
 
 ## 🔍 文档查找指南
 
 ### 我想...
-- **快速开始构建** → [BUILD_STEPS.md](BUILD_STEPS.md)
-- **查找常用命令** → [QUICK_REFERENCE.md](QUICK_REFERENCE.md)
-- **了解脚本用途** → [SCRIPTS.md](SCRIPTS.md)
-- **了解项目状态** → [PROJECT_STATUS.md](PROJECT_STATUS.md)
-- **理解架构设计** → [ARCHITECTURE.md](ARCHITECTURE.md)
-- **了解 Spacetime 参数** → [AUTOSA_SPACETIME_ANALYSIS.md](AUTOSA_SPACETIME_ANALYSIS.md)
-- **检查随机读取问题** → [RANDOM_ACCESS_ANALYSIS.md](RANDOM_ACCESS_ANALYSIS.md)
-- **了解 AutoSA 架构** → [AUTOSA_ANALYSIS.md](AUTOSA_ANALYSIS.md)
-- **查看 Reference Samples** → [REFERENCE_SAMPLES.md](REFERENCE_SAMPLES.md)
+
+- **快速开始构建** → [project/BUILD_STEPS.md](project/BUILD_STEPS.md)
+- **查找常用命令** → [project/QUICK_REFERENCE.md](project/QUICK_REFERENCE.md)
+- **了解写时重排** → [write-time-reordering/README.md](write-time-reordering/README.md)
+- **了解随机访问问题** → [write-time-reordering/RANDOM_ACCESS_ANALYSIS.md](write-time-reordering/RANDOM_ACCESS_ANALYSIS.md)
+- **实现 Space-time** → [spacetime/SPACETIME_IMPLEMENTATION_PLAN.md](spacetime/SPACETIME_IMPLEMENTATION_PLAN.md)
+- **了解 AutoSA** → [autosa/AUTOSA_ANALYSIS.md](autosa/AUTOSA_ANALYSIS.md)
+- **查看测试结果** → [testing/TEST_RESULTS.md](testing/TEST_RESULTS.md)
+- **了解项目状态** → [project/PROJECT_STATUS.md](project/PROJECT_STATUS.md)
+- **查看下一阶段工作计划** → [project/NEXT_PHASE_WORK_PLAN.md](project/NEXT_PHASE_WORK_PLAN.md)
+
+---
+
+## 📊 文档统计
+
+| 分类 | 文档数量 | 主要用途 |
+|------|---------|---------|
+| **write-time-reordering/** | 13 | 写时重排功能（包括随机访问问题） |
+| **spacetime/** | 8 | Space-time 实现和测试 |
+| **autosa/** | 6 | AutoSA 参考和分析 |
+| **project/** | 15+ | 架构、构建、开发、规划、分析总结 |
+| **testing/** | 3 | 测试和验证 |
+| **other-issues/** | 2 | 其他问题分析 |
+| **总计** | **47+** | - |
 
 ---
 
@@ -98,6 +133,7 @@
 - 旧的构建指南（已合并到 BUILD_STEPS.md）
 - 旧的实现总结（已过时）
 - 旧的测试结果（已过时）
+- 已完成的工作计划
 
 如需查看历史文档，请访问 `docs/archive/` 目录。
 
@@ -105,7 +141,34 @@
 
 ## 📝 文档维护
 
-- 文档按功能分类，便于查找
-- 过时文档已移动到 `archive/` 目录
-- 核心文档保持更新，反映最新状态
-- 如有问题或建议，请提交 Issue 或 PR
+- ✅ 文档已按事项/功能分类整理
+- ✅ 每个分类都有 README.md 导航文档
+- ✅ 核心文档保持更新，反映最新状态
+- ✅ 过时文档已移动到 archive 目录
+- ✅ 文档组织结构清晰，便于查找
+
+**文档组织说明**：详见 [DOCUMENT_ORGANIZATION.md](DOCUMENT_ORGANIZATION.md)
+
+---
+
+## 🎯 推荐阅读路径
+
+### 路径 A：新用户（30 分钟）
+1. [project/QUICK_REFERENCE.md](project/QUICK_REFERENCE.md) (10 min)
+2. [project/BUILD_STEPS.md](project/BUILD_STEPS.md) (15 min)
+3. [project/PROJECT_STATUS.md](project/PROJECT_STATUS.md) (5 min)
+
+### 路径 B：开发者（1 小时）
+1. [project/ARCHITECTURE.md](project/ARCHITECTURE.md) (20 min)
+2. [project/DEVELOPMENT_GUIDE.md](project/DEVELOPMENT_GUIDE.md) (20 min)
+3. [project/NEXT_PHASE_WORK_PLAN.md](project/NEXT_PHASE_WORK_PLAN.md) (20 min)
+
+### 路径 C：功能实现（2 小时）
+1. [write-time-reordering/RANDOM_ACCESS_ANALYSIS.md](write-time-reordering/RANDOM_ACCESS_ANALYSIS.md) (20 min)
+2. [write-time-reordering/README.md](write-time-reordering/README.md) (30 min)
+3. [spacetime/SPACETIME_IMPLEMENTATION_PLAN.md](spacetime/SPACETIME_IMPLEMENTATION_PLAN.md) (30 min)
+4. [testing/TEST_RESULTS.md](testing/TEST_RESULTS.md) (30 min)
+
+---
+
+**👉 推荐开始**: [project/QUICK_REFERENCE.md](project/QUICK_REFERENCE.md)

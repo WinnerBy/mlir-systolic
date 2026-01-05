@@ -4,6 +4,14 @@
 		"dockerfile": "Dockerfile"
 	},
 	"remoteUser": "user",
+
+	"containerEnv": {
+		"http_proxy": "http://host.docker.internal:7897",
+		"https_proxy": "http://host.docker.internal:7897",
+		"NO_PROXY": "localhost,127.0.0.1",
+		"LANG": "C.UTF-8",
+    	"LC_ALL": "C.UTF-8"
+	},
 	
 	// 容器创建后执行的命令：确保子模块被拉取（防止你忘记）
 	// "postCreateCommand": "git submodule update --init --recursive --depth 1",
@@ -27,9 +35,5 @@
 				"eamodio.gitlens"
 			]
 		}
-	},
-	// 启用 Git 凭证转发
-	"features": {
-		"ghcr.io/devcontainers/features/git:1": {}
 	}
 }
