@@ -9,6 +9,8 @@
 
 #include "systolic/Analysis/WriteTimeReorderingAnalysis.h"
 #include "systolic/Analysis/PolymerAnalysis.h"
+#include "systolic/Analysis/PolyhedralAccessAnalyzer.h"
+#include "systolic/Analysis/LayoutOptimizer.h"
 
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/Affine/Analysis/AffineStructures.h"
@@ -175,8 +177,13 @@ LogicalResult WriteTimeReorderingAnalyzer::analyzePattern(ArrayAccessPattern &pa
     if (pattern.nonLinearDim >= 0) break;
   }
   
-  // Compute reordering
+  // Compute reordering using polyhedral analysis (Phase 2)
   if (pattern.nonLinearDim >= 0) {
+    // Try polyhedral analysis first
+    if (succeeded(computeReorderingWithISL(pattern))) {
+      return success();
+    }
+    // Fall back to simple heuristic if polyhedral analysis fails
     return computeReordering(pattern);
   }
   
@@ -266,15 +273,65 @@ LogicalResult WriteTimeReorderingAnalyzer::computeReordering(ArrayAccessPattern 
 }
 
 LogicalResult WriteTimeReorderingAnalyzer::computeReorderingWithISL(ArrayAccessPattern &pattern) {
-  // TODO: Use ISL to compute optimal reordering
-  // This would involve:
-  // 1. Building access relations from AffineMaps
-  // 2. Using ISL to analyze access patterns
-  // 3. Computing layout transformation that minimizes non-linear access
-  // 4. Computing loop transformations to match layout transformation
+  // Phase 2: Use polyhedral analysis to compute optimal reordering
+  // 1. Analyze access patterns (stride, reuse distance, randomness)
+  // 2. Evaluate all layout permutations
+  // 3. Select optimal layout based on cost and locality
   
-  // For now, use simple heuristic
-  return computeReordering(pattern);
+  if (pattern.originalDims.size() != 3) {
+    LLVM_DEBUG(llvm::dbgs() << "Polyhedral analysis only supported for 3D arrays, "
+                            << "array " << pattern.arrayName 
+                            << " has " << pattern.originalDims.size() << " dimensions\n");
+    // Fall back to simple heuristic
+    return computeReordering(pattern);
+  }
+  
+  // Step 1: Analyze access patterns
+  PolyhedralAccessAnalyzer analyzer;
+  
+  // Analyze write access (if available)
+  AccessPattern writePattern;
+  if (!pattern.storeMaps.empty()) {
+    writePattern = analyzer.analyzeWriteAccess(pattern.storeMaps, pattern.originalDims);
+  }
+  
+  // Analyze read access
+  AccessPattern readPattern;
+  if (!pattern.loadMaps.empty()) {
+    readPattern = analyzer.analyzeReadAccess(pattern.loadMaps, pattern.originalDims);
+  }
+  
+  // If no access patterns, fall back to simple heuristic
+  if (pattern.loadMaps.empty() && pattern.storeMaps.empty()) {
+    LLVM_DEBUG(llvm::dbgs() << "No access maps available, using simple heuristic\n");
+    return computeReordering(pattern);
+  }
+  
+  // Step 2: Evaluate all layout permutations
+  auto layouts = LayoutOptimizer::evaluateAllLayouts(
+      writePattern, readPattern, pattern.originalDims);
+  
+  // Step 3: Select best layout
+  auto bestLayout = LayoutOptimizer::selectBestLayout(layouts);
+  
+  // Step 4: Apply best layout
+  pattern.dimPermutation = bestLayout.permutation;
+  pattern.reorderedDims = bestLayout.reorderedDims;
+  
+  LLVM_DEBUG({
+    llvm::dbgs() << "Polyhedral analysis selected layout for " << pattern.arrayName << ":\n"
+                 << "  Original: [" << pattern.originalDims[0] << ", "
+                 << pattern.originalDims[1] << ", " << pattern.originalDims[2] << "]\n"
+                 << "  Reordered: [" << pattern.reorderedDims[0] << ", "
+                 << pattern.reorderedDims[1] << ", " << pattern.reorderedDims[2] << "]\n"
+                 << "  Permutation: [" << pattern.dimPermutation[0] << ", "
+                 << pattern.dimPermutation[1] << ", " << pattern.dimPermutation[2] << "]\n"
+                 << "  Score: " << bestLayout.totalScore 
+                 << " (cost=" << bestLayout.memoryCost 
+                 << ", locality=" << bestLayout.cacheLocality << ")\n";
+  });
+  
+  return success();
 }
 
 bool WriteTimeReorderingAnalyzer::needsReordering(StringRef arrayName) const {
