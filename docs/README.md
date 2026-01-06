@@ -21,11 +21,12 @@
 ## 📚 核心文档（必读）
 
 ### 项目分析与规划
-- **[整理工作总结.md](../整理工作总结.md)** ⭐ 总览与结论
-- **[PROJECT_ORGANIZATION_AND_ANALYSIS.md](../PROJECT_ORGANIZATION_AND_ANALYSIS.md)** ⭐ 项目组织与分析
-- **[CODE_ISSUES_DETAILED_ANALYSIS.md](../CODE_ISSUES_DETAILED_ANALYSIS.md)** ⭐ 代码问题详解
-- **[NEXT_STEPS_TECHNICAL_ROADMAP.md](../NEXT_STEPS_TECHNICAL_ROADMAP.md)** ⭐ 技术路线图
-- **[CLEANUP_CHECKLIST.md](../CLEANUP_CHECKLIST.md)** 与 **[CLEANUP_COMPLETE.md](../CLEANUP_COMPLETE.md)**
+- **[整理工作总结.md](整理工作总结.md)** ⭐ 总览与结论
+- **[PROJECT_ORGANIZATION_AND_ANALYSIS.md](PROJECT_ORGANIZATION_AND_ANALYSIS.md)** ⭐ 项目组织与分析
+- **[CODE_ISSUES_DETAILED_ANALYSIS.md](CODE_ISSUES_DETAILED_ANALYSIS.md)** ⭐ 代码问题详解
+- **[NEXT_STEPS_TECHNICAL_ROADMAP.md](NEXT_STEPS_TECHNICAL_ROADMAP.md)** ⭐ 技术路线图
+- **[快速参考卡.md](快速参考卡.md)** 快速查阅
+- **[整理工作文件索引.md](整理工作文件索引.md)** 文档索引
 
 ### 架构与代码
 - **[ARCHITECTURE_OVERVIEW.md](ARCHITECTURE_OVERVIEW.md)** ⭐ 架构概览
@@ -81,7 +82,7 @@ docs/
 ## 📖 推荐阅读路径
 
 ### 新人 30 分钟
-1. [整理工作总结.md](../整理工作总结.md)
+1. [整理工作总结.md](整理工作总结.md)
 2. [ARCHITECTURE_OVERVIEW.md](ARCHITECTURE_OVERVIEW.md)
 3. [guide/BUILD_GUIDE.md](guide/BUILD_GUIDE.md)
 4. [test/TESTING_GUIDE.md](../test/TESTING_GUIDE.md)
@@ -94,8 +95,8 @@ docs/
 5. [features/write-time-reordering/](features/write-time-reordering/)
 
 ### 管理/规划
-1. [PROJECT_ORGANIZATION_AND_ANALYSIS.md](../PROJECT_ORGANIZATION_AND_ANALYSIS.md)
-2. [NEXT_STEPS_TECHNICAL_ROADMAP.md](../NEXT_STEPS_TECHNICAL_ROADMAP.md)
+1. [PROJECT_ORGANIZATION_AND_ANALYSIS.md](PROJECT_ORGANIZATION_AND_ANALYSIS.md)
+2. [NEXT_STEPS_TECHNICAL_ROADMAP.md](NEXT_STEPS_TECHNICAL_ROADMAP.md)
 3. [status/ROADMAP.md](status/ROADMAP.md)
 
 ---

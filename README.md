@@ -2,6 +2,22 @@
 
 基于 MLIR 和 Polymer 的脉动阵列编译器。
 
+---
+
+## 📚 文档导航
+
+- **[docs/](docs/)** - 完整文档目录
+  - [整理工作总结](docs/整理工作总结.md) - 项目整理工作总结 ⭐
+  - [架构概述](docs/ARCHITECTURE_OVERVIEW.md) - 系统架构完整说明 ⭐
+  - [代码结构](docs/CODE_STRUCTURE.md) - 代码组织与问题清单 ⭐
+  - [构建指南](docs/guide/BUILD_GUIDE.md) - 构建步骤与依赖说明 ⭐
+  - [测试指南](test/TESTING_GUIDE.md) - 测试流程与覆盖情况 ⭐
+  - [项目状态](docs/status/PROJECT_STATUS.md) - 当前状态与进展
+  - [技术路线图](docs/NEXT_STEPS_TECHNICAL_ROADMAP.md) - 实施计划
+- **[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)** - 项目目录结构说明
+
+---
+
 ## 项目目标
 
 将 Affine 循环嵌套自动转换为脉动阵列 HLS C++ 代码，结合：
