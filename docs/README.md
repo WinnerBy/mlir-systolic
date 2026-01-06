@@ -1,46 +1,81 @@
 # mlir-systolic 文档索引
 
-> **最后更新**: 2026-01-05  
-> **文档已按事项/功能分类整理**
+> **最后更新**: 2024  
+> **文档已重新整理和分类**
 
 ---
 
-## 📚 文档目录结构
+## 📚 核心文档（必读）
 
-所有文档已按事项/功能分类整理到以下目录：
+### 项目分析和规划
+- **[整理工作总结.md](../整理工作总结.md)** ⭐ - 项目整理工作的总结和概览
+- **[PROJECT_ORGANIZATION_AND_ANALYSIS.md](../PROJECT_ORGANIZATION_AND_ANALYSIS.md)** ⭐ - 完整的项目组织和分析
+- **[CODE_ISSUES_DETAILED_ANALYSIS.md](../CODE_ISSUES_DETAILED_ANALYSIS.md)** ⭐ - 详细的代码问题分析
+- **[NEXT_STEPS_TECHNICAL_ROADMAP.md](../NEXT_STEPS_TECHNICAL_ROADMAP.md)** ⭐ - 技术路线图和实施计划
+- **[CLEANUP_CHECKLIST.md](../CLEANUP_CHECKLIST.md)** - 文档清理检查清单
 
+### 架构和代码结构
+- **[ARCHITECTURE_OVERVIEW.md](ARCHITECTURE_OVERVIEW.md)** ⭐ - 系统架构概述
+- **[CODE_STRUCTURE.md](CODE_STRUCTURE.md)** ⭐ - 代码结构和组织
+- **[PROJECT_STRUCTURE.md](../PROJECT_STRUCTURE.md)** - 项目结构说明
+
+### 测试和验证
+- **[test/TESTING_GUIDE.md](../test/TESTING_GUIDE.md)** ⭐ - 完整的测试指南
+- **[test/TEST_STATUS.md](../test/TEST_STATUS.md)** - 当前测试状态
+
+---
+
+## 📁 专题文档
+
+### write-time-reordering (写时重排功能)
 ```
-docs/
-├── README.md (本文件)
-├── DOCUMENT_ORGANIZATION.md (文档组织说明)
-├── write-time-reordering/ (写时重排功能)
-│   ├── README.md ⭐
-│   ├── RANDOM_ACCESS_ANALYSIS.md (随机访问问题)
-│   ├── DOCUMENTATION_CHECKLIST.md (文档清单)
-│   └── ... (其他写时重排相关文档)
-├── spacetime/ (Space-time 实现)
-│   ├── README.md
-│   ├── SPACETIME_IMPLEMENTATION_PLAN.md ⭐
-│   └── ... (Space-time 相关文档)
-├── autosa/ (AutoSA 参考)
-│   ├── README.md
-│   ├── AUTOSA_ANALYSIS.md ⭐
-│   └── ... (AutoSA 相关文档)
-├── project/ (项目基础)
-│   ├── README.md
-│   ├── BUILD_STEPS.md ⭐
-│   ├── ARCHITECTURE.md
-│   ├── DEVELOPMENT_GUIDE.md
-│   ├── PROJECT_STATUS.md ⭐
-│   └── ... (架构、构建、开发、规划、分析总结)
-├── testing/ (测试验证)
-│   ├── README.md
-│   ├── TEST_RESULTS.md ⭐
-│   └── REFERENCE_SAMPLES.md
-└── other-issues/ (其他问题)
-    ├── README.md
-    ├── SIMD2_ISSUE_ANALYSIS.md
-    └── DATA_REUSE_STRATEGY.md
+docs/write-time-reordering/
+├── README.md ⭐
+├── RANDOM_ACCESS_ANALYSIS.md (随机访问问题)
+└── ... (其他写时重排相关文档)
+```
+
+### spacetime (Space-time 实现)
+```
+docs/spacetime/
+├── README.md
+├── SPACETIME_IMPLEMENTATION_PLAN.md ⭐
+└── ... (Space-time 相关文档)
+```
+
+### autosa (AutoSA 参考)
+```
+docs/autosa/
+├── README.md
+├── AUTOSA_ANALYSIS.md ⭐
+└── ... (AutoSA 相关文档)
+```
+
+### project (项目基础)
+```
+docs/project/
+├── README.md
+├── BUILD_STEPS.md ⭐
+├── ARCHITECTURE.md
+├── DEVELOPMENT_GUIDE.md
+├── PROJECT_STATUS.md ⭐
+└── ... (架构、构建、开发、规划、分析总结)
+```
+
+### testing (测试验证)
+```
+docs/testing/
+├── README.md
+├── TEST_RESULTS.md ⭐
+└── REFERENCE_SAMPLES.md
+```
+
+### other-issues (其他问题)
+```
+docs/other-issues/
+├── README.md
+├── SIMD2_ISSUE_ANALYSIS.md
+└── DATA_REUSE_STRATEGY.md
 ```
 
 ⭐ = 推荐优先阅读
