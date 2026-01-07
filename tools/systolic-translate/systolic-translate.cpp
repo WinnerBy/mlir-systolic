@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "systolic/Dialect/HLS/HLS.h"
+#include "systolic/Dialect/SystolicDataflow/SystolicDataflow.h"
 
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
@@ -1470,6 +1471,7 @@ int main(int argc, char **argv) {
   context.getOrLoadDialect<arith::ArithDialect>();
   context.getOrLoadDialect<func::FuncDialect>();
   context.getOrLoadDialect<memref::MemRefDialect>();
+  context.getOrLoadDialect<mlir::systolic::dataflow::SystolicDataflowDialect>();
   
   // Parse input
   std::string errorMessage;

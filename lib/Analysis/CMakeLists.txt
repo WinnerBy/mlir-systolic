@@ -1,6 +1,7 @@
 # Analysis library - Polyhedral analysis for systolic arrays
 
 add_mlir_library(SystolicAnalysis
+  ParametricSpaceTime.cpp
   SpaceTimeAnalysis.cpp
   PolymerAnalysis.cpp
   WriteTimeReorderingAnalysis.cpp
@@ -22,6 +23,16 @@ add_mlir_library(SystolicAnalysis
   MLIRIR
   MLIRSupport
 )
+# Add Polymer include directories before linking
+if(SYSTOLIC_ENABLE_POLYMER)
+  if(DEFINED POLYGEIST_SOURCE_DIR)
+    target_include_directories(SystolicAnalysis PRIVATE
+      ${POLYGEIST_SOURCE_DIR}/tools/polymer/include
+    )
+    message(STATUS "Added Polymer include to SystolicAnalysis: ${POLYGEIST_SOURCE_DIR}/tools/polymer/include")
+  endif()
+endif()
+
 
 # Link Polymer libraries if available
 if(SYSTOLIC_ENABLE_POLYMER AND POLYMER_AVAILABLE)

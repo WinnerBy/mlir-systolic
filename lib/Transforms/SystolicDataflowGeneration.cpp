@@ -71,6 +71,9 @@ struct ArrayRefGroup {
   bool isInput;   // True for input arrays (A, B)
   bool isOutput; // True for output arrays (C)
   
+  // Phase 2: Parametric data flow direction
+  SystolicFlowDir flowDirection = SystolicFlowDir::NONE;
+  
   // Buffer information
   bool needsDoubleBuffer = false;
   SmallVector<int64_t, 3> bufferShape;
@@ -376,6 +379,88 @@ void SystolicDataflowGenerationPass::runOnOperation() {
                             << arrayPart[2] << "]\n");
   }
   
+  // Phase 2: Parametric data flow analysis
+  // Run space-time analysis to determine flow directions for each array
+  DenseMap<Value, SystolicFlowDir> operandFlows;
+  
+  // Find outermost loop for analysis
+  AffineForOp outermostLoop = nullptr;
+  func.walk([&](AffineForOp forOp) {
+    if (!forOp->getParentOfType<AffineForOp>()) {
+      outermostLoop = forOp;
+      return WalkResult::interrupt();
+    }
+    return WalkResult::advance();
+  });
+  
+  if (outermostLoop) {
+    // Get space-time mode from attributes (default to 3 for ST3)
+    unsigned spaceTimeMode = 3;
+    if (auto modeAttr = func->getAttrOfType<IntegerAttr>("systolic.space_time_mode")) {
+      spaceTimeMode = modeAttr.getInt();
+    }
+    
+    // Create parametric configuration from mode
+    ParametricSpaceTime parametricConfig = ParametricSpaceTime::createFromMode(spaceTimeMode);
+    
+    if (parametricConfig.isValid()) {
+      // Get loop nest
+      SmallVector<AffineForOp, 8> loops;
+      AffineForOp current = outermostLoop;
+      while (current) {
+        loops.push_back(current);
+        AffineForOp inner = nullptr;
+        for (auto &op : *current.getBody()) {
+          if (auto nestedFor = dyn_cast<AffineForOp>(op)) {
+            inner = nestedFor;
+            break;
+          }
+        }
+        current = inner;
+      }
+      
+      // Run parametric data flow analysis
+      if (loops.size() >= 3) {
+        if (succeeded(analyzeOperandFlowsParametric(outermostLoop, loops,
+                                                     parametricConfig, operandFlows))) {
+          LLVM_DEBUG(llvm::dbgs() << "[DataflowGen] Parametric flow analysis succeeded\n");
+          LLVM_DEBUG({
+            llvm::dbgs() << "  Flow directions:\n";
+            for (auto &entry : operandFlows) {
+              llvm::dbgs() << "    Memref: ";
+              switch (entry.second) {
+                case SystolicFlowDir::HORIZONTAL:
+                  llvm::dbgs() << "HORIZONTAL\n";
+                  break;
+                case SystolicFlowDir::VERTICAL:
+                  llvm::dbgs() << "VERTICAL\n";
+                  break;
+                case SystolicFlowDir::NONE:
+                  llvm::dbgs() << "NONE (local)\n";
+                  break;
+                default:
+                  llvm::dbgs() << "UNKNOWN\n";
+              }
+            }
+          });
+          
+          // Populate flow directions in groups
+          for (auto &group : groups) {
+            auto it = operandFlows.find(group.memref);
+            if (it != operandFlows.end()) {
+              group.flowDirection = it->second;
+              LLVM_DEBUG(llvm::dbgs() << "  " << group.arrayName 
+                                      << " flow: " << (int)group.flowDirection << "\n");
+            }
+          }
+        } else {
+          LLVM_DEBUG(llvm::dbgs() 
+              << "[DataflowGen] Parametric flow analysis failed, using defaults\n");
+        }
+      }
+    }
+  }
+  
   // Fallback: Try to infer from loop structure if attributes not available
   if (peArraySize[0] == 2 && peArraySize[1] == 2) {  // Still using defaults
   AffineForOp outermostLoop = nullptr;
@@ -449,8 +534,14 @@ void SystolicDataflowGenerationPass::runOnOperation() {
   // Store created IO modules for later use
   llvm::DenseMap<Value, dataflow::IOModuleOp> ioModules;
   
+  // Save the original insertion point (at function level)
+  OpBuilder::InsertPoint funcInsertPoint = builder.saveInsertionPoint();
+  
   for (const auto &group : groups) {
     if (group.type == ArrayRefGroup::IO_GROUP && group.ioLevel > 0) {
+      // Restore insertion point to function level for each new IO module
+      builder.restoreInsertionPoint(funcInsertPoint);
+      
       // Create IO module
       auto ioModule = builder.create<dataflow::IOModuleOp>(
           loc,
@@ -526,7 +617,7 @@ void SystolicDataflowGenerationPass::runOnOperation() {
         // TODO: Generate proper send logic
         builder.create<dataflow::DoubleBufferYieldOp>(loc);
         
-        // Set insertion point back to body block and add yield at the end
+        // Explicitly add terminator to IOModule body block
         builder.setInsertionPointToEnd(bodyBlock);
         builder.create<dataflow::IOModuleYieldOp>(loc);
         
@@ -540,15 +631,18 @@ void SystolicDataflowGenerationPass::runOnOperation() {
           // TODO: Generate proper load logic based on access pattern
         }
         
-        // Add yield at the end of body block
+        // Explicitly add terminator to IOModule body block
         builder.setInsertionPointToEnd(bodyBlock);
         builder.create<dataflow::IOModuleYieldOp>(loc);
       
-      LLVM_DEBUG(llvm::dbgs() << "Created IO module for " << group.arrayName
-                              << " at level " << group.ioLevel << "\n");
+        LLVM_DEBUG(llvm::dbgs() << "Created IO module for " << group.arrayName
+                                << " at level " << group.ioLevel << "\n");
       }
       
       ioModules[group.memref] = ioModule;
+      
+      // Restore insertion point to function level after completing this IO module
+      builder.restoreInsertionPoint(funcInsertPoint);
     }
   }
   

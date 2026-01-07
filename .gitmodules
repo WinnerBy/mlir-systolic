@@ -1,3 +1,6 @@
 [submodule "third_party/Polygeist"]
 	path = third_party/Polygeist
 	url = https://github.com/llvm/Polygeist.git
+[submodule "third_party/AutoSA"]
+	path = third_party/AutoSA
+	url = https://github.com/UCLA-VAST/AutoSA.git

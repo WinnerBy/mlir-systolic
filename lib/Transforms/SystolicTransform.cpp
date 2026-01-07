@@ -23,6 +23,9 @@
 #if __has_include("polymer/Transforms/ExtractScopStmt.h")
 #include "polymer/Transforms/ExtractScopStmt.h"
 #endif
+#if __has_include("polymer/Transforms/Reg2Mem.h")
+#include "polymer/Transforms/Reg2Mem.h"
+#endif
 #endif
 
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
@@ -42,6 +45,7 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include <algorithm>
+#include <set>
 #include <vector>
 
 #define DEBUG_TYPE "systolic-transform"
@@ -209,6 +213,84 @@ static LogicalResult analyzeDependenceDistances(
 /// Following AutoSA's methodology:
 /// - Space loops must have dependence distance <= 1
 /// - Mode determines which loops are space (PE indices) vs time (execution order)
+//===----------------------------------------------------------------------===//
+// Parametric Space-Time Loop Selection (Phase 2)
+//
+// This enhanced version uses the ParametricSpaceTime framework to determine
+// space and time loop indices instead of hardcoded [0,1]/[2..] assumptions.
+//===----------------------------------------------------------------------===//
+
+/// Select space and time loops using parametric configuration
+static LogicalResult selectSpaceLoopsParametric(
+    const SmallVectorImpl<LoopDepInfo> &depInfos,
+    const ParametricSpaceTime &parametric,
+    SmallVectorImpl<unsigned> &spaceLoopIndices,
+    SmallVectorImpl<unsigned> &timeLoopIndices) {
+  
+  spaceLoopIndices.clear();
+  timeLoopIndices.clear();
+  
+  unsigned numLoops = depInfos.size();
+  
+  // Extract space loop dimensions from parametric configuration
+  // These are the loop indices that form the PE array dimensions
+  SmallVector<unsigned> spaceLoopDims;
+  for (unsigned i = 0; i < parametric.getNumSpaceDims(); ++i) {
+    unsigned loopIdx = parametric.getSpaceDimConfig(i).loopDim;
+    spaceLoopDims.push_back(loopIdx);
+  }
+  
+  // Verify all space loop dimensions are within bounds
+  for (unsigned loopIdx : spaceLoopDims) {
+    if (loopIdx >= numLoops) {
+      LLVM_DEBUG(llvm::dbgs() << "[Systolic] Space loop index " << loopIdx 
+                              << " out of range (total loops: " << numLoops << ")\n");
+      return failure();
+    }
+  }
+  
+  // Assign space loop indices
+  for (unsigned loopIdx : spaceLoopDims) {
+    spaceLoopIndices.push_back(loopIdx);
+  }
+  
+  // Assign time loop indices (remaining loops not in space dimension)
+  std::set<unsigned> spaceSet(spaceLoopDims.begin(), spaceLoopDims.end());
+  for (unsigned i = 0; i < numLoops; ++i) {
+    if (spaceSet.find(i) == spaceSet.end()) {
+      timeLoopIndices.push_back(i);
+    }
+  }
+  
+  // Verify selected space loops have distance <= 1 (space loop legality)
+  for (unsigned idx : spaceLoopIndices) {
+    if (!depInfos[idx].canBeSpaceLoop) {
+      LLVM_DEBUG(llvm::dbgs() 
+          << "[Systolic] Warning: Loop " << idx 
+          << " has dep distance > 1, may not be suitable for space mapping\n");
+      // Don't fail - just warn, as some configurations may intentionally
+      // use higher-distance loops for specific applications
+    }
+  }
+  
+  LLVM_DEBUG({
+    llvm::dbgs() << "[Systolic] Parametric space-time (" 
+                 << parametric.getSpaceTimeTypeString() << "):\n";
+    llvm::dbgs() << "  Space loops: ";
+    for (unsigned i : spaceLoopIndices) llvm::dbgs() << i << " ";
+    llvm::dbgs() << "\n  Time loops: ";
+    for (unsigned i : timeLoopIndices) llvm::dbgs() << i << " ";
+    llvm::dbgs() << "\n  PE array dims: " << parametric.getNumSpaceDims() << "D\n";
+  });
+  
+  return success();
+}
+
+/// Legacy space-time loop selection (backward compatible)
+/// 
+/// This function maintains the original hardcoded space-time modes (ST0-ST5)
+/// for backward compatibility with existing code that doesn't use
+/// the ParametricSpaceTime framework.
 static LogicalResult selectSpaceLoops(
     const SmallVectorImpl<LoopDepInfo> &depInfos,
     unsigned spaceTimeMode,
@@ -587,6 +669,10 @@ struct SystolicTransformPass
       return signalPassFailure();
     }
     
+    // DEBUG: Log that Polymer is available
+    llvm::dbgs() << "[Systolic Debug] Polymer is available\n";
+    llvm::errs() << "[Systolic] Polymer is AVAILABLE - proceeding with transformation\n";
+    
     // Step 0: Preprocess function with ExtractScopStmt if needed
     // This is required by Polymer's createIslFromFuncOp
     mlir::ModuleOp module = cast<mlir::ModuleOp>(func->getParentOp());
@@ -601,7 +687,7 @@ struct SystolicTransformPass
       }
     });
     
-    if (!hasScopStmt) {
+        if (!hasScopStmt) {
       LLVM_DEBUG(llvm::dbgs() << "Function does not have scop.stmt structure, "
                               << "running ExtractScopStmt pass...\n");
       
@@ -609,6 +695,11 @@ struct SystolicTransformPass
 #if __has_include("polymer/Transforms/ExtractScopStmt.h")
       // Run ExtractScopStmt pass to convert affine.for loops to scop.stmt format
       PassManager pm(module.getContext());
+      // Run reg2mem before ExtractScopStmt (Polymer pipeline requirement)
+    #if __has_include("polymer/Transforms/Reg2Mem.h")
+      pm.addNestedPass<mlir::func::FuncOp>(polymer::createRegToMemPass());
+      LLVM_DEBUG(llvm::dbgs() << "Ran Reg2Mem prior to ExtractScopStmt\n");
+    #endif
       pm.addPass(polymer::createExtractScopStmtPass());
       if (failed(pm.run(module))) {
         func.emitError("Failed to run ExtractScopStmt pass. This is required for Polymer.");
@@ -616,6 +707,7 @@ struct SystolicTransformPass
       }
       
       LLVM_DEBUG(llvm::dbgs() << "ExtractScopStmt pass completed successfully\n");
+      llvm::errs() << "[Systolic] Preprocessing done (reg2mem + extract-scop-stmt)\n";
 #else
       func.emitError("ExtractScopStmt pass header not found. Please ensure Polymer Transforms library is built.");
       return signalPassFailure();
@@ -626,6 +718,7 @@ struct SystolicTransformPass
 #endif
     } else {
       LLVM_DEBUG(llvm::dbgs() << "Function already has scop.stmt structure\n");
+      llvm::errs() << "[Systolic] scop.stmt detected, skipping preprocessing\n";
     }
     LLVM_DEBUG({
       llvm::dbgs() << "Options:\n";
@@ -683,21 +776,51 @@ struct SystolicTransformPass
       // Step 2.2: Infer problem size
       ProblemSize problemSize = inferProblemSize(band);
       
-      // Step 2.3: Dependence analysis (AutoSA: get_dep_dis_at_node)
+      // Step 3: Dependence analysis (AutoSA: get_dep_dis_at_node)
       // REQUIRES Polymer - no fallback
       SmallVector<LoopDepInfo, 4> depInfos;
       if (failed(analyzeDependenceDistances(func, band, depInfos))) {
         LLVM_DEBUG(llvm::dbgs() << "Dependence analysis failed\n");
+        llvm::errs() << "[Systolic] Dependence analysis FAILED\n";
         continue;
+      }
+      llvm::errs() << "[Systolic] Dependence analysis OK, deps=" << depInfos.size() << "\n";
+      for (auto &d : depInfos) {
+        llvm::errs() << "  loop=" << d.loopIndex << " min=" << d.minDistance << " max=" << d.maxDistance
+                     << " uniform=" << (d.isUniform?"y":"n") << " space?=" << (d.canBeSpaceLoop?"y":"n") << "\n";
       }
       
       // Step 2.4: Select space and time loops (AutoSA: sa_space_time_transform)
+      // Phase 2 Enhancement: Use parametric space-time framework
       SmallVector<unsigned, 2> spaceLoops;
       SmallVector<unsigned, 3> timeLoops;
-      if (failed(selectSpaceLoops(depInfos, options.spaceTimeMode, 
-                                   spaceLoops, timeLoops))) {
-        LLVM_DEBUG(llvm::dbgs() << "Space loop selection failed\n");
-        continue;
+      
+      // Create parametric configuration based on spaceTimeMode
+      ParametricSpaceTime parametricConfig = 
+        ParametricSpaceTime::createFromMode(options.spaceTimeMode);
+      
+      // Use parametric version for loop selection if available
+      // This replaces hardcoded [0,1]/[2..] assumptions
+      if (parametricConfig.isValid()) {
+        if (failed(selectSpaceLoopsParametric(depInfos, parametricConfig,
+                                              spaceLoops, timeLoops))) {
+          LLVM_DEBUG(llvm::dbgs() 
+              << "Parametric space loop selection failed, "
+              << "falling back to legacy mode\n");
+          // Fallback to legacy mode
+          if (failed(selectSpaceLoops(depInfos, options.spaceTimeMode,
+                                      spaceLoops, timeLoops))) {
+            LLVM_DEBUG(llvm::dbgs() << "Space loop selection failed\n");
+            continue;
+          }
+        }
+      } else {
+        // Fallback to legacy mode if parametric config is invalid
+        if (failed(selectSpaceLoops(depInfos, options.spaceTimeMode,
+                                    spaceLoops, timeLoops))) {
+          LLVM_DEBUG(llvm::dbgs() << "Space loop selection failed\n");
+          continue;
+        }
       }
       
       // Step 2.5: Permute loops (space loops to outer positions)

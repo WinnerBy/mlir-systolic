@@ -38,24 +38,48 @@ if [ ! -d "$LLVM_PROJECT_DIR" ]; then
     exit 1
 fi
 
-# 检查内存并选择并行度
-echo -e "${YELLOW}检查系统内存...${NC}"
-AVAIL_MEM=$(free -g | awk '/^Mem:/{print $7}')
-echo -e "${YELLOW}可用内存: ${AVAIL_MEM}GB${NC}"
+# 解析参数：支持 -j/--jobs 指定并行度（优先级：命令行 > 环境变量 > 内存检测）
+JOBS_OVERRIDE=""
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -j|--jobs)
+            JOBS_OVERRIDE="$2"; shift 2 ;;
+        --)
+            shift; break ;;
+        *)
+            # 其余参数留给 CMake（目前忽略）
+            shift ;;
+    esac
+done
 
-if [ "$AVAIL_MEM" -lt 4 ]; then
-    JOBS=1
-    echo -e "${RED}警告: 内存不足 4GB，使用单线程构建${NC}"
-elif [ "$AVAIL_MEM" -lt 8 ]; then
-    JOBS=1
-    echo -e "${YELLOW}内存不足 8GB，使用单线程构建${NC}"
-elif [ "$AVAIL_MEM" -lt 16 ]; then
-    JOBS=2
-    echo -e "${GREEN}使用 2 个并行任务${NC}"
+# 并行度来源：命令行 > 环境变量(NINJA_JOBS/JOBS) > 内存检测
+if [[ -n "$JOBS_OVERRIDE" ]]; then
+    JOBS="$JOBS_OVERRIDE"; JOBS_SRC="cmdline";
+elif [[ -n "${NINJA_JOBS:-}" ]]; then
+    JOBS="$NINJA_JOBS"; JOBS_SRC="env(NINJA_JOBS)";
+elif [[ -n "${JOBS:-}" ]]; then
+    JOBS="$JOBS"; JOBS_SRC="env(JOBS)";
 else
-    JOBS=4
-    echo -e "${GREEN}内存充足，使用 4 个并行任务${NC}"
+    echo -e "${YELLOW}检查系统内存...${NC}"
+    AVAIL_MEM=$(free -g | awk '/^Mem:/{print $7}')
+    echo -e "${YELLOW}可用内存: ${AVAIL_MEM}GB${NC}"
+    if [[ -z "$AVAIL_MEM" || "$AVAIL_MEM" -lt 4 ]]; then
+        JOBS=1; JOBS_SRC="mem"; echo -e "${RED}警告: 内存不足 4GB，使用单线程构建${NC}"
+    elif [[ "$AVAIL_MEM" -lt 8 ]]; then
+        JOBS=1; JOBS_SRC="mem"; echo -e "${YELLOW}内存不足 8GB，使用单线程构建${NC}"
+    elif [[ "$AVAIL_MEM" -lt 16 ]]; then
+        JOBS=2; JOBS_SRC="mem"; echo -e "${GREEN}使用 2 个并行任务${NC}"
+    else
+        JOBS=4; JOBS_SRC="mem"; echo -e "${GREEN}内存充足，使用 4 个并行任务${NC}"
+    fi
 fi
+
+# 校验 JOBS 数值
+if ! [[ "$JOBS" =~ ^[0-9]+$ ]] || [[ "$JOBS" -le 0 ]]; then
+    echo -e "${YELLOW}无效的并行度: $JOBS，回退为 2${NC}"
+    JOBS=2; JOBS_SRC="fallback";
+fi
+echo -e "${GREEN}并行度: $JOBS (${JOBS_SRC})${NC}"
 
 # 清理旧构建（可选）
 if [ -d "$POLYGEIST_DIR/build" ]; then
@@ -90,15 +114,15 @@ echo -e "${YELLOW}注意: 首次构建可能需要较长时间（需要先构建
 
 # 先构建基础依赖
 echo -e "${YELLOW}构建基础依赖...${NC}"
-ninja -j$JOBS LLVMSupport LLVMCore || true
+ninja -j"$JOBS" LLVMSupport LLVMCore || true
 
 # 构建 Polymer 库
 echo -e "${YELLOW}构建 Polymer 库...${NC}"
-ninja -j$JOBS PolymerSupport PolymerTargetISL PolymerTransforms
+ninja -j"$JOBS" PolymerSupport PolymerTargetISL PolymerTransforms
 
 # 构建 mlir-systolic 需要的 MLIR 库
 echo -e "${YELLOW}构建必要的 MLIR 库...${NC}"
-ninja -j$JOBS \
+ninja -j"$JOBS" \
   MLIRArithTransforms \
   MLIRArithValueBoundsOpInterfaceImpl \
   MLIRAffineTransformOps \

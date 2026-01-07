@@ -3,8 +3,8 @@
 // MLIR-Systolic: Space-Time Analysis Implementation
 //
 // This module provides polyhedral analysis for systolic array generation.
-// In the future, this will integrate with Polymer/ISL for precise
-// dependence distance computation.
+// Integrates with Polymer/ISL for precise dependence distance computation
+// when available, with fallback to MLIR-level heuristics.
 //
 // AutoSA Reference:
 //   - uniform_dep_check: Verify uniform dependences
@@ -14,6 +14,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "systolic/Analysis/SpaceTimeAnalysis.h"
+#include "systolic/Analysis/PolymerAnalysis.h"
 #include "systolic/Analysis/SystolicConfig.h"
 
 #include "mlir/Dialect/Affine/Analysis/AffineAnalysis.h"
@@ -26,6 +27,8 @@
 #include "mlir/IR/AffineExprVisitor.h"
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/Support/Debug.h"
+
+#include <set>
 
 #define DEBUG_TYPE "systolic-analysis"
 
@@ -146,8 +149,45 @@ struct OperandInfo {
 
 //===----------------------------------------------------------------------===//
 // Dependence Distance Computation
-// (Simplified - full version would use ISL dependence analysis)
+// (Uses Polymer/ISL when available, falls back to heuristics)
 //===----------------------------------------------------------------------===//
+
+/// Try to compute dependence distances using Polymer/ISL.
+/// Returns success if Polymer analysis succeeds, failure otherwise.
+static LogicalResult tryPolymerDependenceAnalysis(
+    affine::AffineForOp outerLoop,
+    SmallVectorImpl<affine::AffineForOp> &loops,
+    SmallVectorImpl<DependenceDistance> &distances) {
+  
+  // Get the parent function
+  auto funcOp = outerLoop->getParentOfType<func::FuncOp>();
+  if (!funcOp) {
+    return failure();
+  }
+  
+  // Try Polymer analysis
+  SmallVector<LoopDependenceDistance, 8> polymerDistances;
+  if (failed(computeDependenceDistancesWithPolymer(funcOp, polymerDistances))) {
+    return failure();
+  }
+  
+  // Convert Polymer results to SpaceTimeAnalysis format
+  distances.clear();
+  for (const auto &polyDist : polymerDistances) {
+    DependenceDistance dist;
+    dist.minDistance = polyDist.minDistance;
+    dist.maxDistance = polyDist.maxDistance;
+    dist.isUniform = polyDist.isUniform;
+    distances.push_back(dist);
+  }
+  
+  LLVM_DEBUG({
+    llvm::dbgs() << "[SpaceTimeAnalysis] Using Polymer dependence analysis\n";
+    llvm::dbgs() << "  Computed " << distances.size() << " loop distances\n";
+  });
+  
+  return success();
+}
 
 /// Compute dependence distances for each loop dimension.
 /// AutoSA methodology:
@@ -166,6 +206,15 @@ static LogicalResult computeDependenceDistances(
     SmallVectorImpl<DependenceDistance> &distances) {
   
   distances.clear();
+  
+  // First, try using Polymer/ISL for accurate dependence analysis
+  if (succeeded(tryPolymerDependenceAnalysis(outerLoop, loops, distances))) {
+    return success();
+  }
+  
+  // Fallback: heuristic MLIR-level analysis
+  LLVM_DEBUG(llvm::dbgs() << "[SpaceTimeAnalysis] Polymer analysis unavailable, "
+                          << "using MLIR heuristics\n");
   
   // Initialize distances for each loop
   for (unsigned i = 0; i < loops.size(); ++i) {
@@ -253,6 +302,10 @@ static LogicalResult computeDependenceDistances(
 ///   - A[i,k]: flows horizontally (along j-axis, since j doesn't appear)
 ///   - B[k,j]: flows vertically (along i-axis, since i doesn't appear)
 ///   - C[i,j]: stays local (output-stationary, k doesn't appear)
+/// Legacy data flow analysis (hardcoded for 2D PE arrays)
+/// 
+/// This version assumes 2 space loops and uses hardcoded rules for
+/// MatMul-like patterns. Kept for backward compatibility.
 static LogicalResult analyzeOperandFlows(
     AffineForOp outerLoop,
     SmallVectorImpl<AffineForOp> &loops,
@@ -327,6 +380,125 @@ static LogicalResult analyzeOperandFlows(
       // Neither space loop -> broadcast or some special pattern
       flows[memref] = SystolicFlowDir::NONE;
       LLVM_DEBUG(llvm::dbgs() << "[SpaceTimeAnalysis] Memref uses neither -> NONE\n");
+    }
+  }
+  
+  return success();
+}
+
+/// Parametric data flow analysis (Phase 2 enhancement)
+/// 
+/// This version uses the ParametricSpaceTime configuration to determine
+/// data flow directions based on access projection patterns.
+/// Supports both 1D and 2D PE arrays (ST0-ST5).
+LogicalResult analyzeOperandFlowsParametric(
+    AffineForOp outerLoop,
+    SmallVectorImpl<AffineForOp> &loops,
+    const ParametricSpaceTime &parametric,
+    DenseMap<Value, SystolicFlowDir> &flows) {
+  
+  flows.clear();
+  
+  unsigned numSpaceDims = parametric.getNumSpaceDims();
+  if (loops.size() < 3 || numSpaceDims == 0) {
+    LLVM_DEBUG(llvm::dbgs() 
+        << "[SpaceTimeAnalysis] Invalid config: loops=" << loops.size()
+        << ", spaceDims=" << numSpaceDims << "\n");
+    return failure();
+  }
+  
+  // Collect all accessed memrefs and their IV usage patterns
+  AffineForOp innermostLoop = loops.back();
+  Block *body = innermostLoop.getBody();
+  
+  DenseMap<Value, SmallPtrSet<Value, 4>> memrefToIVs;
+  
+  body->walk([&](Operation *op) {
+    SmallVector<Value, 4> operands;
+    Value memref;
+    
+    if (auto loadOp = dyn_cast<AffineLoadOp>(op)) {
+      memref = loadOp.getMemRef();
+      for (auto o : loadOp.getMapOperands())
+        operands.push_back(o);
+    } else if (auto storeOp = dyn_cast<AffineStoreOp>(op)) {
+      memref = storeOp.getMemRef();
+      for (auto o : storeOp.getMapOperands())
+        operands.push_back(o);
+    }
+    
+    if (memref) {
+      for (auto operand : operands) {
+        for (auto loop : loops) {
+          if (operand == loop.getInductionVar()) {
+            memrefToIVs[memref].insert(operand);
+            break;
+          }
+        }
+      }
+    }
+  });
+  
+  // Extract space loop induction variables from parametric config
+  SmallVector<Value, 2> spaceLoopIVs;
+  for (unsigned i = 0; i < numSpaceDims; ++i) {
+    unsigned loopIdx = parametric.getSpaceDimConfig(i).loopDim;
+    if (loopIdx < loops.size()) {
+      spaceLoopIVs.push_back(loops[loopIdx].getInductionVar());
+    }
+  }
+  
+  // Analyze each memref's access pattern
+  for (auto &entry : memrefToIVs) {
+    Value memref = entry.first;
+    auto &ivSet = entry.second;
+    
+    // Check which space loop IVs are used
+    SmallVector<bool, 2> usesSpaceDim(numSpaceDims, false);
+    for (unsigned i = 0; i < numSpaceDims; ++i) {
+      usesSpaceDim[i] = ivSet.count(spaceLoopIVs[i]) > 0;
+    }
+    
+    // Determine flow direction based on access projection pattern
+    if (numSpaceDims == 1) {
+      // 1D PE array (ST0/ST1/ST2)
+      if (usesSpaceDim[0]) {
+        // Uses the space loop IV -> local storage
+        flows[memref] = SystolicFlowDir::NONE;
+        LLVM_DEBUG(llvm::dbgs() 
+            << "[SpaceTimeAnalysis] 1D: Memref uses space loop -> NONE (local)\n");
+      } else {
+        // Does not use space loop IV -> broadcast along PE array
+        flows[memref] = SystolicFlowDir::HORIZONTAL;
+        LLVM_DEBUG(llvm::dbgs() 
+            << "[SpaceTimeAnalysis] 1D: Memref broadcast -> HORIZONTAL\n");
+      }
+    } else if (numSpaceDims == 2) {
+      // 2D PE array (ST3/ST4/ST5)
+      bool usesFirst = usesSpaceDim[0];
+      bool usesSecond = usesSpaceDim[1];
+      
+      if (usesFirst && usesSecond) {
+        // Uses both space loop IVs -> local storage (output)
+        flows[memref] = SystolicFlowDir::NONE;
+        LLVM_DEBUG(llvm::dbgs() 
+            << "[SpaceTimeAnalysis] 2D: Memref uses both space dims -> NONE (local)\n");
+      } else if (usesFirst && !usesSecond) {
+        // Uses only first space dim -> flows along second dimension
+        flows[memref] = SystolicFlowDir::HORIZONTAL;
+        LLVM_DEBUG(llvm::dbgs() 
+            << "[SpaceTimeAnalysis] 2D: Memref uses first space dim -> HORIZONTAL\n");
+      } else if (!usesFirst && usesSecond) {
+        // Uses only second space dim -> flows along first dimension
+        flows[memref] = SystolicFlowDir::VERTICAL;
+        LLVM_DEBUG(llvm::dbgs() 
+            << "[SpaceTimeAnalysis] 2D: Memref uses second space dim -> VERTICAL\n");
+      } else {
+        // Uses neither space dim -> broadcast or special pattern
+        flows[memref] = SystolicFlowDir::NONE;
+        LLVM_DEBUG(llvm::dbgs() 
+            << "[SpaceTimeAnalysis] 2D: Memref uses neither space dim -> NONE\n");
+      }
     }
   }
   
@@ -419,12 +591,44 @@ LogicalResult selectSpaceLoops(SpaceTimeInfo &info,
   return success();
 }
 
+/// Analyze data flow directions using the parametric configuration
+/// Phase 2 Enhancement: Uses ParametricSpaceTime if available, 
+/// otherwise falls back to legacy mode
 LogicalResult analyzeDataFlow(SpaceTimeInfo &info) {
   SmallVector<AffineForOp, 8> loops;
   getLoopNest(info.outerLoop, loops);
   
-  return analyzeOperandFlows(info.outerLoop, loops, 
-                             info.selectedSpaceLoops, info.operandFlows);
+  // Try parametric analysis first if configuration is valid
+  if (info.parametric.isValid() && info.parametric.getNumSpaceDims() > 0) {
+    LLVM_DEBUG(llvm::dbgs() 
+        << "[SpaceTimeAnalysis] Using parametric data flow analysis ("
+        << info.parametric.getSpaceTimeTypeString() << ")\n");
+    
+    if (succeeded(analyzeOperandFlowsParametric(info.outerLoop, loops,
+                                                info.parametric, info.operandFlows))) {
+      // Copy flows to parametric config for later use
+      for (auto &entry : info.operandFlows) {
+        info.parametric.setOperandFlow(entry.first, entry.second);
+      }
+      return success();
+    }
+    
+    LLVM_DEBUG(llvm::dbgs() 
+        << "[SpaceTimeAnalysis] Parametric analysis failed, falling back to legacy\n");
+  }
+  
+  // Fallback to legacy analysis (requires 2 space loops)
+  if (info.selectedSpaceLoops.size() >= 2) {
+    LLVM_DEBUG(llvm::dbgs() 
+        << "[SpaceTimeAnalysis] Using legacy data flow analysis\n");
+    return analyzeOperandFlows(info.outerLoop, loops, 
+                               info.selectedSpaceLoops, info.operandFlows);
+  }
+  
+  LLVM_DEBUG(llvm::dbgs() 
+      << "[SpaceTimeAnalysis] Data flow analysis failed: "
+      << "no valid parametric config and < 2 space loops\n");
+  return failure();
 }
 
 void SpaceTimeInfo::dump() const {
@@ -490,6 +694,55 @@ void SystolicConfig::dump() const {
   llvm::errs() << "\n  latency: ";
   for (auto s : latency) llvm::errs() << s << " ";
   llvm::errs() << "\n  simdWidth: " << simdWidth << "\n";
+}
+
+//===----------------------------------------------------------------------===//
+// NEW: Parametric Space-Time Configuration Inference
+//===----------------------------------------------------------------------===//
+
+/// Infer parametric space-time configuration from analysis results
+/// Phase 2 Enhancement: Automatically populates SpaceTimeInfo with 
+/// the parametric configuration and syncs loop indices
+LogicalResult inferParametricSpaceTime(SpaceTimeInfo &info,
+                                       const ParametricSpaceTime &spacetimeHint) {
+  // Initialize with the hint (default ST3 for backward compatibility)
+  info.parametric = spacetimeHint;
+  
+  // Validate the configuration
+  if (!info.parametric.isValid()) {
+    LLVM_DEBUG(llvm::dbgs() << "[SpaceTimeAnalysis] Invalid parametric spacetime configuration\n");
+    return failure();
+  }
+  
+  // Sync selected space loops from parametric config
+  info.selectedSpaceLoops.clear();
+  for (unsigned i = 0; i < info.parametric.getNumSpaceDims(); ++i) {
+    unsigned loopIdx = info.parametric.getSpaceDimConfig(i).loopDim;
+    info.selectedSpaceLoops.push_back(loopIdx);
+  }
+  
+  // Sync time loops (all loops not in space dimensions)
+  info.timeLoops.clear();
+  std::set<unsigned> spaceSet(info.selectedSpaceLoops.begin(),
+                              info.selectedSpaceLoops.end());
+  for (unsigned i = 0; i < info.numLoops; ++i) {
+    if (spaceSet.find(i) == spaceSet.end()) {
+      info.timeLoops.push_back(i);
+    }
+  }
+  
+  LLVM_DEBUG({
+    llvm::dbgs() << "[SpaceTimeAnalysis] Inferred parametric spacetime: "
+                 << info.parametric.getSpaceTimeTypeString() << "\n";
+    llvm::dbgs() << "  Space loops: ";
+    for (unsigned i : info.selectedSpaceLoops) llvm::dbgs() << i << " ";
+    llvm::dbgs() << "\n  Time loops: ";
+    for (unsigned i : info.timeLoops) llvm::dbgs() << i << " ";
+    llvm::dbgs() << "\n";
+    info.parametric.dump();
+  });
+  
+  return success();
 }
 
 } // namespace systolic

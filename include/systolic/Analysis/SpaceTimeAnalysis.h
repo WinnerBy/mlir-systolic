@@ -10,6 +10,7 @@
 #ifndef SYSTOLIC_ANALYSIS_SPACETIMEANALYSIS_H
 #define SYSTOLIC_ANALYSIS_SPACETIMEANALYSIS_H
 
+#include "systolic/Analysis/ParametricSpaceTime.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/IR/Value.h"
 #include "llvm/ADT/DenseMap.h"
@@ -18,18 +19,8 @@
 namespace mlir {
 namespace systolic {
 
-//===----------------------------------------------------------------------===//
-// Data Flow Direction
-//===----------------------------------------------------------------------===//
-
-/// Describes the systolic flow direction for a data operand.
-enum class SystolicFlowDir {
-  NONE,               // No systolic flow, local access (e.g., C in output-stationary)
-  HORIZONTAL,         // Data flows along j-axis (PE[i,j] -> PE[i,j+1])
-  VERTICAL,           // Data flows along i-axis (PE[i,j] -> PE[i+1,j])
-  REDUCE_HORIZONTAL,  // Reduction flows horizontally
-  REDUCE_VERTICAL,    // Reduction flows vertically
-};
+// SystolicFlowDir enum and related types are now in ParametricSpaceTime.h
+// Include that header to get the definitions
 
 //===----------------------------------------------------------------------===//
 // Dependence Distance Info
@@ -74,6 +65,10 @@ struct SpaceTimeInfo {
   /// Data flow direction for each memory operand
   llvm::DenseMap<Value, SystolicFlowDir> operandFlows;
   
+  /// **NEW**: Parametric space-time configuration (unified representation)
+  /// This replaces the hardcoded spacetime=3 assumption
+  ParametricSpaceTime parametric;
+  
   /// Check if analysis is valid
   bool isValid() const { return outerLoop && numLoops > 0; }
   
@@ -117,6 +112,21 @@ LogicalResult selectSpaceLoops(SpaceTimeInfo &info,
 
 /// Analyze data flow directions for operands based on space loop selection.
 LogicalResult analyzeDataFlow(SpaceTimeInfo &info);
+
+/// **Phase 2**: Parametric data flow analysis using ParametricSpaceTime config.
+/// This version supports both 1D and 2D PE arrays (ST0-ST5).
+LogicalResult analyzeOperandFlowsParametric(
+    affine::AffineForOp outerLoop,
+    llvm::SmallVectorImpl<affine::AffineForOp> &loops,
+    const ParametricSpaceTime &parametric,
+    llvm::DenseMap<mlir::Value, SystolicFlowDir> &flows);
+
+/// **NEW**: Infer parametric space-time configuration from analysis results.
+/// This consolidates space/time loop selection into a ParametricSpaceTime object.
+/// Initially defaults to ST3 for backward compatibility.
+LogicalResult inferParametricSpaceTime(SpaceTimeInfo &info,
+                                       const ParametricSpaceTime &spacetimeHint =
+                                           presets::createST3());
 
 //===----------------------------------------------------------------------===//
 // Utility Functions
