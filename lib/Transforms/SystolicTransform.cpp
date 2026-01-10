@@ -661,6 +661,18 @@ struct SystolicTransformPass
     
     LLVM_DEBUG(llvm::dbgs() << "\n=== Systolic Transform Pass ===\n");
     LLVM_DEBUG(llvm::dbgs() << "Processing function: " << func.getName() << "\n");
+    LLVM_DEBUG(llvm::dbgs() << "Space-time mode: " << options.spaceTimeMode << "\n");
+    LLVM_DEBUG(llvm::dbgs() << "Array partition: [" << options.arrayPart[0] << ", "
+                            << options.arrayPart[1] << ", " << options.arrayPart[2] << "]\n");
+    LLVM_DEBUG(llvm::dbgs() << "Latency: [" << options.latency[0] << ", "
+                            << options.latency[1] << "]\n");
+    
+    llvm::outs() << "[Systolic] Transform Pass Configuration:\n";
+    llvm::outs() << "  Space-time mode: " << options.spaceTimeMode << "\n";
+    llvm::outs() << "  Array partition: [" << options.arrayPart[0] << ", "
+                 << options.arrayPart[1] << ", " << options.arrayPart[2] << "]\n";
+    llvm::outs() << "  Latency: [" << options.latency[0] << ", "
+                 << options.latency[1] << "]\n";
     
     // REQUIREMENT: Polymer must be available and used
     if (!systolic::isPolymerAvailable()) {

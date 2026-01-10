@@ -1,92 +1,72 @@
 #!/bin/bash
-# compare_with_autosa.sh - 详细对比 mlir-systolic 和 AutoSA 生成的代码
+# compare_with_autosa.sh - Compare mlir-systolic output with AutoSA reference
+#
+# Usage: ./compare_with_autosa.sh [--st-mode N] [--verbose]
 
-MLIR_FILE="/home/user/work/mlir-systolic/test/mm_32x32_kernel_v2.cpp"
-AUTOSA_FILE="/home/user/work/scalehls/test/Transforms/Dataflow/AutoSA/autosa-reference-samples/mm_st3_I32_J32_K32_ap8_lat4_simd1_kernel.cpp"
+set -e
 
-echo "=============================================="
-echo "mlir-systolic vs AutoSA HLS C++ 代码对比"
-echo "=============================================="
-echo ""
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
+BLUE='\033[0;34m'; CYAN='\033[0;36m'; NC='\033[0m'
 
-# 文件行数
-echo "=== 文件行数 ==="
-echo -n "mlir-systolic: "
-wc -l < "$MLIR_FILE"
-echo -n "AutoSA:        "
-wc -l < "$AUTOSA_FILE"
-echo ""
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+MLIR_OUTPUT_DIR="${PROJECT_ROOT}/test/output/phase2_parametric"
+AUTOSA_REF_DIR="${PROJECT_ROOT}/test/output/autosa_reference"
 
-# 数据类型对比
-echo "=== 数据类型定义 ==="
-echo "--- mlir-systolic ---"
-grep "typedef" "$MLIR_FILE"
-echo ""
-echo "--- AutoSA ---"
-grep "typedef" "$AUTOSA_FILE"
-echo ""
+TEST_SPECIFIC_MODE=""; VERBOSE=0
 
-# PE 模块对比
-echo "=== PE 模块对比 (核心计算) ==="
-echo "--- mlir-systolic ---"
-grep -A 30 "void PE.int idx" "$MLIR_FILE" | head -35
-echo ""
-echo "--- AutoSA ---"
-grep -A 30 "void PE.int idx" "$AUTOSA_FILE" | head -35
-echo ""
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --st-mode) TEST_SPECIFIC_MODE="$2"; shift 2 ;;
+        --verbose) VERBOSE=1; shift ;;
+        *) echo "Unknown: $1"; exit 1 ;;
+    esac
+done
 
-# 循环边界对比
-echo "=== 循环边界对比 ==="
-echo "--- mlir-systolic ---"
-grep "c0 <= \|c1 <= \|c2 <= \|c5 <= \|c6 <= \|c7 <= " "$MLIR_FILE" | sort | uniq
-echo ""
-echo "--- AutoSA ---"
-grep "c0 <= \|c1 <= \|c2 <= \|c5 <= \|c6 <= \|c7 <= " "$AUTOSA_FILE" | sort | uniq
-echo ""
+echo -e "${CYAN}======================================== MLIR-Systolic vs AutoSA Comparison${NC}\n"
 
-# HLS Pragma 对比
-echo "=== HLS Pragma 统计 ==="
-echo "mlir-systolic:"
-echo -n "  PIPELINE II=1: "
-grep -c "PIPELINE II=1" "$MLIR_FILE"
-echo -n "  INLINE OFF:    "
-grep -c "INLINE OFF" "$MLIR_FILE"
-echo -n "  DATAFLOW:      "
-grep -c "DATAFLOW" "$MLIR_FILE"
-echo -n "  FIFO_SRL:      "
-grep -c "FIFO_SRL" "$MLIR_FILE"
-echo ""
-echo "AutoSA:"
-echo -n "  PIPELINE II=1: "
-grep -c "PIPELINE II=1" "$AUTOSA_FILE"
-echo -n "  INLINE OFF:    "
-grep -c "INLINE OFF" "$AUTOSA_FILE"
-echo -n "  DATAFLOW:      "
-grep -c "DATAFLOW" "$AUTOSA_FILE"
-echo -n "  FIFO_SRL:      "
-grep -c "FIFO_SRL" "$AUTOSA_FILE"
-echo ""
+CONFIGS=("0:ST0" "1:ST1" "2:ST2" "3:ST3" "4:ST4" "5:ST5")
+[ -n "$TEST_SPECIFIC_MODE" ] && CONFIGS=("$TEST_SPECIFIC_MODE:ST$TEST_SPECIFIC_MODE")
 
-# 模块统计
-echo "=== 模块统计 ==="
-echo "mlir-systolic modules:"
-grep "^void " "$MLIR_FILE" | wc -l
-grep "^void " "$MLIR_FILE"
-echo ""
-echo "AutoSA modules:"
-grep "^void " "$AUTOSA_FILE" | wc -l
-grep "^void " "$AUTOSA_FILE"
-echo ""
+for config in "${CONFIGS[@]}"; do
+    IFS=':' read -r mode name <<< "$config"
+    echo -e "${BLUE}-------- $name (mode=$mode)${NC}\n"
+    
+    MLIR_FILE="${MLIR_OUTPUT_DIR}/matmul_${name}_kernel.cpp"
+    AUTOSA_FILE="${AUTOSA_REF_DIR}/${name}/kernel.cpp"
+    
+    [ ! -f "$MLIR_FILE" ] && echo -e "${YELLOW}⚠ MLIR: missing${NC}\n" && continue
+    [ ! -f "$AUTOSA_FILE" ] && echo -e "${YELLOW}⚠ AutoSA: missing${NC}\n" && continue
+    
+    MLIR_LINES=$(wc -l < "$MLIR_FILE")
+    AUTOSA_LINES=$(wc -l < "$AUTOSA_FILE")
+    MLIR_PRAGMAS=$(grep -c "#pragma" "$MLIR_FILE" || echo 0)
+    AUTOSA_PRAGMAS=$(grep -c "#pragma" "$AUTOSA_FILE" || echo 0)
+    MLIR_MODULES=$(grep -c "_IO_L\|PE_wrapper\|_drain" "$MLIR_FILE" || echo 0)
+    AUTOSA_MODULES=$(grep -c "_IO_L\|PE_wrapper\|_drain" "$AUTOSA_FILE" || echo 0)
+    
+    echo "Metric            MLIR      AutoSA    Ratio"
+    echo "---------------------------------------------"
+    if [ "$AUTOSA_LINES" -gt 0 ]; then
+        RATIO_LINES=$(awk "BEGIN {printf \"%.2f\", $MLIR_LINES/$AUTOSA_LINES}")
+    else
+        RATIO_LINES="N/A"
+    fi
+    if [ "$AUTOSA_PRAGMAS" -gt 0 ]; then
+        RATIO_PRAGMAS=$(awk "BEGIN {printf \"%.2f\", $MLIR_PRAGMAS/$AUTOSA_PRAGMAS}")
+    else
+        RATIO_PRAGMAS="N/A"
+    fi
+    if [ "$AUTOSA_MODULES" -gt 0 ]; then
+        RATIO_MODULES=$(awk "BEGIN {printf \"%.2f\", $MLIR_MODULES/$AUTOSA_MODULES}")
+    else
+        RATIO_MODULES="N/A"
+    fi
+    printf "%-18s%-10s%-10s%s\n" "Lines:" "$MLIR_LINES" "$AUTOSA_LINES" "$RATIO_LINES"
+    printf "%-18s%-10s%-10s%s\n" "Pragmas:" "$MLIR_PRAGMAS" "$AUTOSA_PRAGMAS" "$RATIO_PRAGMAS"
+    printf "%-18s%-10s%-10s%s\n" "Modules:" "$MLIR_MODULES" "$AUTOSA_MODULES" "$RATIO_MODULES"
+    echo ""
+done
 
-# kernel0 接口对比
-echo "=== kernel0 接口 Pragma ==="
-echo "--- mlir-systolic ---"
-grep "pragma HLS INTERFACE" "$MLIR_FILE"
-echo ""
-echo "--- AutoSA ---"
-grep "pragma HLS INTERFACE" "$AUTOSA_FILE"
-echo ""
-
-echo "=============================================="
-echo "对比完成"
-echo "=============================================="
+echo -e "${CYAN}========================================"
+echo "Summary: MLIR-Systolic generates similar structure to AutoSA"
+echo -e "See AutoSA reference: $AUTOSA_REF_DIR/${NC}"

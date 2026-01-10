@@ -649,11 +649,9 @@ void SystolicDataflowGenerationPass::runOnOperation() {
   // Step 4: Generate PE Array
   // Find PE group (accumulator arrays with both loads and stores)
   bool hasPEGroup = false;
-  ArrayRefGroup *peGroup = nullptr;
   for (auto &group : groups) {
     if (group.type == ArrayRefGroup::PE_GROUP) {
       hasPEGroup = true;
-      peGroup = &group;
       break;
     }
   }
@@ -780,13 +778,10 @@ void SystolicDataflowGenerationPass::runOnOperation() {
       // For now, create a placeholder
       // TODO: Generate proper drain logic based on store operations
       if (!group.stores.empty()) {
-        // Clone store operations
-        IRMapping mapping;
-        for (auto storeOp : group.stores) {
-          // TODO: Map values correctly and clone store operations
-          LLVM_DEBUG(llvm::dbgs() << "  Drain module will handle store for " 
-                                  << group.arrayName << "\n");
-        }
+        // TODO: Map values correctly and clone store operations
+        LLVM_DEBUG(llvm::dbgs() << "  Drain module will handle "
+                                << group.stores.size() << " store(s) for "
+                                << group.arrayName << "\n");
       }
       
       // Create yield terminator
