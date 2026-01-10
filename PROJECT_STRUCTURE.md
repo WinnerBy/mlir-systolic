@@ -1,6 +1,7 @@
 # 项目目录结构
 
-> **最后更新**: 2024-12
+> **最后更新**: January 2026
+> **版本**: 3.0 (重构后)
 
 ---
 
@@ -29,53 +30,71 @@ mlir-systolic/
 │   └── systolic-translate/     # MLIR 翻译工具
 │
 ├── test/                        # 测试目录
-│   ├── matmul/                  # 矩阵乘法测试用例
-│   │   ├── matmul.mlir         # 测试输入 MLIR
-│   │   └── README.md           # 测试说明
-│   ├── reference-samples/      # AutoSA 生成的参考代码
-│   │   ├── mm_st3_*.cpp        # 不同配置的参考 HLS C++ 文件
-│   │   └── README.md           # 参考样本说明
-│   ├── output/                  # 测试输出目录（Git 忽略）
-│   │   ├── *.cpp               # 生成的 HLS C++ 代码
-│   │   ├── *.mlir              # 中间 MLIR 文件
-│   │   └── *.log               # 测试日志
-│   ├── *.sh                     # 测试脚本
-│   ├── *.mlir                   # 测试输入 MLIR 文件
-│   └── TEST_RESULTS.md          # 测试结果文档
+│   ├── autosa_hls_refs/         # 精选的 AutoSA HLS 参考（26个）
+│   │   ├── *.cpp                # 完整参数编码的 HLS 文件
+│   │   ├── README.md            # 参考说明
+│   │   └── INDEX.csv            # 文件索引
+│   ├── matmul/                  # 矩阵乘法测试套件
+│   ├── output/                  # 测试输出目录（含性能数据）
+│   ├── docs/                    # 测试文档
+│   ├── *.mlir                   # MLIR 测试输入文件
+│   └── collect_autosa_hls_refs.sh # HLS 参考提取脚本
 │
-├── scripts/                     # 脚本目录
-│   ├── build-polygeist.sh      # Polygeist 构建脚本
-│   ├── build-systolic.sh        # mlir-systolic 构建脚本
-│   ├── generate_autosa_tests.sh # AutoSA 测试用例生成脚本
-│   ├── generate_other_kernels.sh # 其他 Kernel 生成脚本
-│   └── check_random_access.sh  # 随机读取问题检查脚本
+├── scripts/                     # 脚本目录（仅保留核心构建脚本）
+│   ├── build-polygeist.sh       # Polygeist + Polymer 构建脚本
+│   └── build-systolic.sh        # mlir-systolic 构建脚本
 │
-├── docs/                        # 文档目录
-│   ├── README.md                # 文档索引
-│   ├── BUILD_STEPS.md           # 构建指南
-│   ├── QUICK_REFERENCE.md       # 快速参考
-│   ├── PROJECT_STATUS.md        # 项目状态
-│   ├── ARCHITECTURE.md          # 架构设计
-│   ├── DEVELOPMENT_GUIDE.md     # 开发指南
-│   ├── AUTOSA_*.md              # AutoSA 相关文档
-│   ├── RANDOM_ACCESS_*.md       # 随机读取问题文档
-│   ├── ALLO_*.md                # Allo 集成文档
-│   └── archive/                 # 归档文档（过时但保留）
+├── docs/                       # 文档目录（已整理）
+│   ├── README.md                # 文档导航入口
+│   ├── ARCHITECTURE_OVERVIEW.md # 系统架构总览
+│   ├── CODE_STRUCTURE.md        # 代码结构说明
+│   │
+│   ├── guide/                   # 开发指南
+│   │   ├── BUILD_GUIDE.md       # 构建指南
+│   │   └── DEVELOPMENT_GUIDE.md # 开发指南
+│   │
+│   ├── autosa/                  # AutoSA 集成文档
+│   │   ├── README.md            # AutoSA 概述
+│   │   └── REORGANIZATION_COMPLETION_REPORT.md
+│   │
+│   ├── features/                # 特性文档
+│   │   ├── polymer/             # Polymer 优化
+│   │   │   ├── README.md
+│   │   │   ├── POLYMER_QUICK_START.md
+│   │   │   └── POLYMER_INTEGRATION_COMPLETE.md
+│   │   ├── spacetime/           # SpaceTime 数据流
+│   │   │   ├── README.md
+│   │   │   └── SPACETIME_IMPLEMENTATION_PLAN.md
+│   │   └── write-time-reordering/ # 写时重排序
+│   │       ├── README.md
+│   │       ├── PHASE2_IMPLEMENTATION_SUMMARY.md
+│   │       └── WRITE_TIME_REORDERING_IMPLEMENTATION.md
+│   │
+│   ├── status/                  # 项目状态
+│   │   ├── PROJECT_STATUS.md    # 当前状态
+│   │   └── ROADMAP.md           # 技术路线图
+│   │
+│   ├── reference/               # 参考资料
+│   │   ├── autosa/
+│   │   ├── allo/
+│   │   └── testing/
+│   │
+│   └── issues/                  # 已知问题
+│       └── README.md
 │
-├── autosa_hls_output/          # AutoSA 生成的 HLS C 样例（待标注参数）
-│   ├── kernel_mttkrp.cpp       # MTTKRP 运算
-│   ├── kernel_ttmc.cpp         # TTMc 运算
-│   ├── kernel_cnn_small.cpp    # CNN 小规模
-│   ├── kernel_cnn_large.cpp    # CNN 大规模
-│   └── kernel_lu.cpp           # LU 分解
+├── autosa_hls_output/           # AutoSA 生成的原始输出（保留供参考）
+│
+├── autosa_reference_samples/    # AutoSA 参考样本库（19M）
+│   └── [48个样本目录，包含完整元数据和估计数据]
 │
 ├── build/                       # 构建目录（Git 忽略）
 │   └── ...                      # 编译产物
 │
 └── third_party/                 # 第三方依赖
-    └── Polygeist/               # Polygeist submodule
-        ├── llvm-project/        # LLVM/MLIR submodule
-        └── build/               # Polygeist 构建目录（Git 忽略）
+    ├── AutoSA/                  # AutoSA 工具集
+    ├── Polygeist/               # Polygeist + Polymer 框架
+    │   └── llvm-project/        # LLVM/MLIR 核心
+    └── Polymer/                 # (可选) Polymer 单独版本
 ```
 
 ---

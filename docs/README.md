@@ -1,108 +1,132 @@
-# mlir-systolic 文档索引
+# mlir-systolic 文档导航
 
-> **最后更新**: 2026-01-07  \
-> **说明**: 完成 Polymer 文档归类、Phase 进展归档，路径已校正。
-
----
-
-## 📚 核心文档（必读）
-- **[整理工作总结.md](整理工作总结.md)** — 项目概览与结论
-- **[PROJECT_ORGANIZATION_AND_ANALYSIS.md](PROJECT_ORGANIZATION_AND_ANALYSIS.md)** — 项目组织与分析
-- **[CODE_ISSUES_DETAILED_ANALYSIS.md](CODE_ISSUES_DETAILED_ANALYSIS.md)** — 代码问题详解
-- **[NEXT_STEPS_TECHNICAL_ROADMAP.md](NEXT_STEPS_TECHNICAL_ROADMAP.md)** — 技术路线图
-- **[快速参考卡.md](快速参考卡.md)** — 快速查阅卡
-- **[整理工作文件索引.md](整理工作文件索引.md)** — 整理产出索引
-
-## 🏗️ 架构与代码
-- **[ARCHITECTURE_OVERVIEW.md](ARCHITECTURE_OVERVIEW.md)** — 架构概览
-- **[CODE_STRUCTURE.md](CODE_STRUCTURE.md)** — 代码结构与问题清单
-- **[PROJECT_STRUCTURE.md](../PROJECT_STRUCTURE.md)** — 项目目录结构说明
-
-## 🔧 构建与测试
-- **[guide/BUILD_GUIDE.md](guide/BUILD_GUIDE.md)** — 构建/依赖/脚本整合指南
-- **[guide/DEVELOPMENT_GUIDE.md](guide/DEVELOPMENT_GUIDE.md)** — 开发指南
-- **[../test/TESTING_GUIDE.md](../test/TESTING_GUIDE.md)** — 测试指南
-- **[../test/TEST_STATUS.md](../test/TEST_STATUS.md)** — 测试现状
-
-## 📈 状态与报告
-- **[status/PROJECT_STATUS.md](status/PROJECT_STATUS.md)** — 当前状态（精简）
-- **[status/ROADMAP.md](status/ROADMAP.md)** — 阶段目标与测试标准
-- **[status/PROJECT_COMPLETION_REPORT.md](status/PROJECT_COMPLETION_REPORT.md)** — Polymer/ISL 集成完成总结
-
-## 🧩 专题 / 功能
-- **Polymer 集成文档** → [features/polymer/POLYMER_DOCUMENTATION_INDEX.md](features/polymer/POLYMER_DOCUMENTATION_INDEX.md)（索引）
-- **Space-time** → [features/spacetime/](features/spacetime/)
-- **写时重排** → [features/write-time-reordering/](features/write-time-reordering/)
-- **问题分析** → [issues/](issues/)
-- **参考资料** → [reference/autosa/](reference/autosa/), [reference/allo/](reference/allo/), [reference/testing/](reference/testing/)
-
-## 🗂️ 归档
-- **[archive/README.md](archive/README.md)** — 归档说明与索引
-- **近期归档**: [archive/2026-01-phase2/](archive/2026-01-phase2/)（Phase1/2 进展与清单）、[archive/2024-12/](archive/2024-12/)（历史实现）
+> **最后更新**: January 2026  
+> **版本**: 3.0 (文档整理)
 
 ---
 
-## 🗂️ 目录概览（最新分组）
+## 📋 快速导航
+
+### 🚀 快速开始
+1. **[../README.md](../README.md)** — 项目概述
+2. **[guide/BUILD_GUIDE.md](guide/BUILD_GUIDE.md)** — 构建和安装
+3. **[guide/DEVELOPMENT_GUIDE.md](guide/DEVELOPMENT_GUIDE.md)** — 开发指南
+
+### 📚 核心文档
+- **[ARCHITECTURE_OVERVIEW.md](ARCHITECTURE_OVERVIEW.md)** — 系统架构
+- **[CODE_STRUCTURE.md](CODE_STRUCTURE.md)** — 代码组织
+- **[../PROJECT_STRUCTURE.md](../PROJECT_STRUCTURE.md)** — 项目目录结构
+
+### 📊 项目状态
+- **[status/PROJECT_STATUS.md](status/PROJECT_STATUS.md)** — 当前状态
+- **[status/ROADMAP.md](status/ROADMAP.md)** — 技术路线图
+
+---
+
+## 🧩 核心特性
+
+### Polymer 优化框架
+- **[features/polymer/README.md](features/polymer/README.md)** — 概述
+- **[features/polymer/POLYMER_QUICK_START.md](features/polymer/POLYMER_QUICK_START.md)** — 快速入门
+- **[features/polymer/POLYMER_INTEGRATION_COMPLETE.md](features/polymer/POLYMER_INTEGRATION_COMPLETE.md)** — 集成完成报告
+
+### Space-Time 数据流架构
+- **[features/spacetime/README.md](features/spacetime/README.md)** — 概述
+- **[features/spacetime/SPACETIME_IMPLEMENTATION_PLAN.md](features/spacetime/SPACETIME_IMPLEMENTATION_PLAN.md)** — 实现方案
+
+### 写时重排序优化
+- **[features/write-time-reordering/README.md](features/write-time-reordering/README.md)** — 概述
+- **[features/write-time-reordering/PHASE2_IMPLEMENTATION_SUMMARY.md](features/write-time-reordering/PHASE2_IMPLEMENTATION_SUMMARY.md)** — Phase 2总结
+- **[features/write-time-reordering/WRITE_TIME_REORDERING_IMPLEMENTATION.md](features/write-time-reordering/WRITE_TIME_REORDERING_IMPLEMENTATION.md)** — 实现细节
+
+### AutoSA 集成
+- **[autosa/README.md](autosa/README.md)** — 概述
+- **[autosa/REORGANIZATION_COMPLETION_REPORT.md](autosa/REORGANIZATION_COMPLETION_REPORT.md)** — HLS参考文件整理
+
+---
+
+## 🔍 参考资料
+
+- **[reference/autosa/](reference/autosa/)** — AutoSA 分析和集成
+- **[reference/allo/](reference/allo/)** — Allo HLS代码生成
+- **[reference/testing/](reference/testing/)** — 测试参考
+
+---
+
+## 🐛 已知问题
+
+- **[issues/README.md](issues/README.md)** — 问题跟踪和分析
+
+---
+
+## 📁 文档结构
 
 ```
 docs/
-├── guide/                     # 构建 & 开发指南
-├── status/                    # 状态、路线图、完成报告
-├── features/                  # 功能/专题文档
-│   ├── polymer/               # Polymer 全套文档（索引/快速开始/路线图…）
-│   ├── spacetime/             # Space-time 实现与 ST3 报告
-│   └── write-time-reordering/ # 写时重排（分析/实现/代码）
-├── reference/                 # 参考资料（AutoSA/Allo/Testing）
-├── issues/                    # 问题分析（SIMD2、数据重用等）
-└── archive/                   # 历史归档（2024-12/，2026-01-phase2/…）
+├── README.md                                    # 本文件（文档导航）
+├── ARCHITECTURE_OVERVIEW.md                     # 架构总览
+├── CODE_STRUCTURE.md                            # 代码结构
+│
+├── guide/                                       # 开发指南
+│   ├── BUILD_GUIDE.md                           # 构建指南
+│   └── DEVELOPMENT_GUIDE.md                     # 开发指南
+│
+├── autosa/                                      # AutoSA集成
+│   ├── README.md
+│   └── REORGANIZATION_COMPLETION_REPORT.md
+│
+├── features/                                    # 核心特性
+│   ├── polymer/                                 # Polymer优化
+│   │   ├── README.md
+│   │   ├── POLYMER_QUICK_START.md
+│   │   └── POLYMER_INTEGRATION_COMPLETE.md
+│   ├── spacetime/                               # Space-Time架构
+│   │   ├── README.md
+│   │   └── SPACETIME_IMPLEMENTATION_PLAN.md
+│   └── write-time-reordering/                   # 写时重排序
+│       ├── README.md
+│       ├── PHASE2_IMPLEMENTATION_SUMMARY.md
+│       └── WRITE_TIME_REORDERING_IMPLEMENTATION.md
+│
+├── status/                                      # 项目状态
+│   ├── PROJECT_STATUS.md                        # 当前状态
+│   └── ROADMAP.md                               # 路线图
+│
+├── reference/                                   # 参考资料
+│   ├── autosa/                                  # AutoSA参考
+│   │   ├── README.md
+│   │   ├── AUTOSA_ANALYSIS.md
+│   │   ├── AUTOSA_ARCHITECTURE.md
+│   │   └── comparison_with_autosa.md
+│   ├── allo/                                    # Allo参考
+│   │   ├── README.md
+│   │   └── ALLO_HLS_CODE_GENERATION_RULES.md
+│   └── testing/                                 # 测试参考
+│       ├── README.md
+│       └── REFERENCE_SAMPLES.md
+│
+└── issues/                                      # 已知问题
+    └── README.md
 ```
 
 ---
 
-## 🔎 快速导航
+## 📖 使用建议
 
-- 构建/依赖 → [guide/BUILD_GUIDE.md](guide/BUILD_GUIDE.md)
-- 开发指南 → [guide/DEVELOPMENT_GUIDE.md](guide/DEVELOPMENT_GUIDE.md)
-- 当前状态 → [status/PROJECT_STATUS.md](status/PROJECT_STATUS.md)
-- 路线图 → [status/ROADMAP.md](status/ROADMAP.md)
-- 完成报告 → [status/PROJECT_COMPLETION_REPORT.md](status/PROJECT_COMPLETION_REPORT.md)
-- Polymer 文档 → [features/polymer/POLYMER_DOCUMENTATION_INDEX.md](features/polymer/POLYMER_DOCUMENTATION_INDEX.md)
-- Space-time → [features/spacetime/](features/spacetime/)
-- 写时重排 → [features/write-time-reordering/](features/write-time-reordering/)
-- AutoSA 参考 → [reference/autosa/](reference/autosa/)
-- Allo 集成 → [reference/allo/](reference/allo/)
-- 测试结果/样本 → [reference/testing/](reference/testing/)
-- 问题分析 → [issues/](issues/)
-- 历史归档 → [archive/README.md](archive/README.md)
+### 第一次接触项目？
+1. 阅读 [../README.md](../README.md)
+2. 查看 [ARCHITECTURE_OVERVIEW.md](ARCHITECTURE_OVERVIEW.md)
+3. 按照 [guide/BUILD_GUIDE.md](guide/BUILD_GUIDE.md) 构建
 
----
+### 想深入了解某个特性？
+- Polymer → [features/polymer/README.md](features/polymer/README.md)
+- Space-Time → [features/spacetime/README.md](features/spacetime/README.md)
+- Write-Time-Reordering → [features/write-time-reordering/README.md](features/write-time-reordering/README.md)
 
-## 📖 推荐阅读路径
+### 参考AutoSA或Allo？
+- [reference/autosa/](reference/autosa/)
+- [reference/allo/](reference/allo/)
 
-### 新人 30 分钟
-1. [整理工作总结.md](整理工作总结.md)
-2. [ARCHITECTURE_OVERVIEW.md](ARCHITECTURE_OVERVIEW.md)
-3. [guide/BUILD_GUIDE.md](guide/BUILD_GUIDE.md)
-4. [test/TESTING_GUIDE.md](../test/TESTING_GUIDE.md)
+### 遇到问题？
+- [issues/README.md](issues/README.md)
 
-### 开发者 1 小时
-1. [CODE_STRUCTURE.md](CODE_STRUCTURE.md)
-2. [status/PROJECT_STATUS.md](status/PROJECT_STATUS.md)
-3. [status/ROADMAP.md](status/ROADMAP.md)
-4. [features/polymer/POLYMER_DOCUMENTATION_INDEX.md](features/polymer/POLYMER_DOCUMENTATION_INDEX.md)
-5. [features/spacetime/](features/spacetime/)
-6. [features/write-time-reordering/](features/write-time-reordering/)
-
-### 管理/规划
-1. [PROJECT_ORGANIZATION_AND_ANALYSIS.md](PROJECT_ORGANIZATION_AND_ANALYSIS.md)
-2. [NEXT_STEPS_TECHNICAL_ROADMAP.md](NEXT_STEPS_TECHNICAL_ROADMAP.md)
-3. [status/PROJECT_COMPLETION_REPORT.md](status/PROJECT_COMPLETION_REPORT.md)
-4. [status/ROADMAP.md](status/ROADMAP.md)
-
----
-
-## 🧭 说明
-
-- 旧目录 `project/`、`autosa/`、`testing/`、`other-issues/` 已拆分进当前分组；历史版本请从 `archive/` 查找。
-- Polymer 全套文档已归入 `features/polymer/`；Phase 进展类文档下沉到 `archive/2026-01-phase2/`。
-- 路径更新后，如遇链接失效，可通过 `archive/` 或 `git log --follow` 追溯历史位置。
