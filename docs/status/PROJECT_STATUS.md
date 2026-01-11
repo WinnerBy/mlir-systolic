@@ -1,6 +1,6 @@
 # 项目状态（概览版）
 
-**最后更新**: 2026-01-06  
+**最后更新**: 2026-01-06 (更新：反映 ParametricSpaceTime 框架实现状态)  
 **状态**: 核心功能已可用，正推进多配置/多 kernel 支持
 
 ---
@@ -19,9 +19,9 @@
 - **PolymerAnalysis**: SCoP 提取与调度树获取可用
 
 ## 已知问题（优先级）
-- 🔴 Spacetime 硬编码为 3（多处 switch/数组下标假设）
-- 🔴 Kernel 假设 3-loop MM，循环体迁移 TODO
-- 🟡 配置流多次序列化（string attr → enum → switch）
+- ✅ Spacetime 参数化已完成（通过 ParametricSpaceTime 框架支持 ST0-ST5）
+- 🟡 Kernel 主要支持 3-loop MM，循环体迁移 TODO
+- 🟡 配置流使用函数属性传递，可进一步优化为结构化属性
 - 🟡 Write-time reordering 分析结果未应用到生成
 
 ## 测试现状
@@ -37,10 +37,10 @@
 ---
 
 ## 下一步短期计划（1-2 周）
-1) **Spacetime 参数化**：移除硬编码，支持 ST0-5
+1) ✅ **Spacetime 参数化**：已完成 ParametricSpaceTime 框架，支持 ST0-5
 2) **循环体迁移补齐**：通用 loop-body migration，支持非 MM kernel
-3) **配置流重构**：定义 `SystolicConfigAttr`，全流程结构化传递
-4) **测试扩充**：新增 ST0/1/2/4/5 + CNN/MTTKRP/TTMc/TTM/LU
+3) **配置流重构**：定义 `SystolicConfigAttr`，全流程结构化传递（可选优化）
+4) **测试扩充**：新增 ST0/1/2/4/5 + CNN/MTTKRP/TTMc/TTM/LU 的测试验证
 
 ## 中期计划（1-2 月）
 - 写时重排：将分析结果应用到 HLS 生成

@@ -21,11 +21,15 @@
 ## 项目目标
 
 将 Affine 循环嵌套自动转换为脉动阵列 HLS C++ 代码，结合：
-- **Polymer** 的多面体分析能力 ⭐ **核心依赖**
+- **Polymer** 的多面体分析能力 ⭐ **核心依赖** ✅ 已集成
   - 依赖距离分析（使用 ISL）
   - 空间循环自动选择
-  - **调度树获取（用于 task 分解）**
-- **MLIR** 的变换和代码生成能力（参考 ScaleHLS）
+  - 调度树获取（用于 task 分解）
+- **MLIR** 的变换和代码生成能力 ✅ 已实现
+- **ParametricSpaceTime 框架** ✅ 已实现
+  - 支持 ST0-ST5 全部 6 种 spacetime 配置
+  - 参数化的空间/时间循环选择
+  - 自动数据流方向推导
 
 **为什么需要 Polymer**：
 - AutoSA 基于多面体模型，使用 ISL Schedule Tree 进行依赖分析和循环变换
@@ -54,6 +58,9 @@ AutoSA 包含两个主要部分：
 
 **当前实现范围**：
 - ✅ **FPGA Kernel 生成**：专注于 SCoP 区域的循环嵌套（对应 AutoSA 的 `#pragma scop` 区域）
+  - ✅ Polymer 集成完成，支持多面体分析
+  - ✅ ParametricSpaceTime 框架，支持 ST0-ST5 配置
+  - ✅ HLS C++ 代码生成
 - ⚠️ **Host 端代码生成**：接口已预留但暂不实现
 - ⚠️ **SCoP 区域检测**：当前测试阶段只处理单个 `affine.for` 循环嵌套（后续使用 Polygeist 处理 C 文件导入）
 
@@ -371,22 +378,22 @@ mlir-systolic/
 - [x] 分析接口设计
 - [x] 构建系统重构 ✅ **最新完成**
 
-### Phase 2: Polymer 集成 ⭐ **进行中**
+### Phase 2: Polymer 集成 ✅ **已完成**
 - [x] Polymer 集成框架 ✅
 - [x] SCoP 提取（使用 Polymer）✅
 - [x] 强制使用 Polymer（移除启发式方法）✅
 - [x] 自动预处理（ExtractScopStmt）✅
-- [ ] 完善依赖距离提取
-- [ ] 实现基于调度树的 task 分解
+- [x] 依赖距离分析 ✅
+- [ ] 实现基于调度树的 task 分解（可选优化）
 - [ ] 测试各种循环嵌套模式
 
-### Phase 3: 核心实现
-- [ ] SystolicDataflow Dialect 定义 (TableGen)
-- [ ] SystolicDataflow Dialect 实现
-- [ ] SystolicTransform.cpp - 变换 Pass（部分完成）
-- [ ] SystolicDataflowGeneration.cpp - 数据流抽象生成 ⭐
-- [ ] SystolicDataflowToHLS.cpp - Dialect 降级 ⭐
-- [ ] EmitHLSCpp.cpp - 代码生成
+### Phase 3: 核心实现 ✅ **主要完成**
+- [x] SystolicDataflow Dialect 定义 (TableGen) ✅
+- [x] SystolicDataflow Dialect 实现 ✅
+- [x] SystolicTransform.cpp - 变换 Pass ✅（支持参数化 spacetime）
+- [x] SystolicDataflowGeneration.cpp - 数据流抽象生成 ✅
+- [x] SystolicDataflowToHLS.cpp - Dialect 降级 ✅
+- [x] EmitHLSCpp.cpp - 代码生成 ✅
 
 ### Phase 4: 验证
 - [ ] MatMul 端到端测试

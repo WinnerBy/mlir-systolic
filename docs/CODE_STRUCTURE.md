@@ -33,10 +33,10 @@
 - 转换后的 Affine IR
 - 配置信息存储为函数属性
 
-**⚠️ 已知问题**:
-- 空间循环选择硬编码为 `[0, 1]` (即 `[i, j]`)
-- 时间循环硬编码为 `[2+]` (即 `[k, ...]`)
-- 仅支持 spacetime=3 配置
+**✅ 当前状态**:
+- 已实现参数化空间循环选择（通过 `selectSpaceLoopsParametric()`）
+- 支持 ST0-ST5 配置（通过 `ParametricSpaceTime::createFromMode()`）
+- 向后兼容传统模式（`selectSpaceLoops()`）
 
 #### SystolicDataflowGeneration.cpp
 **功能**: 生成 SystolicDataflow Dialect 操作
@@ -54,10 +54,10 @@
 
 **输出**: SystolicDataflow Dialect 操作
 
-**⚠️ 已知问题**:
-- PE 阵列访问模式假设为 `[i][j]`
-- 数据流方向依赖数组名称 (A/B/C)
-- IO 层级分析仅针对 spacetime=3
+**✅ 当前状态**:
+- 使用 ParametricSpaceTime 框架进行参数化分析
+- 数据流方向通过 `analyzeOperandFlowsParametric()` 自动推导
+- 支持不同 spacetime 配置的 IO 层级分析
 
 #### SystolicDataflowToHLS.cpp
 **功能**: 降低 SystolicDataflow 到 HLS Dialect
@@ -249,61 +249,27 @@ systolic-translate \
 
 ## 已知问题和 FIXME
 
-### 🔴 P1 (高优先级) - Spacetime 硬编码
+### ✅ P1 (已完成) - Spacetime 参数化
 
-#### 位置 1: SystolicTransform.cpp (~185-200)
-```cpp
-// FIXME: [spacetime=3 hardcoded] 空间循环选择硬编码为 [i,j]
-// 需要参数化为支持其他 spacetime 配置 (ST0-ST5)
-for (unsigned i = 0; i < 2; ++i) {
-  info.spaceLoops.push_back(i);
-}
-```
+**状态**: 已通过 ParametricSpaceTime 框架实现参数化支持
 
-**影响**: 无法支持 ST0, ST1, ST2, ST4, ST5
+**实现位置**:
+- `SystolicTransform.cpp`: 使用 `selectSpaceLoopsParametric()` 进行参数化选择
+- `SystolicDataflowGeneration.cpp`: 使用 `ParametricSpaceTime::createFromMode()` 创建配置
+- `SpaceTimeAnalysis.cpp`: 实现 `analyzeOperandFlowsParametric()` 进行参数化数据流分析
 
-**解决方案**: 参见 `NEXT_STEPS_TECHNICAL_ROADMAP.md` Phase 1
+**支持范围**: ST0-ST5 全部 6 种配置
 
-#### 位置 2: SystolicTransform.cpp (~210-220)
-```cpp
-// FIXME: [spacetime=3 hardcoded] 时间循环硬编码从第 2 维开始
-for (unsigned i = 2; i < loops.size(); ++i) {
-  info.timeLoops.push_back(i);
-}
-```
+**向后兼容**: 保留传统 `selectSpaceLoops()` 作为回退机制
 
-#### 位置 3: SystolicDataflowGeneration.cpp (~210-240)
-```cpp
-// FIXME: [spacetime=3 hardcoded] 数据流方向依赖数组名称
-// 需要基于实际访问模式自动推导
-if (arrayName == "A") {
-  flows[memref] = SystolicFlowDir::HORIZONTAL;
-} else if (arrayName == "B") {
-  flows[memref] = SystolicFlowDir::VERTICAL;
-}
-```
+### 🟡 P2 (中优先级) - Kernel 泛化
 
-#### 位置 4: SystolicDataflowGeneration.cpp (~350-400)
-```cpp
-// FIXME: [spacetime=3 hardcoded] PE 阵列维度假设为 2D [i][j]
-// 需要根据实际 spaceLoops 动态确定
-```
+#### 当前状态
+- ✅ 主要支持 3-loop 矩阵乘法 (MM)
+- 🟡 其他 kernel 类型 (MTTKRP, CNN, LU 等) 支持有限
+- 🟡 需要实现通用的 loop body migration
 
-#### 位置 5: systolic-translate.cpp (~300-350)
-```cpp
-// FIXME: [spacetime=3 hardcoded] 数组维度硬编码为 3D
-// serialize 循环边界依赖 spacetime=3 的具体参数
-```
-
-### 🟡 P2 (中优先级) - Kernel 特异性
-
-#### 位置: 多个文件
-```cpp
-// FIXME: [MM kernel specific] 假设 3 个循环 [i, j, k]
-// 需要支持 N 维循环嵌套 (MTTKRP: 4+, CNN: 5+)
-```
-
-**影响**: 无法支持其他 kernel
+**影响**: 其他 kernel 类型可能需要手动适配或等待通用实现
 
 ### 🟡 P2 (中优先级) - 配置流
 
@@ -314,17 +280,17 @@ if (arrayName == "A") {
 func.setAttr("systolic.config", ...);
 ```
 
-### 🟢 P3 (低优先级) - 功能未完成
+### 🟢 P3 (低优先级) - 功能完善
 
 #### 位置: SystolicDataflowToHLS.cpp
 ```cpp
-// TODO: 实现循环体迁移
-// TODO: 实现双缓冲逻辑
+// TODO: 实现通用循环体迁移（当前主要支持 MM kernel）
+// TODO: 完善双缓冲逻辑
 ```
 
 #### 位置: WriteTimeReorderingAnalysis.cpp
 ```cpp
-// FIXME: 仅支持 3D 数组
+// FIXME: 当前主要支持 3D 数组，其他维度支持有限
 if (arrayDims.size() != 3) {
   return failure();
 }
@@ -383,48 +349,59 @@ auto configAttr = func.getAttr("systolic.config")
 
 ---
 
-## 参数化重构指南
+## 参数化实现状态
 
-### 目标
+### 已完成
 
-将硬编码的 spacetime=3 和 MM kernel 参数化，支持:
-- 6 种 spacetime (ST0-ST5)
-- 多种 kernel (MM, MTTKRP, CNN, ...)
+✅ **Spacetime 参数化**: 通过 ParametricSpaceTime 框架实现，支持 ST0-ST5
+- 使用 `ParametricSpaceTime::createFromMode()` 创建配置
+- 使用 `selectSpaceLoopsParametric()` 进行参数化选择
+- 使用 `analyzeOperandFlowsParametric()` 进行参数化数据流分析
 
-### 关键改动
+### 待完善
 
-1. **定义参数化数据结构**
+🟡 **Kernel 泛化**: 主要支持 3-loop MM，其他 kernel 类型支持有限
+- 需要实现通用的 loop body migration
+- 需要支持 N 维循环嵌套 (MTTKRP: 4+, CNN: 5+)
+
+### 已实现的参数化框架
+
+1. **ParametricSpaceTime 数据结构** ✅
    ```cpp
-   struct ParametricSpaceTime {
-     SmallVector<unsigned> spaceLoopDims;
-     SmallVector<unsigned> timeLoopDims;
-     unsigned peArrayDims;
-     bool hasReductionLoop;
+   class ParametricSpaceTime {
+     SmallVector<SpaceDimConfig> spaceDimConfigs;  // 空间维度配置
+     TimeDimConfig timeDimConfig;                   // 时间维度配置
+     ReductionDimConfig reductionDimConfig;         // Reduction 维度配置
+     DenseMap<Value, SystolicFlowDir> operandFlows; // 数据流方向
    };
    ```
 
-2. **通用的空间循环选择**
+2. **参数化空间循环选择** ✅
    ```cpp
    LogicalResult selectSpaceLoopsParametric(
-       SpaceTimeInfo &info,
-       unsigned numSpaceLoops);  // 1 或 2
+       const SmallVectorImpl<LoopDepInfo> &depInfos,
+       const ParametricSpaceTime &parametric,
+       SmallVectorImpl<unsigned> &spaceLoopIndices,
+       SmallVectorImpl<unsigned> &timeLoopIndices);
    ```
 
-3. **数据流自动推导**
+3. **参数化数据流分析** ✅
    ```cpp
-   LogicalResult inferDataFlows(
-       const ParametricSpaceTime &spacetime,
+   LogicalResult analyzeOperandFlowsParametric(
+       AffineForOp outerLoop,
+       const SmallVector<AffineForOp> &loops,
+       const ParametricSpaceTime &parametric,
        DenseMap<Value, SystolicFlowDir> &flows);
    ```
 
-4. **参数化代码生成**
-   - PE 模块维度由 `peArrayDims` 决定
-   - IO 模块结构动态生成
+4. **参数化代码生成** ✅
+   - PE 模块维度由 `getNumSpaceDims()` 决定
+   - IO 模块结构根据 spacetime 配置动态生成
    - HLS 代码根据配置生成
 
-### 详细实施计划
+### 待完善的功能
 
-参见 [NEXT_STEPS_TECHNICAL_ROADMAP.md](../NEXT_STEPS_TECHNICAL_ROADMAP.md) Phase 1-3
+参见 [ROADMAP.md](../status/ROADMAP.md) 了解后续计划
 
 ---
 
@@ -432,12 +409,12 @@ auto configAttr = func.getAttr("systolic.config")
 
 提交代码前检查:
 
-- [ ] 是否支持参数化 spacetime?
-- [ ] 是否支持 3+ 维循环?
+- [x] 是否支持参数化 spacetime? ✅ 已通过 ParametricSpaceTime 框架实现
+- [ ] 是否支持 3+ 维循环? 🟡 主要支持 3-loop，其他维度支持有限
 - [ ] 是否处理了错误情况?
 - [ ] 是否有充分的单元测试?
 - [ ] 是否与 AutoSA 行为一致?
-- [ ] 是否避免了新的硬编码?
+- [x] 是否避免了新的硬编码? ✅ 已使用参数化框架
 - [ ] 是否更新了文档?
 - [ ] 是否添加了 FIXME 注释 (如果临时实现)?
 

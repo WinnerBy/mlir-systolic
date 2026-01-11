@@ -66,9 +66,9 @@
 4. **可扩展性**: 易于添加新的优化 pass 和代码生成策略
 
 ### 当前限制 (待改进)
-- 🔴 **ST3-Only**: 当前仅支持 spacetime=3 配置
-- 🔴 **MM-Specific**: 仅针对 3-loop 矩阵乘法优化
-- 🟡 **配置流混乱**: 多次序列化配置参数
+- ✅ **Spacetime 参数化**: 已支持 ST0-ST5 配置（通过 ParametricSpaceTime 框架）
+- 🟡 **Kernel 泛化**: 主要针对 3-loop 矩阵乘法优化，其他 kernel 类型支持有限
+- 🟡 **配置流**: 使用函数属性传递配置，可进一步优化为结构化属性
 - 🟡 **Write-Time Reordering**: 分析结果未完全应用到代码生成
 
 ---
@@ -85,12 +85,12 @@
   - 提取时间循环 (time loops)
   - 添加 systolic 属性到 IR 中
 - **关键函数**:
-  - `extractSpaceLoops()`: 根据 spacetime 配置选择空间循环
-  - `extractTimeLoops()`: 选择时间维度
+  - `selectSpaceLoopsParametric()`: 使用 ParametricSpaceTime 框架选择空间循环（支持 ST0-ST5）
+  - `selectSpaceLoops()`: 传统模式选择（向后兼容）
   - `annotateSystolicConfig()`: 添加属性标记
-- **当前问题**: 
-  - 🔴 硬编码 `spacetime=3`（约 185-220 行）
-  - 🔴 假设 3-loop 结构
+- **当前状态**: 
+  - ✅ 已实现参数化 spacetime 配置（通过 ParametricSpaceTime 框架）
+  - 🟡 主要针对 3-loop 结构优化，其他循环嵌套支持有限
 
 #### ArrayPartitioning.cpp
 - **职责**: 分析和标记数组分区策略
@@ -109,9 +109,10 @@
 - **关键数据结构**:
   - `DataflowNode`: 表示数据流节点（PE、load、store）
   - `FIFOConnection`: FIFO 连接信息
-- **当前问题**:
-  - 🔴 硬编码 3D 数组假设（约 210-240 行）
-  - 🔴 固定的 FIFO 深度计算
+- **当前状态**:
+  - ✅ 使用 ParametricSpaceTime 框架支持不同 spacetime 配置
+  - ✅ 支持参数化的数据流方向分析（analyzeOperandFlowsParametric）
+  - 🟡 FIFO 深度计算可进一步优化
 
 #### SystolicDataflowToHLS.cpp
 - **职责**:
@@ -153,9 +154,10 @@
   ```bash
   systolic-translate --emit-hls input.mlir -o output.cpp
   ```
-- **当前问题**:
-  - 🔴 硬编码 spacetime=3 配置（约 300-350 行）
-  - 🟡 配置选项不完整
+- **当前状态**:
+  - ✅ 支持从函数属性读取 spacetime 配置
+  - ✅ 支持参数化的代码生成
+  - 🟡 配置选项可进一步扩展
 
 ---
 
@@ -236,21 +238,25 @@
 
 #### Phase 2: Space/Time Loop Extraction
 ```
-For spacetime=3 (MM kernel):
+使用 ParametricSpaceTime 框架进行参数化配置：
+
+示例：spacetime=3 (MM kernel)
   i, j, k loops
   ↓
-  Space loops: i, j
-  Time loops: k
+  ParametricSpaceTime::createFromMode(3)
+  ↓
+  Space loops: i, j (从配置获取)
+  Time loops: k (剩余循环)
   ↓
   Generate: (t, i, j) systolic array
 
-配置选择逻辑 (当前硬编码):
-  - spacetime=0: i (1D)
-  - spacetime=1: i,j (2D)
-  - spacetime=2: i (1D + different projection)
-  - spacetime=3: i,j (2D, standard)
-  - spacetime=4: i,j,k (3D)
-  - spacetime=5: i,j,k (3D, different projection)
+支持的配置 (通过 ParametricSpaceTime):
+  - spacetime=0: space=[0] (1D row array)
+  - spacetime=1: space=[1] (1D column array)
+  - spacetime=2: space=[2] (1D reduction array)
+  - spacetime=3: space=[0,1] (2D output-stationary) ✅ 主要测试
+  - spacetime=4: space=[0,2] (2D weight-stationary)
+  - spacetime=5: space=[1,2] (2D activation-stationary)
 ```
 
 #### Phase 5: FIFO Depth Calculation
@@ -452,8 +458,8 @@ pm.addPass(createDataflowOptimizationPass());
 | 特性 | mlir-systolic | AutoSA | 说明 |
 |-----|---------------|--------|------|
 | **框架** | MLIR | PoCC/PPCG | mlir-systolic 基于现代 MLIR 基础设施 |
-| **Spacetime 支持** | 🔴 仅 ST3 (当前) | ✅ ST0-ST5 | AutoSA 支持全部 6 种配置 |
-| **Kernel 支持** | 🔴 仅 MM | ✅ MM/CNN/MTTKRP 等 | AutoSA 更通用 |
+| **Spacetime 支持** | ✅ ST0-ST5 (参数化) | ✅ ST0-ST5 | 已实现 ParametricSpaceTime 框架支持全部 6 种配置 |
+| **Kernel 支持** | 🟡 主要 MM (3-loop) | ✅ MM/CNN/MTTKRP 等 | AutoSA 更通用，mlir-systolic 主要针对 MM 优化 |
 | **代码质量** | 🟡 中等 | ✅ 高 | AutoSA 经过大量优化 |
 | **可扩展性** | ✅ 好 (MLIR) | 🟡 中等 (C++) | MLIR pass 系统更易扩展 |
 | **文档** | 🟡 进行中 | ✅ 完善 | AutoSA 有完整论文和文档 |
@@ -502,8 +508,8 @@ for (int i = 0; i < I; i++) {
 ## 下一步架构演进
 
 ### 短期目标 (1-2 个月)
-1. ✅ **参数化 Spacetime**: 移除所有硬编码
-2. ✅ **通用化 Kernel**: 支持 N-loop 结构
+1. ✅ **参数化 Spacetime**: 已完成 ParametricSpaceTime 框架，支持 ST0-ST5
+2. 🟡 **通用化 Kernel**: 主要支持 3-loop MM，其他 kernel 类型支持有限
 3. 🟡 **完善 Loop Body Migration**: 实现 TODO
 
 ### 中期目标 (3-6 个月)
@@ -549,4 +555,4 @@ for (int i = 0; i < I; i++) {
 ---
 
 **文档维护**: 此文档应在架构重大变更时更新。
-**最后更新**: 2024 (初始版本)
+**最后更新**: 2026-01 (更新：反映 ParametricSpaceTime 框架实现)

@@ -242,8 +242,28 @@ public:
   /// Create a parametric configuration from a numeric mode (0-5)
   /// This factory function maps AutoSA's spaceTimeMode enum to ParametricSpaceTime
   static ParametricSpaceTime createFromMode(unsigned mode);
+  
+  /// Create a parametric configuration from loop indices (for dynamic enumeration)
+  /// This is used when enumerating all possible spacetime configurations
+  static ParametricSpaceTime createFromLoopIndices(
+      const llvm::SmallVector<unsigned> &spaceLoopIndices,
+      const llvm::SmallVector<unsigned> &timeLoopIndices,
+      const llvm::SmallVector<llvm::StringRef> &loopNames);
+  
+  //===--------------------------------------------------------------------===//
+  // Configuration ID (for dynamic enumeration)
+  //===--------------------------------------------------------------------===//
+  
+  /// Set configuration ID (corresponds to AutoSA's space_time_id)
+  void setConfigId(unsigned id) { configId = id; }
+  
+  /// Get configuration ID
+  unsigned getConfigId() const { return configId; }
 
 private:
+  /// Configuration ID (for dynamic enumeration, corresponds to AutoSA's space_time_id)
+  unsigned configId = 0;
+  
   /// Configurations for each space dimension (1–2 elements for typical systolic)
   llvm::SmallVector<SpaceDimConfig, 2> spaceDimConfigs;
   
