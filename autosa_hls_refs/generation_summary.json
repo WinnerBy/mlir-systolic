@@ -1,0 +1,1188 @@
+[
+  {
+    "kernel": "mm",
+    "spacetime": 0,
+    "array_part": "16,16,16",
+    "latency": "8,8",
+    "simd": "2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/simd_info.json --sa-sizes={kernel[]->space_time[0];kernel[]->array_part[16,16,16];kernel[]->latency[8,8];kernel[]->simd[2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st0_ap16,16,16_lat8,8_simd2/mm_st0_ap16,16,16_lat8,8_simd2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st0_ap16,16,16_lat8,8_simd2/mm_st0_ap16,16,16_lat8,8_simd2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mm",
+    "spacetime": 0,
+    "array_part": "32,32,32",
+    "latency": "16,16",
+    "simd": "4",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/simd_info.json --sa-sizes={kernel[]->space_time[0];kernel[]->array_part[32,32,32];kernel[]->latency[16,16];kernel[]->simd[4]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st0_ap32,32,32_lat16,16_simd4/mm_st0_ap32,32,32_lat16,16_simd4_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st0_ap32,32,32_lat16,16_simd4/mm_st0_ap32,32,32_lat16,16_simd4_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mm",
+    "spacetime": 0,
+    "array_part": "64,64,64",
+    "latency": "32,32",
+    "simd": "8",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/simd_info.json --sa-sizes={kernel[]->space_time[0];kernel[]->array_part[64,64,64];kernel[]->latency[32,32];kernel[]->simd[8]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st0_ap64,64,64_lat32,32_simd8/mm_st0_ap64,64,64_lat32,32_simd8_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st0_ap64,64,64_lat32,32_simd8/mm_st0_ap64,64,64_lat32,32_simd8_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mm",
+    "spacetime": 1,
+    "array_part": "16,16,16",
+    "latency": "8,8",
+    "simd": "2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/simd_info.json --sa-sizes={kernel[]->space_time[1];kernel[]->array_part[16,16,16];kernel[]->latency[8,8];kernel[]->simd[2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st1_ap16,16,16_lat8,8_simd2/mm_st1_ap16,16,16_lat8,8_simd2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st1_ap16,16,16_lat8,8_simd2/mm_st1_ap16,16,16_lat8,8_simd2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mm",
+    "spacetime": 1,
+    "array_part": "32,32,32",
+    "latency": "16,16",
+    "simd": "4",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/simd_info.json --sa-sizes={kernel[]->space_time[1];kernel[]->array_part[32,32,32];kernel[]->latency[16,16];kernel[]->simd[4]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st1_ap32,32,32_lat16,16_simd4/mm_st1_ap32,32,32_lat16,16_simd4_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st1_ap32,32,32_lat16,16_simd4/mm_st1_ap32,32,32_lat16,16_simd4_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mm",
+    "spacetime": 1,
+    "array_part": "64,64,64",
+    "latency": "32,32",
+    "simd": "8",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/simd_info.json --sa-sizes={kernel[]->space_time[1];kernel[]->array_part[64,64,64];kernel[]->latency[32,32];kernel[]->simd[8]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st1_ap64,64,64_lat32,32_simd8/mm_st1_ap64,64,64_lat32,32_simd8_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st1_ap64,64,64_lat32,32_simd8/mm_st1_ap64,64,64_lat32,32_simd8_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mm",
+    "spacetime": 2,
+    "array_part": "16,16,16",
+    "latency": "8,8",
+    "simd": "2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/simd_info.json --sa-sizes={kernel[]->space_time[2];kernel[]->array_part[16,16,16];kernel[]->latency[8,8];kernel[]->simd[2]} --local-reduce --reduce-op=\"+\" --simd-touch-space --array-contraction",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st2_ap16,16,16_lat8,8_simd2/mm_st2_ap16,16,16_lat8,8_simd2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st2_ap16,16,16_lat8,8_simd2/mm_st2_ap16,16,16_lat8,8_simd2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mm",
+    "spacetime": 2,
+    "array_part": "32,32,32",
+    "latency": "16,16",
+    "simd": "4",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/simd_info.json --sa-sizes={kernel[]->space_time[2];kernel[]->array_part[32,32,32];kernel[]->latency[16,16];kernel[]->simd[4]} --local-reduce --reduce-op=\"+\" --simd-touch-space --array-contraction",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st2_ap32,32,32_lat16,16_simd4/mm_st2_ap32,32,32_lat16,16_simd4_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st2_ap32,32,32_lat16,16_simd4/mm_st2_ap32,32,32_lat16,16_simd4_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mm",
+    "spacetime": 2,
+    "array_part": "64,64,64",
+    "latency": "32,32",
+    "simd": "8",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/simd_info.json --sa-sizes={kernel[]->space_time[2];kernel[]->array_part[64,64,64];kernel[]->latency[32,32];kernel[]->simd[8]} --local-reduce --reduce-op=\"+\" --simd-touch-space --array-contraction",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st2_ap64,64,64_lat32,32_simd8/mm_st2_ap64,64,64_lat32,32_simd8_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st2_ap64,64,64_lat32,32_simd8/mm_st2_ap64,64,64_lat32,32_simd8_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mm",
+    "spacetime": 3,
+    "array_part": "16,16,16",
+    "latency": "8,8",
+    "simd": "2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/simd_info.json --sa-sizes={kernel[]->space_time[3];kernel[]->array_part[16,16,16];kernel[]->latency[8,8];kernel[]->simd[2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st3_ap16,16,16_lat8,8_simd2/mm_st3_ap16,16,16_lat8,8_simd2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st3_ap16,16,16_lat8,8_simd2/mm_st3_ap16,16,16_lat8,8_simd2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mm",
+    "spacetime": 3,
+    "array_part": "32,32,32",
+    "latency": "16,16",
+    "simd": "4",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/simd_info.json --sa-sizes={kernel[]->space_time[3];kernel[]->array_part[32,32,32];kernel[]->latency[16,16];kernel[]->simd[4]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st3_ap32,32,32_lat16,16_simd4/mm_st3_ap32,32,32_lat16,16_simd4_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st3_ap32,32,32_lat16,16_simd4/mm_st3_ap32,32,32_lat16,16_simd4_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mm",
+    "spacetime": 3,
+    "array_part": "64,64,64",
+    "latency": "32,32",
+    "simd": "8",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/simd_info.json --sa-sizes={kernel[]->space_time[3];kernel[]->array_part[64,64,64];kernel[]->latency[32,32];kernel[]->simd[8]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st3_ap64,64,64_lat32,32_simd8/mm_st3_ap64,64,64_lat32,32_simd8_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st3_ap64,64,64_lat32,32_simd8/mm_st3_ap64,64,64_lat32,32_simd8_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mm",
+    "spacetime": 4,
+    "array_part": "16,16,16",
+    "latency": "8,8",
+    "simd": "2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/simd_info.json --sa-sizes={kernel[]->space_time[4];kernel[]->array_part[16,16,16];kernel[]->latency[8,8];kernel[]->simd[2]} --local-reduce --reduce-op=\"+\" --simd-touch-space --array-contraction",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st4_ap16,16,16_lat8,8_simd2/mm_st4_ap16,16,16_lat8,8_simd2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st4_ap16,16,16_lat8,8_simd2/mm_st4_ap16,16,16_lat8,8_simd2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mm",
+    "spacetime": 4,
+    "array_part": "32,32,32",
+    "latency": "16,16",
+    "simd": "4",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/simd_info.json --sa-sizes={kernel[]->space_time[4];kernel[]->array_part[32,32,32];kernel[]->latency[16,16];kernel[]->simd[4]} --local-reduce --reduce-op=\"+\" --simd-touch-space --array-contraction",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st4_ap32,32,32_lat16,16_simd4/mm_st4_ap32,32,32_lat16,16_simd4_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st4_ap32,32,32_lat16,16_simd4/mm_st4_ap32,32,32_lat16,16_simd4_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mm",
+    "spacetime": 4,
+    "array_part": "64,64,64",
+    "latency": "32,32",
+    "simd": "8",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/simd_info.json --sa-sizes={kernel[]->space_time[4];kernel[]->array_part[64,64,64];kernel[]->latency[32,32];kernel[]->simd[8]} --local-reduce --reduce-op=\"+\" --simd-touch-space --array-contraction",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st4_ap64,64,64_lat32,32_simd8/mm_st4_ap64,64,64_lat32,32_simd8_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st4_ap64,64,64_lat32,32_simd8/mm_st4_ap64,64,64_lat32,32_simd8_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mm",
+    "spacetime": 5,
+    "array_part": "16,16,16",
+    "latency": "8,8",
+    "simd": "2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/simd_info.json --sa-sizes={kernel[]->space_time[5];kernel[]->array_part[16,16,16];kernel[]->latency[8,8];kernel[]->simd[2]} --local-reduce --reduce-op=\"+\" --simd-touch-space --array-contraction",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st5_ap16,16,16_lat8,8_simd2/mm_st5_ap16,16,16_lat8,8_simd2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st5_ap16,16,16_lat8,8_simd2/mm_st5_ap16,16,16_lat8,8_simd2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mm",
+    "spacetime": 5,
+    "array_part": "32,32,32",
+    "latency": "16,16",
+    "simd": "4",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/simd_info.json --sa-sizes={kernel[]->space_time[5];kernel[]->array_part[32,32,32];kernel[]->latency[16,16];kernel[]->simd[4]} --local-reduce --reduce-op=\"+\" --simd-touch-space --array-contraction",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st5_ap32,32,32_lat16,16_simd4/mm_st5_ap32,32,32_lat16,16_simd4_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st5_ap32,32,32_lat16,16_simd4/mm_st5_ap32,32,32_lat16,16_simd4_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mm",
+    "spacetime": 5,
+    "array_part": "64,64,64",
+    "latency": "32,32",
+    "simd": "8",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/mm/simd_info.json --sa-sizes={kernel[]->space_time[5];kernel[]->array_part[64,64,64];kernel[]->latency[32,32];kernel[]->simd[8]} --local-reduce --reduce-op=\"+\" --simd-touch-space --array-contraction",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st5_ap64,64,64_lat32,32_simd8/mm_st5_ap64,64,64_lat32,32_simd8_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mm/st5_ap64,64,64_lat32,32_simd8/mm_st5_ap64,64,64_lat32,32_simd8_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 0,
+    "array_part": "16,16,16,16",
+    "latency": "1,2,2",
+    "simd": "1,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[0];kernel[]->array_part[16,16,16,16];kernel[]->latency[1,2,2];kernel[]->simd[1,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st0_ap16,16,16,16_lat1,2,2_simd1,1/ttmc_st0_ap16,16,16,16_lat1,2,2_simd1,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st0_ap16,16,16,16_lat1,2,2_simd1,1/ttmc_st0_ap16,16,16,16_lat1,2,2_simd1,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 0,
+    "array_part": "32,32,32,32",
+    "latency": "2,4,4",
+    "simd": "2,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[0];kernel[]->array_part[32,32,32,32];kernel[]->latency[2,4,4];kernel[]->simd[2,2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st0_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st0_ap32,32,32,32_lat2,4,4_simd2,2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st0_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st0_ap32,32,32,32_lat2,4,4_simd2,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 0,
+    "array_part": "64,64,64,64",
+    "latency": "4,8,8",
+    "simd": "4,4",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[0];kernel[]->array_part[64,64,64,64];kernel[]->latency[4,8,8];kernel[]->simd[4,4]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st0_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st0_ap64,64,64,64_lat4,8,8_simd4,4_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st0_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st0_ap64,64,64,64_lat4,8,8_simd4,4_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 1,
+    "array_part": "16,16,16,16",
+    "latency": "1,2,2",
+    "simd": "1,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[1];kernel[]->array_part[16,16,16,16];kernel[]->latency[1,2,2];kernel[]->simd[1,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st1_ap16,16,16,16_lat1,2,2_simd1,1/ttmc_st1_ap16,16,16,16_lat1,2,2_simd1,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st1_ap16,16,16,16_lat1,2,2_simd1,1/ttmc_st1_ap16,16,16,16_lat1,2,2_simd1,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 1,
+    "array_part": "32,32,32,32",
+    "latency": "2,4,4",
+    "simd": "2,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[1];kernel[]->array_part[32,32,32,32];kernel[]->latency[2,4,4];kernel[]->simd[2,2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st1_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st1_ap32,32,32,32_lat2,4,4_simd2,2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st1_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st1_ap32,32,32,32_lat2,4,4_simd2,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 1,
+    "array_part": "64,64,64,64",
+    "latency": "4,8,8",
+    "simd": "4,4",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[1];kernel[]->array_part[64,64,64,64];kernel[]->latency[4,8,8];kernel[]->simd[4,4]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st1_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st1_ap64,64,64,64_lat4,8,8_simd4,4_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st1_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st1_ap64,64,64,64_lat4,8,8_simd4,4_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 2,
+    "array_part": "32,32,32,32",
+    "latency": "2,4,4",
+    "simd": "2,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[2];kernel[]->array_part[32,32,32,32];kernel[]->latency[2,4,4];kernel[]->simd[2,2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st2_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st2_ap32,32,32,32_lat2,4,4_simd2,2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st2_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st2_ap32,32,32,32_lat2,4,4_simd2,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 2,
+    "array_part": "64,64,64,64",
+    "latency": "4,8,8",
+    "simd": "4,4",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[2];kernel[]->array_part[64,64,64,64];kernel[]->latency[4,8,8];kernel[]->simd[4,4]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st2_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st2_ap64,64,64,64_lat4,8,8_simd4,4_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st2_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st2_ap64,64,64,64_lat4,8,8_simd4,4_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 3,
+    "array_part": "16,16,16,16",
+    "latency": "1,2,2",
+    "simd": "1,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[3];kernel[]->array_part[16,16,16,16];kernel[]->latency[1,2,2];kernel[]->simd[1,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st3_ap16,16,16,16_lat1,2,2_simd1,1/ttmc_st3_ap16,16,16,16_lat1,2,2_simd1,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st3_ap16,16,16,16_lat1,2,2_simd1,1/ttmc_st3_ap16,16,16,16_lat1,2,2_simd1,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 3,
+    "array_part": "32,32,32,32",
+    "latency": "2,4,4",
+    "simd": "2,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[3];kernel[]->array_part[32,32,32,32];kernel[]->latency[2,4,4];kernel[]->simd[2,2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st3_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st3_ap32,32,32,32_lat2,4,4_simd2,2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st3_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st3_ap32,32,32,32_lat2,4,4_simd2,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 3,
+    "array_part": "64,64,64,64",
+    "latency": "4,8,8",
+    "simd": "4,4",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[3];kernel[]->array_part[64,64,64,64];kernel[]->latency[4,8,8];kernel[]->simd[4,4]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st3_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st3_ap64,64,64,64_lat4,8,8_simd4,4_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st3_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st3_ap64,64,64,64_lat4,8,8_simd4,4_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 3,
+    "array_part": "128,128,128,128",
+    "latency": "8,16,16",
+    "simd": "8,8",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[3];kernel[]->array_part[128,128,128,128];kernel[]->latency[8,16,16];kernel[]->simd[8,8]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st3_ap128,128,128,128_lat8,16,16_simd8,8/ttmc_st3_ap128,128,128,128_lat8,16,16_simd8,8_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st3_ap128,128,128,128_lat8,16,16_simd8,8/ttmc_st3_ap128,128,128,128_lat8,16,16_simd8,8_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 4,
+    "array_part": "16,16,16,16",
+    "latency": "1,2,2",
+    "simd": "1,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[4];kernel[]->array_part[16,16,16,16];kernel[]->latency[1,2,2];kernel[]->simd[1,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st4_ap16,16,16,16_lat1,2,2_simd1,1/ttmc_st4_ap16,16,16,16_lat1,2,2_simd1,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st4_ap16,16,16,16_lat1,2,2_simd1,1/ttmc_st4_ap16,16,16,16_lat1,2,2_simd1,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 4,
+    "array_part": "32,32,32,32",
+    "latency": "2,4,4",
+    "simd": "2,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[4];kernel[]->array_part[32,32,32,32];kernel[]->latency[2,4,4];kernel[]->simd[2,2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st4_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st4_ap32,32,32,32_lat2,4,4_simd2,2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st4_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st4_ap32,32,32,32_lat2,4,4_simd2,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 4,
+    "array_part": "64,64,64,64",
+    "latency": "4,8,8",
+    "simd": "4,4",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[4];kernel[]->array_part[64,64,64,64];kernel[]->latency[4,8,8];kernel[]->simd[4,4]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st4_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st4_ap64,64,64,64_lat4,8,8_simd4,4_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st4_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st4_ap64,64,64,64_lat4,8,8_simd4,4_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 4,
+    "array_part": "128,128,128,128",
+    "latency": "8,16,16",
+    "simd": "8,8",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[4];kernel[]->array_part[128,128,128,128];kernel[]->latency[8,16,16];kernel[]->simd[8,8]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st4_ap128,128,128,128_lat8,16,16_simd8,8/ttmc_st4_ap128,128,128,128_lat8,16,16_simd8,8_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st4_ap128,128,128,128_lat8,16,16_simd8,8/ttmc_st4_ap128,128,128,128_lat8,16,16_simd8,8_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 5,
+    "array_part": "16,16,16,16",
+    "latency": "1,2,2",
+    "simd": "1,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[5];kernel[]->array_part[16,16,16,16];kernel[]->latency[1,2,2];kernel[]->simd[1,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st5_ap16,16,16,16_lat1,2,2_simd1,1/ttmc_st5_ap16,16,16,16_lat1,2,2_simd1,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st5_ap16,16,16,16_lat1,2,2_simd1,1/ttmc_st5_ap16,16,16,16_lat1,2,2_simd1,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 5,
+    "array_part": "32,32,32,32",
+    "latency": "2,4,4",
+    "simd": "2,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[5];kernel[]->array_part[32,32,32,32];kernel[]->latency[2,4,4];kernel[]->simd[2,2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st5_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st5_ap32,32,32,32_lat2,4,4_simd2,2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st5_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st5_ap32,32,32,32_lat2,4,4_simd2,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 5,
+    "array_part": "64,64,64,64",
+    "latency": "4,8,8",
+    "simd": "4,4",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[5];kernel[]->array_part[64,64,64,64];kernel[]->latency[4,8,8];kernel[]->simd[4,4]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st5_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st5_ap64,64,64,64_lat4,8,8_simd4,4_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st5_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st5_ap64,64,64,64_lat4,8,8_simd4,4_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 5,
+    "array_part": "128,128,128,128",
+    "latency": "8,16,16",
+    "simd": "8,8",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[5];kernel[]->array_part[128,128,128,128];kernel[]->latency[8,16,16];kernel[]->simd[8,8]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st5_ap128,128,128,128_lat8,16,16_simd8,8/ttmc_st5_ap128,128,128,128_lat8,16,16_simd8,8_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st5_ap128,128,128,128_lat8,16,16_simd8,8/ttmc_st5_ap128,128,128,128_lat8,16,16_simd8,8_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 6,
+    "array_part": "32,32,32,32",
+    "latency": "2,4,4",
+    "simd": "2,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[6];kernel[]->array_part[32,32,32,32];kernel[]->latency[2,4,4];kernel[]->simd[2,2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st6_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st6_ap32,32,32,32_lat2,4,4_simd2,2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st6_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st6_ap32,32,32,32_lat2,4,4_simd2,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 6,
+    "array_part": "64,64,64,64",
+    "latency": "4,8,8",
+    "simd": "4,4",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[6];kernel[]->array_part[64,64,64,64];kernel[]->latency[4,8,8];kernel[]->simd[4,4]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st6_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st6_ap64,64,64,64_lat4,8,8_simd4,4_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st6_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st6_ap64,64,64,64_lat4,8,8_simd4,4_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 7,
+    "array_part": "32,32,32,32",
+    "latency": "2,4,4",
+    "simd": "2,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[7];kernel[]->array_part[32,32,32,32];kernel[]->latency[2,4,4];kernel[]->simd[2,2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st7_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st7_ap32,32,32,32_lat2,4,4_simd2,2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st7_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st7_ap32,32,32,32_lat2,4,4_simd2,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 7,
+    "array_part": "64,64,64,64",
+    "latency": "4,8,8",
+    "simd": "4,4",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[7];kernel[]->array_part[64,64,64,64];kernel[]->latency[4,8,8];kernel[]->simd[4,4]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st7_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st7_ap64,64,64,64_lat4,8,8_simd4,4_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st7_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st7_ap64,64,64,64_lat4,8,8_simd4,4_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 8,
+    "array_part": "32,32,32,32",
+    "latency": "2,4,4",
+    "simd": "2,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[8];kernel[]->array_part[32,32,32,32];kernel[]->latency[2,4,4];kernel[]->simd[2,2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st8_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st8_ap32,32,32,32_lat2,4,4_simd2,2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st8_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st8_ap32,32,32,32_lat2,4,4_simd2,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 8,
+    "array_part": "64,64,64,64",
+    "latency": "4,8,8",
+    "simd": "4,4",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[8];kernel[]->array_part[64,64,64,64];kernel[]->latency[4,8,8];kernel[]->simd[4,4]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st8_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st8_ap64,64,64,64_lat4,8,8_simd4,4_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st8_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st8_ap64,64,64,64_lat4,8,8_simd4,4_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 9,
+    "array_part": "32,32,32,32",
+    "latency": "2,4,4",
+    "simd": "2,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[9];kernel[]->array_part[32,32,32,32];kernel[]->latency[2,4,4];kernel[]->simd[2,2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st9_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st9_ap32,32,32,32_lat2,4,4_simd2,2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st9_ap32,32,32,32_lat2,4,4_simd2,2/ttmc_st9_ap32,32,32,32_lat2,4,4_simd2,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 9,
+    "array_part": "64,64,64,64",
+    "latency": "4,8,8",
+    "simd": "4,4",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[9];kernel[]->array_part[64,64,64,64];kernel[]->latency[4,8,8];kernel[]->simd[4,4]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st9_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st9_ap64,64,64,64_lat4,8,8_simd4,4_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st9_ap64,64,64,64_lat4,8,8_simd4,4/ttmc_st9_ap64,64,64,64_lat4,8,8_simd4,4_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "ttmc",
+    "spacetime": 0,
+    "array_part": "128,128,128,128",
+    "latency": "8,16,16",
+    "simd": "8,8",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/ttmc/simd_info.json --sa-sizes={kernel[]->space_time[0];kernel[]->array_part[128,128,128,128];kernel[]->latency[8,16,16];kernel[]->simd[8,8]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st0_ap128,128,128,128_lat8,16,16_simd8,8/ttmc_st0_ap128,128,128,128_lat8,16,16_simd8,8_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/ttmc/st0_ap128,128,128,128_lat8,16,16_simd8,8/ttmc_st0_ap128,128,128,128_lat8,16,16_simd8,8_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 0,
+    "array_part": "32,32,2",
+    "latency": "4,2",
+    "simd": "2,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[0];kernel[]->array_part[32,32,2];kernel[]->latency[4,2];kernel[]->simd[2,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st0_ap32,32,2_lat4,2_simd2,1/mttkrp_st0_ap32,32,2_lat4,2_simd2,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st0_ap32,32,2_lat4,2_simd2,1/mttkrp_st0_ap32,32,2_lat4,2_simd2,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 0,
+    "array_part": "64,64,2",
+    "latency": "8,4",
+    "simd": "4,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[0];kernel[]->array_part[64,64,2];kernel[]->latency[8,4];kernel[]->simd[4,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st0_ap64,64,2_lat8,4_simd4,1/mttkrp_st0_ap64,64,2_lat8,4_simd4,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st0_ap64,64,2_lat8,4_simd4,1/mttkrp_st0_ap64,64,2_lat8,4_simd4,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 0,
+    "array_part": "128,128,2",
+    "latency": "16,8",
+    "simd": "8,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[0];kernel[]->array_part[128,128,2];kernel[]->latency[16,8];kernel[]->simd[8,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st0_ap128,128,2_lat16,8_simd8,1/mttkrp_st0_ap128,128,2_lat16,8_simd8,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st0_ap128,128,2_lat16,8_simd8,1/mttkrp_st0_ap128,128,2_lat16,8_simd8,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 0,
+    "array_part": "256,256,4",
+    "latency": "32,16",
+    "simd": "16,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[0];kernel[]->array_part[256,256,4];kernel[]->latency[32,16];kernel[]->simd[16,2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st0_ap256,256,4_lat32,16_simd16,2/mttkrp_st0_ap256,256,4_lat32,16_simd16,2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st0_ap256,256,4_lat32,16_simd16,2/mttkrp_st0_ap256,256,4_lat32,16_simd16,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 1,
+    "array_part": "32,32,2",
+    "latency": "4,2",
+    "simd": "2,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[1];kernel[]->array_part[32,32,2];kernel[]->latency[4,2];kernel[]->simd[2,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st1_ap32,32,2_lat4,2_simd2,1/mttkrp_st1_ap32,32,2_lat4,2_simd2,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st1_ap32,32,2_lat4,2_simd2,1/mttkrp_st1_ap32,32,2_lat4,2_simd2,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 1,
+    "array_part": "64,64,2",
+    "latency": "8,4",
+    "simd": "4,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[1];kernel[]->array_part[64,64,2];kernel[]->latency[8,4];kernel[]->simd[4,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st1_ap64,64,2_lat8,4_simd4,1/mttkrp_st1_ap64,64,2_lat8,4_simd4,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st1_ap64,64,2_lat8,4_simd4,1/mttkrp_st1_ap64,64,2_lat8,4_simd4,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 1,
+    "array_part": "128,128,2",
+    "latency": "16,8",
+    "simd": "8,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[1];kernel[]->array_part[128,128,2];kernel[]->latency[16,8];kernel[]->simd[8,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st1_ap128,128,2_lat16,8_simd8,1/mttkrp_st1_ap128,128,2_lat16,8_simd8,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st1_ap128,128,2_lat16,8_simd8,1/mttkrp_st1_ap128,128,2_lat16,8_simd8,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 1,
+    "array_part": "256,256,4",
+    "latency": "32,16",
+    "simd": "16,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[1];kernel[]->array_part[256,256,4];kernel[]->latency[32,16];kernel[]->simd[16,2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st1_ap256,256,4_lat32,16_simd16,2/mttkrp_st1_ap256,256,4_lat32,16_simd16,2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st1_ap256,256,4_lat32,16_simd16,2/mttkrp_st1_ap256,256,4_lat32,16_simd16,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 2,
+    "array_part": "32,32,2",
+    "latency": "4,2",
+    "simd": "2,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[2];kernel[]->array_part[32,32,2];kernel[]->latency[4,2];kernel[]->simd[2,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st2_ap32,32,2_lat4,2_simd2,1/mttkrp_st2_ap32,32,2_lat4,2_simd2,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st2_ap32,32,2_lat4,2_simd2,1/mttkrp_st2_ap32,32,2_lat4,2_simd2,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 2,
+    "array_part": "64,64,2",
+    "latency": "8,4",
+    "simd": "4,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[2];kernel[]->array_part[64,64,2];kernel[]->latency[8,4];kernel[]->simd[4,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st2_ap64,64,2_lat8,4_simd4,1/mttkrp_st2_ap64,64,2_lat8,4_simd4,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st2_ap64,64,2_lat8,4_simd4,1/mttkrp_st2_ap64,64,2_lat8,4_simd4,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 2,
+    "array_part": "128,128,2",
+    "latency": "16,8",
+    "simd": "8,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[2];kernel[]->array_part[128,128,2];kernel[]->latency[16,8];kernel[]->simd[8,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st2_ap128,128,2_lat16,8_simd8,1/mttkrp_st2_ap128,128,2_lat16,8_simd8,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st2_ap128,128,2_lat16,8_simd8,1/mttkrp_st2_ap128,128,2_lat16,8_simd8,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 2,
+    "array_part": "256,256,4",
+    "latency": "32,16",
+    "simd": "16,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[2];kernel[]->array_part[256,256,4];kernel[]->latency[32,16];kernel[]->simd[16,2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st2_ap256,256,4_lat32,16_simd16,2/mttkrp_st2_ap256,256,4_lat32,16_simd16,2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st2_ap256,256,4_lat32,16_simd16,2/mttkrp_st2_ap256,256,4_lat32,16_simd16,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 3,
+    "array_part": "32,32,2",
+    "latency": "4,2",
+    "simd": "2,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[3];kernel[]->array_part[32,32,2];kernel[]->latency[4,2];kernel[]->simd[2,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st3_ap32,32,2_lat4,2_simd2,1/mttkrp_st3_ap32,32,2_lat4,2_simd2,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st3_ap32,32,2_lat4,2_simd2,1/mttkrp_st3_ap32,32,2_lat4,2_simd2,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 3,
+    "array_part": "64,64,2",
+    "latency": "8,4",
+    "simd": "4,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[3];kernel[]->array_part[64,64,2];kernel[]->latency[8,4];kernel[]->simd[4,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st3_ap64,64,2_lat8,4_simd4,1/mttkrp_st3_ap64,64,2_lat8,4_simd4,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st3_ap64,64,2_lat8,4_simd4,1/mttkrp_st3_ap64,64,2_lat8,4_simd4,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 3,
+    "array_part": "128,128,2",
+    "latency": "16,8",
+    "simd": "8,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[3];kernel[]->array_part[128,128,2];kernel[]->latency[16,8];kernel[]->simd[8,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st3_ap128,128,2_lat16,8_simd8,1/mttkrp_st3_ap128,128,2_lat16,8_simd8,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st3_ap128,128,2_lat16,8_simd8,1/mttkrp_st3_ap128,128,2_lat16,8_simd8,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 3,
+    "array_part": "256,256,4",
+    "latency": "32,16",
+    "simd": "16,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[3];kernel[]->array_part[256,256,4];kernel[]->latency[32,16];kernel[]->simd[16,2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st3_ap256,256,4_lat32,16_simd16,2/mttkrp_st3_ap256,256,4_lat32,16_simd16,2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st3_ap256,256,4_lat32,16_simd16,2/mttkrp_st3_ap256,256,4_lat32,16_simd16,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 4,
+    "array_part": "64,64,2",
+    "latency": "8,4",
+    "simd": "4,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[4];kernel[]->array_part[64,64,2];kernel[]->latency[8,4];kernel[]->simd[4,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st4_ap64,64,2_lat8,4_simd4,1/mttkrp_st4_ap64,64,2_lat8,4_simd4,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st4_ap64,64,2_lat8,4_simd4,1/mttkrp_st4_ap64,64,2_lat8,4_simd4,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 4,
+    "array_part": "128,128,2",
+    "latency": "16,8",
+    "simd": "8,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[4];kernel[]->array_part[128,128,2];kernel[]->latency[16,8];kernel[]->simd[8,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st4_ap128,128,2_lat16,8_simd8,1/mttkrp_st4_ap128,128,2_lat16,8_simd8,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st4_ap128,128,2_lat16,8_simd8,1/mttkrp_st4_ap128,128,2_lat16,8_simd8,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 4,
+    "array_part": "256,256,4",
+    "latency": "32,16",
+    "simd": "16,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[4];kernel[]->array_part[256,256,4];kernel[]->latency[32,16];kernel[]->simd[16,2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st4_ap256,256,4_lat32,16_simd16,2/mttkrp_st4_ap256,256,4_lat32,16_simd16,2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st4_ap256,256,4_lat32,16_simd16,2/mttkrp_st4_ap256,256,4_lat32,16_simd16,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 5,
+    "array_part": "64,64,2",
+    "latency": "8,4",
+    "simd": "4,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[5];kernel[]->array_part[64,64,2];kernel[]->latency[8,4];kernel[]->simd[4,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st5_ap64,64,2_lat8,4_simd4,1/mttkrp_st5_ap64,64,2_lat8,4_simd4,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st5_ap64,64,2_lat8,4_simd4,1/mttkrp_st5_ap64,64,2_lat8,4_simd4,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 5,
+    "array_part": "128,128,2",
+    "latency": "16,8",
+    "simd": "8,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[5];kernel[]->array_part[128,128,2];kernel[]->latency[16,8];kernel[]->simd[8,1]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st5_ap128,128,2_lat16,8_simd8,1/mttkrp_st5_ap128,128,2_lat16,8_simd8,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st5_ap128,128,2_lat16,8_simd8,1/mttkrp_st5_ap128,128,2_lat16,8_simd8,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "mttkrp",
+    "spacetime": 5,
+    "array_part": "256,256,4",
+    "latency": "32,16",
+    "simd": "16,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/mttkrp/simd_info.json --sa-sizes={kernel[]->space_time[5];kernel[]->array_part[256,256,4];kernel[]->latency[32,16];kernel[]->simd[16,2]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st5_ap256,256,4_lat32,16_simd16,2/mttkrp_st5_ap256,256,4_lat32,16_simd16,2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/mttkrp/st5_ap256,256,4_lat32,16_simd16,2/mttkrp_st5_ap256,256,4_lat32,16_simd16,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "lu",
+    "spacetime": 0,
+    "array_part": "-1,-1,-1",
+    "latency": "4,4",
+    "simd": "1,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/simd_info.json --sa-sizes={kernel[]->space_time[0];kernel[]->array_part[-1,-1,-1];kernel[]->latency[4,4];kernel[]->simd[1,1]} --use-cplusplus-template --no-reschedule --live-range-reordering",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/lu/st0_ap-1,-1,-1_lat4,4_simd1,1/lu_st0_ap-1,-1,-1_lat4,4_simd1,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/lu/st0_ap-1,-1,-1_lat4,4_simd1,1/lu_st0_ap-1,-1,-1_lat4,4_simd1,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "lu",
+    "spacetime": 1,
+    "array_part": "-1,-1,-1",
+    "latency": "4,4",
+    "simd": "1,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/simd_info.json --sa-sizes={kernel[]->space_time[1];kernel[]->array_part[-1,-1,-1];kernel[]->latency[4,4];kernel[]->simd[1,1]} --use-cplusplus-template --no-reschedule --live-range-reordering",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/lu/st1_ap-1,-1,-1_lat4,4_simd1,1/lu_st1_ap-1,-1,-1_lat4,4_simd1,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/lu/st1_ap-1,-1,-1_lat4,4_simd1,1/lu_st1_ap-1,-1,-1_lat4,4_simd1,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "lu",
+    "spacetime": 1,
+    "array_part": "-1,-1,-1",
+    "latency": "8,8",
+    "simd": "2,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/simd_info.json --sa-sizes={kernel[]->space_time[1];kernel[]->array_part[-1,-1,-1];kernel[]->latency[8,8];kernel[]->simd[2,2]} --use-cplusplus-template --no-reschedule --live-range-reordering",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/lu/st1_ap-1,-1,-1_lat8,8_simd2,2/lu_st1_ap-1,-1,-1_lat8,8_simd2,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "lu",
+    "spacetime": 2,
+    "array_part": "-1,-1,-1",
+    "latency": "4,4",
+    "simd": "1,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/simd_info.json --sa-sizes={kernel[]->space_time[2];kernel[]->array_part[-1,-1,-1];kernel[]->latency[4,4];kernel[]->simd[1,1]} --use-cplusplus-template --no-reschedule --live-range-reordering",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/lu/st2_ap-1,-1,-1_lat4,4_simd1,1/lu_st2_ap-1,-1,-1_lat4,4_simd1,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/lu/st2_ap-1,-1,-1_lat4,4_simd1,1/lu_st2_ap-1,-1,-1_lat4,4_simd1,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "lu",
+    "spacetime": 2,
+    "array_part": "-1,-1,-1",
+    "latency": "8,8",
+    "simd": "2,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/simd_info.json --sa-sizes={kernel[]->space_time[2];kernel[]->array_part[-1,-1,-1];kernel[]->latency[8,8];kernel[]->simd[2,2]} --use-cplusplus-template --no-reschedule --live-range-reordering",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/lu/st2_ap-1,-1,-1_lat8,8_simd2,2/lu_st2_ap-1,-1,-1_lat8,8_simd2,2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/lu/st2_ap-1,-1,-1_lat8,8_simd2,2/lu_st2_ap-1,-1,-1_lat8,8_simd2,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "lu",
+    "spacetime": 3,
+    "array_part": "-1,-1,-1",
+    "latency": "4,4",
+    "simd": "1,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/simd_info.json --sa-sizes={kernel[]->space_time[3];kernel[]->array_part[-1,-1,-1];kernel[]->latency[4,4];kernel[]->simd[1,1]} --use-cplusplus-template --no-reschedule --live-range-reordering",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/lu/st3_ap-1,-1,-1_lat4,4_simd1,1/lu_st3_ap-1,-1,-1_lat4,4_simd1,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/lu/st3_ap-1,-1,-1_lat4,4_simd1,1/lu_st3_ap-1,-1,-1_lat4,4_simd1,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "lu",
+    "spacetime": 3,
+    "array_part": "-1,-1,-1",
+    "latency": "8,8",
+    "simd": "2,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/simd_info.json --sa-sizes={kernel[]->space_time[3];kernel[]->array_part[-1,-1,-1];kernel[]->latency[8,8];kernel[]->simd[2,2]} --use-cplusplus-template --no-reschedule --live-range-reordering",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/lu/st3_ap-1,-1,-1_lat8,8_simd2,2/lu_st3_ap-1,-1,-1_lat8,8_simd2,2_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/lu/st3_ap-1,-1,-1_lat8,8_simd2,2/lu_st3_ap-1,-1,-1_lat8,8_simd2,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "lu",
+    "spacetime": 4,
+    "array_part": "-1,-1,-1",
+    "latency": "4,4",
+    "simd": "1,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/simd_info.json --sa-sizes={kernel[]->space_time[4];kernel[]->array_part[-1,-1,-1];kernel[]->latency[4,4];kernel[]->simd[1,1]} --use-cplusplus-template --no-reschedule --live-range-reordering",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/lu/st4_ap-1,-1,-1_lat4,4_simd1,1/lu_st4_ap-1,-1,-1_lat4,4_simd1,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/lu/st4_ap-1,-1,-1_lat4,4_simd1,1/lu_st4_ap-1,-1,-1_lat4,4_simd1,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "lu",
+    "spacetime": 5,
+    "array_part": "-1,-1,-1",
+    "latency": "4,4",
+    "simd": "1,1",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/simd_info.json --sa-sizes={kernel[]->space_time[5];kernel[]->array_part[-1,-1,-1];kernel[]->latency[4,4];kernel[]->simd[1,1]} --use-cplusplus-template --no-reschedule --live-range-reordering",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/lu/st5_ap-1,-1,-1_lat4,4_simd1,1/lu_st5_ap-1,-1,-1_lat4,4_simd1,1_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/lu/st5_ap-1,-1,-1_lat4,4_simd1,1/lu_st5_ap-1,-1,-1_lat4,4_simd1,1_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "lu",
+    "spacetime": 5,
+    "array_part": "-1,-1,-1",
+    "latency": "8,8",
+    "simd": "2,2",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/lu/simd_info.json --sa-sizes={kernel[]->space_time[5];kernel[]->array_part[-1,-1,-1];kernel[]->latency[8,8];kernel[]->simd[2,2]} --use-cplusplus-template --no-reschedule --live-range-reordering",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/lu/st5_ap-1,-1,-1_lat8,8_simd2,2/lu_st5_ap-1,-1,-1_lat8,8_simd2,2_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 0,
+    "array_part": "64,56,14,64",
+    "latency": "4,4,7",
+    "simd": "1,1,8",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[0];kernel[]->array_part[64,56,14,64];kernel[]->latency[4,4,7];kernel[]->simd[1,1,8]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st0_ap64,56,14,64_lat4,4,7_simd1,1,8/cnn_st0_ap64,56,14,64_lat4,4,7_simd1,1,8_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st0_ap64,56,14,64_lat4,4,7_simd1,1,8/cnn_st0_ap64,56,14,64_lat4,4,7_simd1,1,8_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 0,
+    "array_part": "128,112,28,128",
+    "latency": "8,8,14",
+    "simd": "2,2,16",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[0];kernel[]->array_part[128,112,28,128];kernel[]->latency[8,8,14];kernel[]->simd[2,2,16]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st0_ap128,112,28,128_lat8,8,14_simd2,2,16/cnn_st0_ap128,112,28,128_lat8,8,14_simd2,2,16_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st0_ap128,112,28,128_lat8,8,14_simd2,2,16/cnn_st0_ap128,112,28,128_lat8,8,14_simd2,2,16_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 1,
+    "array_part": "64,56,14,64",
+    "latency": "4,4,7",
+    "simd": "1,1,8",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[1];kernel[]->array_part[64,56,14,64];kernel[]->latency[4,4,7];kernel[]->simd[1,1,8]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st1_ap64,56,14,64_lat4,4,7_simd1,1,8/cnn_st1_ap64,56,14,64_lat4,4,7_simd1,1,8_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st1_ap64,56,14,64_lat4,4,7_simd1,1,8/cnn_st1_ap64,56,14,64_lat4,4,7_simd1,1,8_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 1,
+    "array_part": "128,112,28,128",
+    "latency": "8,8,14",
+    "simd": "2,2,16",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[1];kernel[]->array_part[128,112,28,128];kernel[]->latency[8,8,14];kernel[]->simd[2,2,16]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st1_ap128,112,28,128_lat8,8,14_simd2,2,16/cnn_st1_ap128,112,28,128_lat8,8,14_simd2,2,16_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st1_ap128,112,28,128_lat8,8,14_simd2,2,16/cnn_st1_ap128,112,28,128_lat8,8,14_simd2,2,16_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 2,
+    "array_part": "64,56,14,64",
+    "latency": "4,4,7",
+    "simd": "1,1,8",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[2];kernel[]->array_part[64,56,14,64];kernel[]->latency[4,4,7];kernel[]->simd[1,1,8]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st2_ap64,56,14,64_lat4,4,7_simd1,1,8/cnn_st2_ap64,56,14,64_lat4,4,7_simd1,1,8_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st2_ap64,56,14,64_lat4,4,7_simd1,1,8/cnn_st2_ap64,56,14,64_lat4,4,7_simd1,1,8_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 2,
+    "array_part": "128,112,28,128",
+    "latency": "8,8,14",
+    "simd": "2,2,16",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[2];kernel[]->array_part[128,112,28,128];kernel[]->latency[8,8,14];kernel[]->simd[2,2,16]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st2_ap128,112,28,128_lat8,8,14_simd2,2,16/cnn_st2_ap128,112,28,128_lat8,8,14_simd2,2,16_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st2_ap128,112,28,128_lat8,8,14_simd2,2,16/cnn_st2_ap128,112,28,128_lat8,8,14_simd2,2,16_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 3,
+    "array_part": "64,56,14,64",
+    "latency": "4,4,7",
+    "simd": "1,1,8",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[3];kernel[]->array_part[64,56,14,64];kernel[]->latency[4,4,7];kernel[]->simd[1,1,8]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st3_ap64,56,14,64_lat4,4,7_simd1,1,8/cnn_st3_ap64,56,14,64_lat4,4,7_simd1,1,8_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st3_ap64,56,14,64_lat4,4,7_simd1,1,8/cnn_st3_ap64,56,14,64_lat4,4,7_simd1,1,8_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 3,
+    "array_part": "96,84,21,96",
+    "latency": "6,6,10",
+    "simd": "1,1,12",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[3];kernel[]->array_part[96,84,21,96];kernel[]->latency[6,6,10];kernel[]->simd[1,1,12]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st3_ap96,84,21,96_lat6,6,10_simd1,1,12/cnn_st3_ap96,84,21,96_lat6,6,10_simd1,1,12_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st3_ap96,84,21,96_lat6,6,10_simd1,1,12/cnn_st3_ap96,84,21,96_lat6,6,10_simd1,1,12_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 3,
+    "array_part": "128,112,28,128",
+    "latency": "8,8,14",
+    "simd": "2,2,16",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[3];kernel[]->array_part[128,112,28,128];kernel[]->latency[8,8,14];kernel[]->simd[2,2,16]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st3_ap128,112,28,128_lat8,8,14_simd2,2,16/cnn_st3_ap128,112,28,128_lat8,8,14_simd2,2,16_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st3_ap128,112,28,128_lat8,8,14_simd2,2,16/cnn_st3_ap128,112,28,128_lat8,8,14_simd2,2,16_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 4,
+    "array_part": "64,56,14,64",
+    "latency": "4,4,7",
+    "simd": "1,1,8",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[4];kernel[]->array_part[64,56,14,64];kernel[]->latency[4,4,7];kernel[]->simd[1,1,8]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st4_ap64,56,14,64_lat4,4,7_simd1,1,8/cnn_st4_ap64,56,14,64_lat4,4,7_simd1,1,8_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st4_ap64,56,14,64_lat4,4,7_simd1,1,8/cnn_st4_ap64,56,14,64_lat4,4,7_simd1,1,8_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 4,
+    "array_part": "128,112,28,128",
+    "latency": "8,8,14",
+    "simd": "2,2,16",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[4];kernel[]->array_part[128,112,28,128];kernel[]->latency[8,8,14];kernel[]->simd[2,2,16]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st4_ap128,112,28,128_lat8,8,14_simd2,2,16/cnn_st4_ap128,112,28,128_lat8,8,14_simd2,2,16_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st4_ap128,112,28,128_lat8,8,14_simd2,2,16/cnn_st4_ap128,112,28,128_lat8,8,14_simd2,2,16_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 5,
+    "array_part": "64,56,14,64",
+    "latency": "4,4,7",
+    "simd": "1,1,8",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[5];kernel[]->array_part[64,56,14,64];kernel[]->latency[4,4,7];kernel[]->simd[1,1,8]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st5_ap64,56,14,64_lat4,4,7_simd1,1,8/cnn_st5_ap64,56,14,64_lat4,4,7_simd1,1,8_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st5_ap64,56,14,64_lat4,4,7_simd1,1,8/cnn_st5_ap64,56,14,64_lat4,4,7_simd1,1,8_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 5,
+    "array_part": "128,112,28,128",
+    "latency": "8,8,14",
+    "simd": "2,2,16",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[5];kernel[]->array_part[128,112,28,128];kernel[]->latency[8,8,14];kernel[]->simd[2,2,16]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st5_ap128,112,28,128_lat8,8,14_simd2,2,16/cnn_st5_ap128,112,28,128_lat8,8,14_simd2,2,16_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st5_ap128,112,28,128_lat8,8,14_simd2,2,16/cnn_st5_ap128,112,28,128_lat8,8,14_simd2,2,16_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 6,
+    "array_part": "64,56,14,64",
+    "latency": "4,4,7",
+    "simd": "1,1,8",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[6];kernel[]->array_part[64,56,14,64];kernel[]->latency[4,4,7];kernel[]->simd[1,1,8]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st6_ap64,56,14,64_lat4,4,7_simd1,1,8/cnn_st6_ap64,56,14,64_lat4,4,7_simd1,1,8_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st6_ap64,56,14,64_lat4,4,7_simd1,1,8/cnn_st6_ap64,56,14,64_lat4,4,7_simd1,1,8_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 6,
+    "array_part": "96,84,21,96",
+    "latency": "6,6,10",
+    "simd": "1,1,12",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[6];kernel[]->array_part[96,84,21,96];kernel[]->latency[6,6,10];kernel[]->simd[1,1,12]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st6_ap96,84,21,96_lat6,6,10_simd1,1,12/cnn_st6_ap96,84,21,96_lat6,6,10_simd1,1,12_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st6_ap96,84,21,96_lat6,6,10_simd1,1,12/cnn_st6_ap96,84,21,96_lat6,6,10_simd1,1,12_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 6,
+    "array_part": "128,112,28,128",
+    "latency": "8,8,14",
+    "simd": "2,2,16",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[6];kernel[]->array_part[128,112,28,128];kernel[]->latency[8,8,14];kernel[]->simd[2,2,16]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st6_ap128,112,28,128_lat8,8,14_simd2,2,16/cnn_st6_ap128,112,28,128_lat8,8,14_simd2,2,16_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st6_ap128,112,28,128_lat8,8,14_simd2,2,16/cnn_st6_ap128,112,28,128_lat8,8,14_simd2,2,16_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 7,
+    "array_part": "64,56,14,64",
+    "latency": "4,4,7",
+    "simd": "1,1,8",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[7];kernel[]->array_part[64,56,14,64];kernel[]->latency[4,4,7];kernel[]->simd[1,1,8]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st7_ap64,56,14,64_lat4,4,7_simd1,1,8/cnn_st7_ap64,56,14,64_lat4,4,7_simd1,1,8_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st7_ap64,56,14,64_lat4,4,7_simd1,1,8/cnn_st7_ap64,56,14,64_lat4,4,7_simd1,1,8_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 7,
+    "array_part": "128,112,28,128",
+    "latency": "8,8,14",
+    "simd": "2,2,16",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[7];kernel[]->array_part[128,112,28,128];kernel[]->latency[8,8,14];kernel[]->simd[2,2,16]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st7_ap128,112,28,128_lat8,8,14_simd2,2,16/cnn_st7_ap128,112,28,128_lat8,8,14_simd2,2,16_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st7_ap128,112,28,128_lat8,8,14_simd2,2,16/cnn_st7_ap128,112,28,128_lat8,8,14_simd2,2,16_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 3,
+    "array_part": "80,70,17,80",
+    "latency": "5,5,8",
+    "simd": "1,1,10",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[3];kernel[]->array_part[80,70,17,80];kernel[]->latency[5,5,8];kernel[]->simd[1,1,10]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st3_ap80,70,17,80_lat5,5,8_simd1,1,10/cnn_st3_ap80,70,17,80_lat5,5,8_simd1,1,10_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st3_ap80,70,17,80_lat5,5,8_simd1,1,10/cnn_st3_ap80,70,17,80_lat5,5,8_simd1,1,10_kernel_host.cpp"
+    ]
+  },
+  {
+    "kernel": "cnn",
+    "spacetime": 6,
+    "array_part": "80,70,17,80",
+    "latency": "5,5,8",
+    "simd": "1,1,10",
+    "command": "/workspaces/mlir-systolic/third_party/AutoSA/autosa /workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/kernel.c --config=/workspaces/mlir-systolic/third_party/AutoSA/autosa_config/autosa_config.json --target=autosa_hls_c --output-dir=/workspaces/mlir-systolic/third_party/AutoSA/autosa.tmp/output --host-serialize --simd-info=/workspaces/mlir-systolic/third_party/AutoSA/autosa_tests/large/cnn/simd_info.json --sa-sizes={kernel[]->space_time[6];kernel[]->array_part[80,70,17,80];kernel[]->latency[5,5,8];kernel[]->simd[1,1,10]}",
+    "files": [
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st6_ap80,70,17,80_lat5,5,8_simd1,1,10/cnn_st6_ap80,70,17,80_lat5,5,8_simd1,1,10_kernel_kernel.cpp",
+      "/workspaces/mlir-systolic/autosa_hls_refs/cnn/st6_ap80,70,17,80_lat5,5,8_simd1,1,10/cnn_st6_ap80,70,17,80_lat5,5,8_simd1,1,10_kernel_host.cpp"
+    ]
+  }
+]

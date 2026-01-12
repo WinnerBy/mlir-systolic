@@ -6,15 +6,17 @@
 
 ## 📚 文档导航
 
-- **[docs/](docs/)** - 完整文档目录
-  - [整理工作总结](docs/整理工作总结.md) - 项目整理工作总结 ⭐
-  - [架构概述](docs/ARCHITECTURE_OVERVIEW.md) - 系统架构完整说明 ⭐
-  - [代码结构](docs/CODE_STRUCTURE.md) - 代码组织与问题清单 ⭐
-  - [构建指南](docs/guide/BUILD_GUIDE.md) - 构建步骤与依赖说明 ⭐
-  - [测试指南](test/TESTING_GUIDE.md) - 测试流程与覆盖情况 ⭐
-  - [项目状态](docs/status/PROJECT_STATUS.md) - 当前状态与进展
-  - [技术路线图](docs/NEXT_STEPS_TECHNICAL_ROADMAP.md) - 实施计划
-- **[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)** - 项目目录结构说明
+**📖 [docs/README.md](docs/README.md) - 完整文档导航入口 ⭐**
+
+### 快速链接
+- **[docs/ARCHITECTURE_OVERVIEW.md](docs/ARCHITECTURE_OVERVIEW.md)** — 系统架构概述
+- **[docs/guide/CODE_STRUCTURE.md](docs/guide/CODE_STRUCTURE.md)** — 代码组织与结构
+- **[docs/guide/BUILD_GUIDE.md](docs/guide/BUILD_GUIDE.md)** — 构建步骤与依赖说明
+- **[docs/guide/DEVELOPMENT_GUIDE.md](docs/guide/DEVELOPMENT_GUIDE.md)** — 开发指南
+- **[docs/reference/PROJECT_STRUCTURE.md](docs/reference/PROJECT_STRUCTURE.md)** — 项目目录结构
+- **[docs/status/PROJECT_STATUS.md](docs/status/PROJECT_STATUS.md)** — 当前状态与进展
+- **[docs/status/NEXT_STEPS_ROADMAP.md](docs/status/NEXT_STEPS_ROADMAP.md)** — 下一步工作路线
+- **[scripts/README.md](scripts/README.md)** — Scripts 使用指南
 
 ---
 
