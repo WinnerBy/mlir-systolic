@@ -89,11 +89,7 @@ std::string ParametricSpaceTime::getSpaceTimeTypeString() const {
 
 std::string ParametricSpaceTime::toString() const {
   std::stringstream ss;
-  ss << "SpaceTime(" << getSpaceTimeTypeString() << ")";
-  if (configId > 0 || spaceDimConfigs.size() > 0) {
-    ss << " [ID=" << configId << "]";
-  }
-  ss << "\n";
+  ss << "SpaceTime(" << getSpaceTimeTypeString() << ")\n";
   
   ss << "  Space Dims: ";
   for (unsigned i = 0; i < spaceDimConfigs.size(); ++i) {
@@ -135,6 +131,42 @@ void ParametricSpaceTime::print(llvm::raw_ostream &os) const {
 //===----------------------------------------------------------------------===//
 // Predefined Configurations (ST0–ST5)
 //===----------------------------------------------------------------------===//
+
+//===----------------------------------------------------------------------===//
+// Factory Methods
+//===----------------------------------------------------------------------===//
+
+ParametricSpaceTime ParametricSpaceTime::createFromLoopIndices(
+    const SmallVector<unsigned> &spaceLoopIndices,
+    const SmallVector<unsigned> &timeLoopIndices,
+    const SmallVector<StringRef> &loopNames) {
+  
+  ParametricSpaceTime config;
+  
+  // Add space dimensions
+  for (unsigned idx : spaceLoopIndices) {
+    std::string loopName = "loop";
+    if (idx < loopNames.size()) {
+      loopName = loopNames[idx].str();
+    } else {
+      loopName += std::to_string(idx);
+    }
+    config.addSpaceDim(idx, loopName, 16, 16);
+  }
+  
+  // Add time dimensions
+  for (unsigned idx : timeLoopIndices) {
+    std::string loopName = "loop";
+    if (idx < loopNames.size()) {
+      loopName = loopNames[idx].str();
+    } else {
+      loopName += std::to_string(idx);
+    }
+    config.addTimeDim(idx, loopName, 1);
+  }
+  
+  return config;
+}
 
 namespace presets {
 
@@ -212,46 +244,6 @@ ParametricSpaceTime createST5() {
 }
 
 } // namespace presets
-
-//===----------------------------------------------------------------------===//
-// Dynamic Configuration Creation
-//===----------------------------------------------------------------------===//
-
-ParametricSpaceTime ParametricSpaceTime::createFromLoopIndices(
-    const llvm::SmallVector<unsigned> &spaceLoopIndices,
-    const llvm::SmallVector<unsigned> &timeLoopIndices,
-    const llvm::SmallVector<llvm::StringRef> &loopNames) {
-  
-  ParametricSpaceTime config;
-  
-  // Helper to get loop name
-  auto getLoopName = [&](unsigned idx) -> llvm::StringRef {
-    if (idx < loopNames.size() && !loopNames[idx].empty()) {
-      return loopNames[idx];
-    }
-    // Generate default name based on index
-    static thread_local std::string defaultNames[10];
-    if (idx < 10) {
-      defaultNames[idx] = "loop" + std::to_string(idx);
-      return llvm::StringRef(defaultNames[idx].c_str(), defaultNames[idx].length());
-    }
-    return llvm::StringRef("unknown");
-  };
-  
-  // Add space dimensions
-  for (unsigned idx : spaceLoopIndices) {
-    llvm::StringRef name = getLoopName(idx);
-    config.addSpaceDim(idx, name);
-  }
-  
-  // Add time dimensions
-  for (unsigned idx : timeLoopIndices) {
-    llvm::StringRef name = getLoopName(idx);
-    config.addTimeDim(idx, name);
-  }
-  
-  return config;
-}
 
 } // namespace systolic
 } // namespace mlir

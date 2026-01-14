@@ -212,15 +212,22 @@ static LogicalResult analyzeDependenceDistances(
 }
 
 //===----------------------------------------------------------------------===//
-// Dynamic Spacetime Enumeration
-// (AutoSA: sa_space_time_transform)
+// Dynamic Space-Time Configuration Enumeration
 //===----------------------------------------------------------------------===//
 
-/// Enumerate all possible spacetime configurations
-/// Similar to AutoSA's sa_space_time_transform()
-/// 
-/// This function dynamically generates all possible spacetime configurations
-/// by enumerating all combinations of space loops (1D, 2D, 3D arrays).
+/// Enumerate all valid space-time configurations for a loop nest.
+/// This function generates all possible combinations of space and time loops,
+/// respecting data dependence constraints.
+///
+/// Args:
+///   loops: The loops to configure
+///   depInfos: Dependence information for each loop
+///   maxSADim: Maximum systolic array dimensionality (1D, 2D, or 3D)
+///   configs: Output vector of all valid configurations
+///
+/// Returns:
+///   success() if at least one valid configuration found
+///   failure() if no valid configurations exist
 static LogicalResult enumerateSpaceTimeConfigs(
     const SmallVector<AffineForOp> &loops,
     const SmallVectorImpl<LoopDepInfo> &depInfos,
@@ -267,10 +274,10 @@ static LogicalResult enumerateSpaceTimeConfigs(
         LLVM_DEBUG(llvm::dbgs() << "    [" << (configId-1) << "] 1D: space=[" 
                                 << i << "], time=[");
         for (unsigned j = 0; j < timeLoops.size(); ++j) {
-          llvm::dbgs() << timeLoops[j];
-          if (j < timeLoops.size() - 1) llvm::dbgs() << ",";
+          LLVM_DEBUG(llvm::dbgs() << timeLoops[j]);
+          if (j < timeLoops.size() - 1) LLVM_DEBUG(llvm::dbgs() << ",");
         }
-        llvm::dbgs() << "]\n";
+        LLVM_DEBUG(llvm::dbgs() << "]\n");
       }
     }
   }
@@ -300,10 +307,10 @@ static LogicalResult enumerateSpaceTimeConfigs(
             LLVM_DEBUG(llvm::dbgs() << "    [" << (configId-1) << "] 2D: space=[" 
                                     << i << "," << j << "], time=[");
             for (unsigned k = 0; k < timeLoops.size(); ++k) {
-              llvm::dbgs() << timeLoops[k];
-              if (k < timeLoops.size() - 1) llvm::dbgs() << ",";
+              LLVM_DEBUG(llvm::dbgs() << timeLoops[k]);
+              if (k < timeLoops.size() - 1) LLVM_DEBUG(llvm::dbgs() << ",");
             }
-            llvm::dbgs() << "]\n";
+            LLVM_DEBUG(llvm::dbgs() << "]\n");
           }
         }
       }
@@ -337,10 +344,10 @@ static LogicalResult enumerateSpaceTimeConfigs(
                 LLVM_DEBUG(llvm::dbgs() << "    [" << (configId-1) << "] 3D: space=[" 
                                         << i << "," << j << "," << k << "], time=[");
                 for (unsigned l = 0; l < timeLoops.size(); ++l) {
-                  llvm::dbgs() << timeLoops[l];
-                  if (l < timeLoops.size() - 1) llvm::dbgs() << ",";
+                  LLVM_DEBUG(llvm::dbgs() << timeLoops[l]);
+                  if (l < timeLoops.size() - 1) LLVM_DEBUG(llvm::dbgs() << ",");
                 }
-                llvm::dbgs() << "]\n";
+                LLVM_DEBUG(llvm::dbgs() << "]\n");
               }
             }
           }
@@ -801,8 +808,7 @@ struct SystolicTransformPass
   
   SystolicTransformPass() = default;
   SystolicTransformPass(const SystolicConfig &config) {
-    options.spaceTimeMode = -1;  // Default to auto (will select from enumerated configs)
-    options.maxSADim = 2;  // Default to 2D arrays
+    options.spaceTimeMode = 3;  // Default to [i,j] 2D output-stationary
     if (!config.arrayPart.empty())
       options.arrayPart.assign(config.arrayPart.begin(), config.arrayPart.end());
     if (!config.latency.empty())
@@ -824,21 +830,14 @@ struct SystolicTransformPass
     
     LLVM_DEBUG(llvm::dbgs() << "\n=== Systolic Transform Pass ===\n");
     LLVM_DEBUG(llvm::dbgs() << "Processing function: " << func.getName() << "\n");
-    LLVM_DEBUG(llvm::dbgs() << "Space-time mode: " << options.spaceTimeMode 
-                            << " (maxSADim: " << options.maxSADim 
-                            << ", listConfigs: " << (options.listConfigs ? "yes" : "no") << ")\n");
+    LLVM_DEBUG(llvm::dbgs() << "Space-time mode: " << options.spaceTimeMode << "\n");
     LLVM_DEBUG(llvm::dbgs() << "Array partition: [" << options.arrayPart[0] << ", "
                             << options.arrayPart[1] << ", " << options.arrayPart[2] << "]\n");
     LLVM_DEBUG(llvm::dbgs() << "Latency: [" << options.latency[0] << ", "
                             << options.latency[1] << "]\n");
     
     llvm::outs() << "[Systolic] Transform Pass Configuration:\n";
-    if (options.spaceTimeMode >= 0) {
-      llvm::outs() << "  Space-time mode: " << options.spaceTimeMode << " (index)\n";
-    } else {
-      llvm::outs() << "  Space-time mode: auto (will select from enumerated configs)\n";
-    }
-    llvm::outs() << "  Max SA dimension: " << options.maxSADim << "\n";
+    llvm::outs() << "  Space-time mode: " << options.spaceTimeMode << "\n";
     llvm::outs() << "  Array partition: [" << options.arrayPart[0] << ", "
                  << options.arrayPart[1] << ", " << options.arrayPart[2] << "]\n";
     llvm::outs() << "  Latency: [" << options.latency[0] << ", "
@@ -972,106 +971,42 @@ struct SystolicTransformPass
                      << " uniform=" << (d.isUniform?"y":"n") << " space?=" << (d.canBeSpaceLoop?"y":"n") << "\n";
       }
       
-      // Convert band to loops vector for enumeration
-      SmallVector<AffineForOp> loops(band.begin(), band.end());
-      
-      // Step 2.4: Enumerate and select spacetime configuration
-      // (AutoSA: sa_space_time_transform)
-      SmallVector<ParametricSpaceTime, 8> allConfigs;
-      
-      // Enumerate all possible spacetime configurations
-      if (failed(enumerateSpaceTimeConfigs(loops, depInfos, 
-                                            options.maxSADim, allConfigs))) {
-        LLVM_DEBUG(llvm::dbgs() << "Failed to enumerate spacetime configs\n");
-        continue;
-      }
-      
-      if (allConfigs.empty()) {
-        LLVM_DEBUG(llvm::dbgs() << "No valid spacetime configurations found\n");
-        continue;
-      }
-      
-      // If list mode, output all configurations and return
-      if (options.listConfigs) {
-        llvm::outs() << "[Systolic] Found " << allConfigs.size() 
-                     << " spacetime configurations:\n";
-        for (const auto &config : allConfigs) {
-          llvm::outs() << "  [" << config.getConfigId() << "] " 
-                       << config.getSpaceTimeTypeString() << ": ";
-          llvm::outs() << "space=[";
-          for (unsigned i = 0; i < config.getNumSpaceDims(); ++i) {
-            llvm::outs() << config.getSpaceDimConfig(i).loopDim;
-            if (i < config.getNumSpaceDims() - 1) llvm::outs() << ",";
-          }
-          llvm::outs() << "], time=[";
-          for (unsigned i = 0; i < config.getNumTimeDims(); ++i) {
-            llvm::outs() << config.getTimeDimConfig().loopDims[i];
-            if (i < config.getNumTimeDims() - 1) llvm::outs() << ",";
-          }
-          llvm::outs() << "]\n";
-        }
-        continue;  // Don't generate code, just list
-      }
-      
-      // Select configuration
-      ParametricSpaceTime selectedConfig;
-      if (options.spaceTimeMode >= 0 && 
-          static_cast<unsigned>(options.spaceTimeMode) < allConfigs.size()) {
-        // Use specified mode (index into enumerated list)
-        selectedConfig = allConfigs[options.spaceTimeMode];
-        LLVM_DEBUG(llvm::dbgs() 
-            << "Selected spacetime config [" << selectedConfig.getConfigId() 
-            << "]: " << selectedConfig.getSpaceTimeTypeString() << "\n");
-      } else {
-        // Default: use first config (or could use heuristics)
-        // For backward compatibility with 3-loop MM, try to match ST3
-        bool foundST3 = false;
-        for (const auto &config : allConfigs) {
-          if (config.getSpaceTimeTypeString() == "ST3") {
-            selectedConfig = config;
-            foundST3 = true;
-            break;
-          }
-        }
-        if (!foundST3) {
-          selectedConfig = allConfigs[0];
-        }
-        LLVM_DEBUG(llvm::dbgs() 
-            << "Using default spacetime config [" << selectedConfig.getConfigId() 
-            << "]: " << selectedConfig.getSpaceTimeTypeString() << "\n");
-      }
-      
-      // Extract space and time loop indices from selected configuration
+      // Step 2.4: Select space and time loops (AutoSA: sa_space_time_transform)
+      // Phase 2 Enhancement: Use parametric space-time framework
       SmallVector<unsigned, 2> spaceLoops;
       SmallVector<unsigned, 3> timeLoops;
       
-      for (unsigned i = 0; i < selectedConfig.getNumSpaceDims(); ++i) {
-        spaceLoops.push_back(selectedConfig.getSpaceDimConfig(i).loopDim);
-      }
+      // Create parametric configuration based on spaceTimeMode
+      ParametricSpaceTime parametricConfig = 
+        ParametricSpaceTime::createFromMode(options.spaceTimeMode);
       
-      for (unsigned i = 0; i < selectedConfig.getNumTimeDims(); ++i) {
-        timeLoops.push_back(selectedConfig.getTimeDimConfig().loopDims[i]);
+      // Use parametric version for loop selection if available
+      // This replaces hardcoded [0,1]/[2..] assumptions
+      if (parametricConfig.isValid()) {
+        if (failed(selectSpaceLoopsParametric(depInfos, parametricConfig,
+                                              spaceLoops, timeLoops))) {
+          LLVM_DEBUG(llvm::dbgs() 
+              << "Parametric space loop selection failed, "
+              << "falling back to legacy mode\n");
+          // Fallback to legacy mode
+          if (failed(selectSpaceLoops(depInfos, options.spaceTimeMode,
+                                      spaceLoops, timeLoops))) {
+            LLVM_DEBUG(llvm::dbgs() << "Space loop selection failed\n");
+            continue;
+          }
+        }
+      } else {
+        // Fallback to legacy mode if parametric config is invalid
+        if (failed(selectSpaceLoops(depInfos, options.spaceTimeMode,
+                                    spaceLoops, timeLoops))) {
+          LLVM_DEBUG(llvm::dbgs() << "Space loop selection failed\n");
+          continue;
+        }
       }
-      
-      LLVM_DEBUG({
-        llvm::dbgs() << "[Systolic] Selected configuration:\n";
-        llvm::dbgs() << "  Space loops: ";
-        for (unsigned i : spaceLoops) llvm::dbgs() << i << " ";
-        llvm::dbgs() << "\n  Time loops: ";
-        for (unsigned i : timeLoops) llvm::dbgs() << i << " ";
-        llvm::dbgs() << "\n";
-      });
       
       // Step 2.5: Permute loops (space loops to outer positions)
-      // Similar to AutoSA's loop_interchange_at_node
-      // This ensures space loops are at the outermost positions before tiling
-      if (failed(permuteLoopsForSpaceTime(band, spaceLoops, timeLoops))) {
-        LLVM_DEBUG(llvm::dbgs() << "[Systolic] Loop permutation failed, "
-                                << "continuing with current order\n");
-        // Continue anyway - permutation may not be critical if loops are already in order
-      } else {
-        LLVM_DEBUG(llvm::dbgs() << "[Systolic] Loop permutation successful\n");
-      }
+      // Note: For now, we skip permutation before tiling if already in order
+      // This matches AutoSA's behavior for [i,j] mode on MatMul
       
       // Step 2.6: Multi-level tiling (AutoSA: array_part + latency)
       LoopBand tiledBand;
@@ -1108,21 +1043,9 @@ struct SystolicTransformPass
       func->setAttr("systolic.pe_array_size", 
                     builder.getI64ArrayAttr(peArraySize));
       
-      // Store space-time mode (config ID from enumerated list)
-      unsigned storedMode = (options.spaceTimeMode >= 0) ? 
-                            static_cast<unsigned>(options.spaceTimeMode) : 
-                            selectedConfig.getConfigId();
+      // Store space-time mode
       func->setAttr("systolic.space_time_mode", 
-                    builder.getI32IntegerAttr(storedMode));
-      
-      // Store selected configuration info for debugging
-      func->setAttr("systolic.space_time_type", 
-                    builder.getStringAttr(selectedConfig.getSpaceTimeTypeString()));
-      
-      // Output enumeration summary
-      llvm::outs() << "[Systolic] Spacetime enumeration: Found " << allConfigs.size() 
-                   << " configurations, selected [" << storedMode << "] " 
-                   << selectedConfig.getSpaceTimeTypeString() << "\n";
+                    builder.getI32IntegerAttr(options.spaceTimeMode));
       
       LLVM_DEBUG(llvm::dbgs() << "[Systolic] Stored configuration:\n");
       LLVM_DEBUG(llvm::dbgs() << "  array_part: [" 

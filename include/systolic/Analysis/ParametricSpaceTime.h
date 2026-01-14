@@ -239,16 +239,17 @@ public:
   /// Print to stream
   void print(llvm::raw_ostream &os) const;
   
-  /// Create a parametric configuration from a numeric mode (0-5)
-  /// This factory function maps AutoSA's spaceTimeMode enum to ParametricSpaceTime
-  static ParametricSpaceTime createFromMode(unsigned mode);
-  
-  /// Create a parametric configuration from loop indices (for dynamic enumeration)
-  /// This is used when enumerating all possible spacetime configurations
+  /// Create a parametric configuration from loop indices
+  /// This dynamically constructs a configuration based on which loops
+  /// are designated as space vs time loops.
   static ParametricSpaceTime createFromLoopIndices(
       const llvm::SmallVector<unsigned> &spaceLoopIndices,
       const llvm::SmallVector<unsigned> &timeLoopIndices,
       const llvm::SmallVector<llvm::StringRef> &loopNames);
+  
+  /// Create a parametric configuration from a numeric mode (0-5)
+  /// This factory function maps AutoSA's spaceTimeMode enum to ParametricSpaceTime
+  static ParametricSpaceTime createFromMode(unsigned mode);
   
   //===--------------------------------------------------------------------===//
   // Configuration ID (for dynamic enumeration)
