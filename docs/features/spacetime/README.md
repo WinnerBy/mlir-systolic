@@ -1,92 +1,81 @@
-# Space-Time 数据流架构
+# Space-time 相关文档
 
-> **目录**: `docs/features/spacetime/`  
-> **状态**: ✅ 动态枚举功能已实现
+> **目录**: `docs/spacetime/`  
+> **目的**: 收集所有与 Space-time 参数实现、测试和分析相关的文档
 
 ---
 
-## 📚 文档导航
+## 📚 文档列表
 
-### 核心文档
+### Space-time 实现文档
 
-1. **[SPACETIME_DYNAMIC_ENUMERATION.md](SPACETIME_DYNAMIC_ENUMERATION.md)** ⭐ **最新**
-   - 动态枚举功能概述
-   - 快速开始和使用示例
-   - 实现细节和测试结果
-
-2. **[SPACETIME_IMPLEMENTATION_PLAN.md](SPACETIME_IMPLEMENTATION_PLAN.md)**
-   - 基于 AutoSA 的详细实现计划
+1. **[SPACETIME_IMPLEMENTATION_PLAN.md](SPACETIME_IMPLEMENTATION_PLAN.md)**
+   - 基于 AutoSA 官方文档的详细实现计划
    - 实现步骤和注意事项
 
-### 详细分析文档
+2. **[SPACETIME_IMPLEMENTATION_ANALYSIS.md](SPACETIME_IMPLEMENTATION_ANALYSIS.md)**
+   - 基于文档和参考代码的实现方案
+   - 实现细节分析
 
-3. **[../SPACETIME_COMPARISON.md](../SPACETIME_COMPARISON.md)**
-   - AutoSA vs mlir-systolic 的详细对比
-   - 关键差异和调整方案
+3. **[SPACETIME_TEST_ANALYSIS.md](SPACETIME_TEST_ANALYSIS.md)**
+   - 不同 Space-time 配置的测试结果
+   - 优化方向和建议
 
-4. **[../SPACETIME_ANALYSIS.md](../SPACETIME_ANALYSIS.md)**
-   - 不同循环数量的映射规则
-   - Spacetime 映射分析
+### Space-time=3 详细分析
 
-5. **[../SPACETIME_USAGE.md](../SPACETIME_USAGE.md)**
-   - 详细使用指南
-   - 配置选项说明
+4. **[ST3_DETAILED_CODE_ANALYSIS.md](ST3_DETAILED_CODE_ANALYSIS.md)**
+   - 逐行代码差异分析及 HLS 行为影响评估
+   - 与 AutoSA 参考代码的详细对比
 
-### 测试文档
+5. **[ST3_FUNCTION_DIFF_ANALYSIS.md](ST3_FUNCTION_DIFF_ANALYSIS.md)**
+   - 函数数量差异详细分析
+   - 函数结构对比
 
-6. **[../SPACETIME_TEST_RESULTS.md](../SPACETIME_TEST_RESULTS.md)**
-   - 测试结果和验证检查点
-   - 性能指标
+6. **[ST3_CODE_VERIFICATION.md](ST3_CODE_VERIFICATION.md)**
+   - 有效代码一致性验证报告
+   - 功能正确性验证
 
-7. **[../SPACETIME_TESTING.md](../SPACETIME_TESTING.md)**
-   - 测试用例和验证方法
-   - 测试脚本说明
-
-### 实现状态
-
-8. **[../SPACETIME_IMPLEMENTATION_STATUS.md](../SPACETIME_IMPLEMENTATION_STATUS.md)**
-   - 实现状态和代码变更总结
-   - 待完成工作
+7. **[ST3_OPTIMIZATION_ANALYSIS.md](ST3_OPTIMIZATION_ANALYSIS.md)**
+   - Space-time=3 代码生成优化分析
+   - 性能优化建议
 
 ---
 
-## 🎯 快速开始
+## 🎯 使用场景
 
-### 了解功能
-
-1. 阅读 [SPACETIME_DYNAMIC_ENUMERATION.md](SPACETIME_DYNAMIC_ENUMERATION.md) 了解核心功能
-2. 查看 [SPACETIME_TEST_RESULTS.md](../SPACETIME_TEST_RESULTS.md) 了解测试结果
-
-### 使用功能
-
-1. 参考 [SPACETIME_USAGE.md](../SPACETIME_USAGE.md) 了解如何使用
-2. 查看 [SPACETIME_ANALYSIS.md](../SPACETIME_ANALYSIS.md) 了解不同配置
-
-### 深入理解
-
-1. 阅读 [SPACETIME_COMPARISON.md](../SPACETIME_COMPARISON.md) 了解与 AutoSA 的差异
-2. 查看 [SPACETIME_IMPLEMENTATION_STATUS.md](../SPACETIME_IMPLEMENTATION_STATUS.md) 了解实现细节
-
----
-
-## 📊 功能状态
-
-| 功能 | 状态 | 说明 |
-|------|------|------|
-| 动态枚举 | ✅ | 支持任意循环数量 |
-| 自动选择 | ✅ | 默认选择 ST3 |
-| 循环置换 | ✅ | Space loops 移到最外层 |
-| 测试验证 | ✅ | 3 循环测试通过 |
-| 命令行选项 | 🟡 | 部分支持 |
+- **实现 Space-time**: 参考实现计划和方案文档
+- **测试验证**: 查看测试分析了解不同配置的效果
+- **问题排查**: 参考 ST3 分析文档排查问题
+- **性能优化**: 查看优化分析文档改进性能
 
 ---
 
 ## 🔗 相关文档
 
-- **项目状态**: [../status/PROJECT_STATUS.md](../status/PROJECT_STATUS.md)
-- **下一步工作**: [../NEXT_STEPS_ROADMAP.md](../NEXT_STEPS_ROADMAP.md)
-- **实现状态**: [../IMPLEMENTATION_STATUS.md](../IMPLEMENTATION_STATUS.md)
+- **AutoSA 参考**: `../autosa/` - AutoSA 的 spacetime 分析
+- **测试结果**: `../testing/` - 测试结果和验证
+- **问题分析**: `../issues/` - 发现的问题和解决方案
 
 ---
 
-**👉 推荐开始**: [SPACETIME_DYNAMIC_ENUMERATION.md](SPACETIME_DYNAMIC_ENUMERATION.md)
+## 📊 文档统计
+
+| 指标 | 数值 |
+|------|------|
+| **文档数量** | 7 份 |
+| **总字数** | ~60,000 字 |
+| **主要用途** | 实现参考、问题分析、性能优化 |
+
+---
+
+## 🗺️ 推荐阅读顺序
+
+1. **了解 Space-time**: SPACETIME_IMPLEMENTATION_PLAN.md
+2. **实现参考**: SPACETIME_IMPLEMENTATION_ANALYSIS.md
+3. **测试验证**: SPACETIME_TEST_ANALYSIS.md
+4. **问题排查**: ST3_DETAILED_CODE_ANALYSIS.md
+
+---
+
+**👉 推荐开始**: [SPACETIME_IMPLEMENTATION_PLAN.md](SPACETIME_IMPLEMENTATION_PLAN.md)
+
